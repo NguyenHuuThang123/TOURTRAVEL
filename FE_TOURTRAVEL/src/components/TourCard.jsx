@@ -2,7 +2,7 @@ import { Link } from 'react-router-dom'
 
 export default function TourCard({ tour }) {
   return (
-    <Link to={`/tour/${tour.id}`} style={{ textDecoration: 'none' }}>
+    <Link to={`/tours/${tour.id}`} style={{ textDecoration: 'none' }}>
       <div className="card" style={{
         height: '100%',
         display: 'flex',

@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { getTours } from '../api/tourService'
+import Header from '../components/Header'
 
 export default function Home() {
   const [tours, setTours] = useState([])
@@ -40,63 +41,7 @@ export default function Home() {
 
   return (
     <div style={{ minHeight: '100vh', backgroundColor: 'var(--bg-gray-50)' }}>
-      {/* Header */}
-      <header style={{
-        backgroundColor: 'var(--bg-white)',
-        borderBottom: '1px solid var(--border-gray-200)',
-        padding: 'var(--spacing-lg) 0',
-        position: 'sticky',
-        top: 0,
-        zIndex: 50
-      }}>
-        <div style={{ maxWidth: 'var(--container-max)', margin: '0 auto', padding: '0 var(--spacing-lg)' }}>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-            <Link to="/" style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 'var(--spacing-sm)' }}>
-              <div style={{ color: 'var(--primary-color)' }}>
-                <svg width="32" height="32" viewBox="0 0 48 48" fill="currentColor">
-                  <path d="M24 45.8096C19.6865 45.8096 15.4698 44.5305 11.8832 42.134C8.29667 39.7376 5.50128 36.3314 3.85056 32.3462C2.19985 28.361 1.76794 23.9758 2.60947 19.7452C3.451 15.5145 5.52816 11.6284 8.57829 8.5783C11.6284 5.52817 15.5145 3.45101 19.7452 2.60948C23.9758 1.76795 28.361 2.19986 32.3462 3.85057C36.3314 5.50129 39.7376 8.29668 42.134 11.8833C44.5305 15.4698 45.8096 19.6865 45.8096 24L24 24L24 45.8096Z"/>
-                </svg>
-              </div>
-              <h1 style={{ fontSize: 'var(--text-xl)', fontWeight: 'var(--font-black)', color: 'var(--text-gray-900)' }}>
-                TOURTRAVEL
-              </h1>
-            </Link>
-
-            <nav style={{ display: 'none', gap: 'var(--spacing-xl)', alignItems: 'center' }} className="md:flex">
-              <Link to="/tours" style={{ fontSize: 'var(--text-sm)', fontWeight: 'var(--font-medium)', color: 'var(--text-gray-600)' }}>
-                Tours
-              </Link>
-              <Link to="/destinations" style={{ fontSize: 'var(--text-sm)', fontWeight: 'var(--font-medium)', color: 'var(--text-gray-600)' }}>
-                Destinations
-              </Link>
-              <Link to="/about" style={{ fontSize: 'var(--text-sm)', fontWeight: 'var(--font-medium)', color: 'var(--text-gray-600)' }}>
-                About
-              </Link>
-            </nav>
-
-            <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--spacing-md)' }}>
-              <button style={{
-                padding: 'var(--spacing-sm)',
-                borderRadius: 'var(--border-radius-lg)',
-                backgroundColor: 'var(--primary-color)',
-                opacity: 0.1,
-                border: 'none',
-                cursor: 'pointer'
-              }}>
-                ❤️
-              </button>
-              <div style={{
-                width: '40px',
-                height: '40px',
-                borderRadius: '50%',
-                backgroundColor: 'var(--bg-gray-300)',
-                backgroundImage: 'url(https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=40)',
-                backgroundSize: 'cover'
-              }}></div>
-            </div>
-          </div>
-        </div>
-      </header>
+      <Header />
 
       {/* Hero Section */}
       <section style={{

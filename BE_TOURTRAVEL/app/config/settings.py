@@ -1,6 +1,14 @@
-# Database configuration
-SQLALCHEMY_DATABASE_URL = "sqlite:///./tourtravel.db"
-# For MongoDB: MONGODB_URL = "mongodb://localhost:27017"
-# For PostgreSQL: SQLALCHEMY_DATABASE_URL = "postgresql://user:password@localhost/tourtravel"
+import os
+from functools import lru_cache
 
-DEBUG = True
+
+class Settings:
+    def __init__(self) -> None:
+        self.mongodb_url = os.getenv("MONGODB_URL", "mongodb://127.0.0.1:27017")
+        self.mongodb_db_name = os.getenv("MONGODB_DB_NAME", "tourtravel")
+        self.debug = os.getenv("DEBUG", "true").lower() == "true"
+
+
+@lru_cache
+def get_settings() -> Settings:
+    return Settings()

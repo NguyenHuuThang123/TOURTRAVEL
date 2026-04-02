@@ -1,8 +1,9 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-import os
 from dotenv import load_dotenv
-from app.routes import tours, bookings
+
+from app.database import close_database, initialize_database
+from app.routes import auth, tours, bookings
 
 load_dotenv()
 
@@ -26,6 +27,17 @@ app.add_middleware(
 # Include routes
 app.include_router(tours.router)
 app.include_router(bookings.router)
+app.include_router(auth.router)
+
+
+@app.on_event("startup")
+async def startup_event():
+    initialize_database()
+
+
+@app.on_event("shutdown")
+async def shutdown_event():
+    close_database()
 
 @app.get("/")
 async def root():

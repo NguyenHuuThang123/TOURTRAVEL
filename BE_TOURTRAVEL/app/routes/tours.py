@@ -1,56 +1,92 @@
-from fastapi import APIRouter, Depends, HTTPException
-from sqlalchemy.orm import Session
-from typing import List
-from app.schemas.tour import Tour, TourCreate
-# from app.models import Tour as TourModel
-# from app.database import get_db
+from datetime import datetime
 
-router = APIRouter(
-    prefix="/api/tours",
-    tags=["tours"]
-)
+from bson import ObjectId
+from fastapi import APIRouter, Depends, HTTPException, Query, status
 
-# Mock data for now
-mock_tours = [
-    {
-        "id": 1,
-        "name": "Paris City Tour",
-        "description": "Explore the City of Light",
-        "destination": "Paris",
-        "price": 1200,
-        "duration_days": 5,
-        "max_participants": 20,
-        "start_date": "2024-04-01T00:00:00",
-        "end_date": "2024-04-06T00:00:00"
-    },
-    {
-        "id": 2,
-        "name": "Tokyo Adventure",
-        "description": "Experience Japanese culture",
-        "destination": "Tokyo",
-        "price": 1800,
-        "duration_days": 7,
-        "max_participants": 15,
-        "start_date": "2024-05-01T00:00:00",
-        "end_date": "2024-05-08T00:00:00"
-    }
-]
+from app.database import get_collection, serialize_document
+from app.schemas.tour import Tour, TourCreate, TourUpdate
+from app.security import require_admin
 
-@router.get("/", response_model=List[Tour])
-async def get_tours():
-    return mock_tours
+router = APIRouter(prefix="/api/tours", tags=["tours"])
 
-@router.get("/{tour_id}", response_model=Tour)
-async def get_tour(tour_id: int):
-    tour = next((t for t in mock_tours if t["id"] == tour_id), None)
+
+def _get_tour_or_404(tour_id: str):
+    if not ObjectId.is_valid(tour_id):
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Tour not found")
+
+    tour = get_collection("tours").find_one({"_id": ObjectId(tour_id)})
     if not tour:
-        raise HTTPException(status_code=404, detail="Tour not found")
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Tour not found")
     return tour
 
-@router.post("/", response_model=Tour)
-async def create_tour(tour: TourCreate):
-    # In production, save to database
-    mock_tour = dict(tour)
-    mock_tour["id"] = len(mock_tours) + 1
-    mock_tours.append(mock_tour)
-    return mock_tour
+
+@router.get("/", response_model=list[Tour])
+async def get_tours(search: str | None = None, destination: str | None = None):
+    filters = {}
+    if search:
+        filters["name"] = {"$regex": search, "$options": "i"}
+    if destination:
+        filters["destination"] = {"$regex": destination, "$options": "i"}
+
+    tours = get_collection("tours").find(filters).sort("start_date", 1)
+    return [serialize_document(tour) for tour in tours]
+
+
+@router.get("/{tour_id}", response_model=Tour)
+async def get_tour(tour_id: str):
+    return serialize_document(_get_tour_or_404(tour_id))
+
+
+@router.post("/", response_model=Tour, status_code=status.HTTP_201_CREATED)
+async def create_tour(tour: TourCreate, _admin=Depends(require_admin)):
+    if tour.end_date <= tour.start_date:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="End date must be after start date")
+    if tour.available_slots > tour.max_participants:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Available slots cannot exceed max participants")
+
+    now = datetime.utcnow()
+    payload = tour.dict()
+    payload["created_at"] = now
+    payload["updated_at"] = now
+
+    result = get_collection("tours").insert_one(payload)
+    created = get_collection("tours").find_one({"_id": result.inserted_id})
+    return serialize_document(created)
+
+
+@router.put("/{tour_id}", response_model=Tour)
+async def update_tour(tour_id: str, tour: TourUpdate, _admin=Depends(require_admin)):
+    current = _get_tour_or_404(tour_id)
+    updates = tour.dict(exclude_none=True)
+    if not updates:
+        return serialize_document(current)
+
+    merged = {**current, **updates}
+    if merged["end_date"] <= merged["start_date"]:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="End date must be after start date")
+    if merged["available_slots"] > merged["max_participants"]:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Available slots cannot exceed max participants")
+
+    updates["updated_at"] = datetime.utcnow()
+    get_collection("tours").update_one({"_id": current["_id"]}, {"$set": updates})
+    updated = get_collection("tours").find_one({"_id": current["_id"]})
+    return serialize_document(updated)
+
+
+@router.delete("/{tour_id}", status_code=status.HTTP_204_NO_CONTENT)
+async def delete_tour(tour_id: str, force: bool = Query(default=False), _admin=Depends(require_admin)):
+    current = _get_tour_or_404(tour_id)
+    bookings_collection = get_collection("bookings")
+    active_bookings = bookings_collection.count_documents(
+        {"tour_id": tour_id, "status": {"$in": ["pending", "confirmed"]}}
+    )
+    if active_bookings and not force:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Tour has active bookings. Pass force=true to delete it together with its bookings.",
+        )
+
+    if force:
+        bookings_collection.delete_many({"tour_id": tour_id})
+    get_collection("tours").delete_one({"_id": current["_id"]})
+    return None
