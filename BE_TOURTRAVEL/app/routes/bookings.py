@@ -5,7 +5,7 @@ from fastapi import APIRouter, Depends, HTTPException, status
 
 from app.database import get_collection, serialize_document
 from app.schemas.booking import Booking, BookingCreate, BookingUpdate
-from app.security import require_admin
+from app.security import get_current_user, get_current_user_optional, require_admin
 
 router = APIRouter(prefix="/api/bookings", tags=["bookings"])
 
@@ -30,10 +30,33 @@ def _get_tour_or_400(tour_id: str):
     return tour
 
 
+def _serialize_bookings(cursor):
+    return [serialize_document(booking) for booking in cursor]
+
+
+def _assert_booking_owner(booking: dict, user: dict):
+    if booking.get("user_id") == user["id"] or booking.get("user_email") == user["email"]:
+        return
+    raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Khong co quyen truy cap booking nay")
+
+
 @router.get("/", response_model=list[Booking])
 async def get_bookings(_admin=Depends(require_admin)):
     bookings = get_collection("bookings").find().sort("created_at", -1)
-    return [serialize_document(booking) for booking in bookings]
+    return _serialize_bookings(bookings)
+
+
+@router.get("/my", response_model=list[Booking])
+async def get_my_bookings(user=Depends(get_current_user)):
+    bookings = get_collection("bookings").find(
+        {
+            "$or": [
+                {"user_id": user["id"]},
+                {"user_email": user["email"]},
+            ]
+        }
+    ).sort("created_at", -1)
+    return _serialize_bookings(bookings)
 
 
 @router.get("/{booking_id}", response_model=Booking)
@@ -42,7 +65,7 @@ async def get_booking(booking_id: str, _admin=Depends(require_admin)):
 
 
 @router.post("/", response_model=Booking, status_code=status.HTTP_201_CREATED)
-async def create_booking(booking: BookingCreate):
+async def create_booking(booking: BookingCreate, user=Depends(get_current_user_optional)):
     tours_collection = get_collection("tours")
     bookings_collection = get_collection("bookings")
 
@@ -52,7 +75,12 @@ async def create_booking(booking: BookingCreate):
 
     now = datetime.utcnow()
     payload = booking.dict()
+    payload["user_id"] = user["id"] if user else None
     payload["tour_name"] = tour["name"]
+    payload["tour_destination"] = tour.get("destination")
+    payload["tour_image"] = tour.get("image")
+    payload["start_date"] = tour.get("start_date")
+    payload["end_date"] = tour.get("end_date")
     payload["total_price"] = booking.quantity * float(tour["price"])
     payload["status"] = "confirmed"
     payload["created_at"] = now
@@ -96,6 +124,10 @@ async def update_booking(booking_id: str, booking: BookingUpdate, _admin=Depends
 
     updates["total_price"] = new_quantity * float(tour["price"])
     updates["tour_name"] = tour["name"]
+    updates["tour_destination"] = tour.get("destination")
+    updates["tour_image"] = tour.get("image")
+    updates["start_date"] = tour.get("start_date")
+    updates["end_date"] = tour.get("end_date")
     updates["updated_at"] = datetime.utcnow()
 
     bookings_collection.update_one({"_id": current["_id"]}, {"$set": updates})
@@ -104,6 +136,33 @@ async def update_booking(booking_id: str, booking: BookingUpdate, _admin=Depends
             {"_id": tour["_id"]},
             {"$inc": {"available_slots": slot_delta}, "$set": {"updated_at": updates["updated_at"]}},
         )
+
+    updated = bookings_collection.find_one({"_id": current["_id"]})
+    return serialize_document(updated)
+
+
+@router.put("/my/{booking_id}/cancel", response_model=Booking)
+async def cancel_my_booking(booking_id: str, user=Depends(get_current_user)):
+    tours_collection = get_collection("tours")
+    bookings_collection = get_collection("bookings")
+
+    current = _get_booking_or_404(booking_id)
+    _assert_booking_owner(current, user)
+
+    if current["status"] == "cancelled":
+        return serialize_document(current)
+
+    tour = _get_tour_or_400(current["tour_id"])
+    updated_at = datetime.utcnow()
+
+    bookings_collection.update_one(
+        {"_id": current["_id"]},
+        {"$set": {"status": "cancelled", "updated_at": updated_at}},
+    )
+    tours_collection.update_one(
+        {"_id": tour["_id"]},
+        {"$inc": {"available_slots": current["quantity"]}, "$set": {"updated_at": updated_at}},
+    )
 
     updated = bookings_collection.find_one({"_id": current["_id"]})
     return serialize_document(updated)

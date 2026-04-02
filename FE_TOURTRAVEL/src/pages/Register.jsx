@@ -17,7 +17,7 @@ export default function Register() {
       setLoading(true)
       setError('')
       await register(formData)
-      navigate('/', { replace: true })
+      navigate('/account', { replace: true })
     } catch (err) {
       setError(err.response?.data?.detail || 'Dang ky that bai.')
     } finally {

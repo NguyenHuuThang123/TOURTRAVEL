@@ -2,12 +2,17 @@ import { useEffect, useMemo, useState } from 'react'
 import { useAuth } from '../context/AuthContext'
 import {
   createTour,
+  createUserByAdmin,
   deleteBooking,
   deleteTour,
+  deleteUserByAdmin,
   getBookings,
   getTours,
+  getUsers,
+  toggleUserBlock,
   updateBooking,
-  updateTour
+  updateTour,
+  updateUserByAdmin
 } from '../api/tourService'
 
 const initialTour = {
@@ -25,10 +30,21 @@ const initialTour = {
   travel_style: ''
 }
 
+const initialUser = {
+  id: '',
+  name: '',
+  email: '',
+  phone: '',
+  password: '',
+  role: 'user',
+  is_blocked: false
+}
+
 const sidebarItems = [
   { id: 'bookings', label: 'Bookings', icon: 'BK' },
   { id: 'tours', label: 'Tours', icon: 'TR' },
-  { id: 'editor', label: 'Editor', icon: 'ED' }
+  { id: 'users', label: 'Users', icon: 'US' },
+  { id: 'editor', label: 'Tour Editor', icon: 'ED' }
 ]
 
 function toDateTimeLocal(value) {
@@ -49,18 +65,30 @@ function formatDateTime(value) {
   return new Date(value).toLocaleString('vi-VN')
 }
 
+function titleForSection(section) {
+  if (section === 'bookings') return 'All Bookings'
+  if (section === 'tours') return 'Tour Inventory'
+  if (section === 'users') return 'User Management'
+  if (section === 'user-editor') return 'Create / Update User'
+  return 'Create / Update Tour'
+}
+
 export default function AdminDashboard() {
   const { token, user, logout } = useAuth()
   const [activeSection, setActiveSection] = useState('bookings')
   const [tourForm, setTourForm] = useState(initialTour)
+  const [userForm, setUserForm] = useState(initialUser)
   const [tours, setTours] = useState([])
   const [bookings, setBookings] = useState([])
+  const [users, setUsers] = useState([])
   const [loading, setLoading] = useState(true)
   const [message, setMessage] = useState('')
   const [error, setError] = useState('')
   const [search, setSearch] = useState('')
   const [bookingStatusFilter, setBookingStatusFilter] = useState('all')
   const [tourStockFilter, setTourStockFilter] = useState('all')
+  const [userRoleFilter, setUserRoleFilter] = useState('all')
+  const [userBlockFilter, setUserBlockFilter] = useState('all')
 
   useEffect(() => {
     if (token) {
@@ -71,9 +99,10 @@ export default function AdminDashboard() {
   const loadData = async () => {
     try {
       setLoading(true)
-      const [tourData, bookingData] = await Promise.all([getTours(), getBookings(token)])
+      const [tourData, bookingData, userData] = await Promise.all([getTours(), getBookings(token), getUsers(token)])
       setTours(tourData)
       setBookings(bookingData)
+      setUsers(userData)
       setError('')
     } catch (err) {
       setError(err.response?.data?.detail || 'Không thể tải dữ liệu quản trị.')
@@ -89,11 +118,11 @@ export default function AdminDashboard() {
 
     return [
       { label: 'All bookings', value: bookings.length, note: 'Tổng booking trong hệ thống' },
-      { label: 'Confirmed', value: bookings.filter((booking) => booking.status === 'confirmed').length, note: 'Đơn đã xác nhận' },
-      { label: 'Low stock tours', value: tours.filter((tour) => tour.available_slots <= 5).length, note: 'Tour cần được ưu tiên' },
+      { label: 'Users', value: users.length, note: 'Tài khoản đang được quản lý' },
+      { label: 'Blocked users', value: users.filter((item) => item.is_blocked).length, note: 'Người dùng đang bị chặn' },
       { label: 'Revenue', value: formatCurrency(confirmedRevenue), note: 'Thu nhập từ đơn đã chốt' }
     ]
-  }, [bookings, tours])
+  }, [bookings, users])
 
   const filteredBookings = useMemo(() => {
     return bookings.filter((booking) => {
@@ -125,8 +154,31 @@ export default function AdminDashboard() {
     })
   }, [search, tourStockFilter, tours])
 
-  const resetForm = () => {
+  const filteredUsers = useMemo(() => {
+    return users.filter((item) => {
+      const keyword = search.trim().toLowerCase()
+      const matchesSearch =
+        !keyword ||
+        item.name.toLowerCase().includes(keyword) ||
+        item.email.toLowerCase().includes(keyword) ||
+        (item.phone || '').toLowerCase().includes(keyword)
+
+      const matchesRole = userRoleFilter === 'all' || item.role === userRoleFilter
+      const matchesBlocked =
+        userBlockFilter === 'all' ||
+        (userBlockFilter === 'blocked' && item.is_blocked) ||
+        (userBlockFilter === 'active' && !item.is_blocked)
+
+      return matchesSearch && matchesRole && matchesBlocked
+    })
+  }, [search, userRoleFilter, userBlockFilter, users])
+
+  const resetTourForm = () => {
     setTourForm(initialTour)
+  }
+
+  const resetUserForm = () => {
+    setUserForm(initialUser)
   }
 
   const handleTourSubmit = async (event) => {
@@ -153,11 +205,41 @@ export default function AdminDashboard() {
         setMessage('Thêm tour mới thành công.')
       }
 
-      resetForm()
+      resetTourForm()
       setActiveSection('tours')
       await loadData()
     } catch (err) {
       setError(err.response?.data?.detail || 'Không thể lưu tour.')
+    }
+  }
+
+  const handleUserSubmit = async (event) => {
+    event.preventDefault()
+    try {
+      setError('')
+      setMessage('')
+
+      const payload = {
+        name: userForm.name,
+        email: userForm.email,
+        phone: userForm.phone || null,
+        role: userForm.role,
+        is_blocked: userForm.is_blocked
+      }
+
+      if (userForm.id) {
+        await updateUserByAdmin(userForm.id, { ...payload, password: userForm.password || null }, token)
+        setMessage('Cập nhật user thành công.')
+      } else {
+        await createUserByAdmin({ ...payload, password: userForm.password }, token)
+        setMessage('Tạo user mới thành công.')
+      }
+
+      resetUserForm()
+      setActiveSection('users')
+      await loadData()
+    } catch (err) {
+      setError(err.response?.data?.detail || 'Không thể lưu user.')
     }
   }
 
@@ -170,6 +252,19 @@ export default function AdminDashboard() {
     setActiveSection('editor')
   }
 
+  const handleEditUser = (selectedUser) => {
+    setUserForm({
+      id: selectedUser.id,
+      name: selectedUser.name,
+      email: selectedUser.email,
+      phone: selectedUser.phone || '',
+      password: '',
+      role: selectedUser.role,
+      is_blocked: Boolean(selectedUser.is_blocked)
+    })
+    setActiveSection('user-editor')
+  }
+
   const handleDeleteTour = async (tourId) => {
     try {
       await deleteTour(tourId, true, token)
@@ -177,6 +272,26 @@ export default function AdminDashboard() {
       await loadData()
     } catch (err) {
       setError(err.response?.data?.detail || 'Không thể xóa tour.')
+    }
+  }
+
+  const handleDeleteUser = async (userId) => {
+    try {
+      await deleteUserByAdmin(userId, token)
+      setMessage('Đã xóa user.')
+      await loadData()
+    } catch (err) {
+      setError(err.response?.data?.detail || 'Không thể xóa user.')
+    }
+  }
+
+  const handleToggleBlock = async (selectedUser) => {
+    try {
+      await toggleUserBlock(selectedUser.id, !selectedUser.is_blocked, token)
+      setMessage(selectedUser.is_blocked ? 'Đã bỏ chặn user.' : 'Đã chặn user.')
+      await loadData()
+    } catch (err) {
+      setError(err.response?.data?.detail || 'Không thể cập nhật trạng thái user.')
     }
   }
 
@@ -264,7 +379,7 @@ export default function AdminDashboard() {
       <div className="admin-section-header">
         <div>
           <h2>All Tours</h2>
-          <p>Quản lý sản phẩm tour và tồn kho cho trong.</p>
+          <p>Quản lý sản phẩm tour và tồn kho trong hệ thống.</p>
         </div>
       </div>
 
@@ -309,7 +424,65 @@ export default function AdminDashboard() {
     </div>
   )
 
-  const renderEditor = () => (
+  const renderUsersTable = () => (
+    <div className="admin-table-wrap">
+      <div className="admin-section-header">
+        <div>
+          <h2>All Users</h2>
+          <p>Quản lý tài khoản, phân quyền admin hoặc chặn người dùng.</p>
+        </div>
+      </div>
+
+      <div className="admin-table">
+        <div className="admin-table-head admin-user-head">
+          <span>User</span>
+          <span>Contact</span>
+          <span>Role</span>
+          <span>Status</span>
+          <span>Created</span>
+          <span>Actions</span>
+        </div>
+
+        {filteredUsers.map((item) => (
+          <article key={item.id} className="admin-table-row admin-user-row">
+            <div className="admin-tour-name-cell">
+              <div className="admin-user-mini-avatar">{item.name?.slice(0, 1) || 'U'}</div>
+              <div>
+                <strong>{item.name}</strong>
+                <small>ID: {item.id.slice(-6)}</small>
+              </div>
+            </div>
+            <div>
+              <strong>{item.email}</strong>
+              <small>{item.phone || 'Chua co so dien thoai'}</small>
+            </div>
+            <div>
+              <span className={`admin-status-chip ${item.role === 'admin' ? 'admin-status-open' : 'admin-status-neutral'}`}>
+                {item.role}
+              </span>
+            </div>
+            <div>
+              <span className={`admin-status-chip ${item.is_blocked ? 'admin-status-cancelled' : 'admin-status-open'}`}>
+                {item.is_blocked ? 'blocked' : 'active'}
+              </span>
+            </div>
+            <div>{formatDateTime(item.created_at)}</div>
+            <div className="admin-row-actions">
+              <button className="admin-link-btn" onClick={() => handleEditUser(item)}>Edit</button>
+              <button className={`admin-link-btn ${item.is_blocked ? '' : 'danger'}`} onClick={() => handleToggleBlock(item)}>
+                {item.is_blocked ? 'Unblock' : 'Block'}
+              </button>
+              <button className="admin-link-btn danger" onClick={() => handleDeleteUser(item.id)}>Delete</button>
+            </div>
+          </article>
+        ))}
+
+        {!filteredUsers.length && !loading && <div className="admin-empty-row">Không có user phù hợp.</div>}
+      </div>
+    </div>
+  )
+
+  const renderTourEditor = () => (
     <div className="admin-editor-wrap">
       <div className="admin-section-header">
         <div>
@@ -376,11 +549,84 @@ export default function AdminDashboard() {
 
         <div className="admin-editor-actions admin-span-2">
           <button type="submit" className="admin-green-btn">{tourForm.id ? 'Save changes' : 'Create tour'}</button>
-          <button type="button" className="admin-ghost-btn" onClick={resetForm}>Reset</button>
+          <button type="button" className="admin-ghost-btn" onClick={resetTourForm}>Reset</button>
         </div>
       </form>
     </div>
   )
+
+  const renderUserEditor = () => (
+    <div className="admin-editor-wrap">
+      <div className="admin-section-header">
+        <div>
+          <h2>{userForm.id ? 'Edit User' : 'Create User'}</h2>
+          <p>Tạo, sửa, phân quyền và chặn user ngay trong dashboard admin.</p>
+        </div>
+      </div>
+
+      <form onSubmit={handleUserSubmit} className="admin-editor-form">
+        <label className="admin-editor-field">
+          <span>Full name</span>
+          <input required value={userForm.name} onChange={(event) => setUserForm((prev) => ({ ...prev, name: event.target.value }))} />
+        </label>
+
+        <label className="admin-editor-field">
+          <span>Email</span>
+          <input required type="email" value={userForm.email} onChange={(event) => setUserForm((prev) => ({ ...prev, email: event.target.value }))} />
+        </label>
+
+        <label className="admin-editor-field">
+          <span>Phone</span>
+          <input value={userForm.phone} onChange={(event) => setUserForm((prev) => ({ ...prev, phone: event.target.value }))} />
+        </label>
+
+        <label className="admin-editor-field">
+          <span>Role</span>
+          <select value={userForm.role} onChange={(event) => setUserForm((prev) => ({ ...prev, role: event.target.value }))}>
+            <option value="user">User</option>
+            <option value="admin">Admin</option>
+          </select>
+        </label>
+
+        <label className="admin-editor-field admin-span-2">
+          <span>{userForm.id ? 'New password (optional)' : 'Password'}</span>
+          <input
+            required={!userForm.id}
+            type="password"
+            value={userForm.password}
+            onChange={(event) => setUserForm((prev) => ({ ...prev, password: event.target.value }))}
+          />
+        </label>
+
+        <label className="admin-editor-check admin-span-2">
+          <input
+            type="checkbox"
+            checked={userForm.is_blocked}
+            onChange={(event) => setUserForm((prev) => ({ ...prev, is_blocked: event.target.checked }))}
+          />
+          <span>Blocked user</span>
+        </label>
+
+        <div className="admin-editor-actions admin-span-2">
+          <button type="submit" className="admin-green-btn">{userForm.id ? 'Save user' : 'Create user'}</button>
+          <button type="button" className="admin-ghost-btn" onClick={resetUserForm}>Reset</button>
+        </div>
+      </form>
+    </div>
+  )
+
+  const createButtonLabel =
+    activeSection === 'users' || activeSection === 'user-editor'
+      ? (userForm.id ? 'Update User' : 'Create User')
+      : (tourForm.id ? 'Update Tour' : 'Create Tour')
+
+  const createButtonAction = () => {
+    if (activeSection === 'users' || activeSection === 'user-editor') {
+      setActiveSection('user-editor')
+      return
+    }
+    setActiveSection('editor')
+  }
 
   return (
     <div className="admin-shell">
@@ -397,6 +643,13 @@ export default function AdminDashboard() {
               <span>{item.icon}</span>
             </button>
           ))}
+          <button
+            className={`admin-side-link ${activeSection === 'user-editor' ? 'active' : ''}`}
+            onClick={() => setActiveSection('user-editor')}
+            title="User Editor"
+          >
+            <span>UE</span>
+          </button>
         </div>
         <button className="admin-side-link logout" onClick={logout} title="Logout">
           <span>LO</span>
@@ -407,7 +660,7 @@ export default function AdminDashboard() {
         <header className="admin-topbar">
           <div>
             <p className="admin-topbar-eyebrow">Admin dashboard</p>
-            <h1>{activeSection === 'bookings' ? 'All Bookings' : activeSection === 'tours' ? 'Tour Inventory' : 'Create / Update Tour'}</h1>
+            <h1>{titleForSection(activeSection)}</h1>
           </div>
 
           <div className="admin-topbar-actions">
@@ -461,15 +714,36 @@ export default function AdminDashboard() {
             </select>
           )}
 
+          {activeSection === 'users' && (
+            <>
+              <select value={userRoleFilter} onChange={(event) => setUserRoleFilter(event.target.value)} className="admin-toolbar-control">
+                <option value="all">All Roles</option>
+                <option value="user">Users</option>
+                <option value="admin">Admins</option>
+              </select>
+              <select value={userBlockFilter} onChange={(event) => setUserBlockFilter(event.target.value)} className="admin-toolbar-control">
+                <option value="all">All Status</option>
+                <option value="active">Active</option>
+                <option value="blocked">Blocked</option>
+              </select>
+            </>
+          )}
+
           <input
             className="admin-toolbar-search"
-            placeholder={activeSection === 'bookings' ? 'Search customer or booking...' : 'Search tours...'}
+            placeholder={
+              activeSection === 'bookings'
+                ? 'Search customer or booking...'
+                : activeSection === 'users'
+                  ? 'Search user by name, email or phone...'
+                  : 'Search tours...'
+            }
             value={search}
             onChange={(event) => setSearch(event.target.value)}
           />
 
-          <button className="admin-green-btn" onClick={() => setActiveSection('editor')}>
-            {tourForm.id ? 'Update Tour' : 'Create Tour'}
+          <button className="admin-green-btn" onClick={createButtonAction}>
+            {createButtonLabel}
           </button>
           <button className="admin-ghost-btn" onClick={loadData}>Refresh</button>
         </section>
@@ -485,7 +759,9 @@ export default function AdminDashboard() {
         <main className="admin-content-area">
           {activeSection === 'bookings' && renderBookingsTable()}
           {activeSection === 'tours' && renderToursTable()}
-          {activeSection === 'editor' && renderEditor()}
+          {activeSection === 'users' && renderUsersTable()}
+          {activeSection === 'editor' && renderTourEditor()}
+          {activeSection === 'user-editor' && renderUserEditor()}
         </main>
       </div>
     </div>

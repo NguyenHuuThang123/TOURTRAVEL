@@ -4,6 +4,7 @@ import TourList from './pages/TourList'
 import TourDetail from './pages/TourDetail'
 import Checkout from './pages/Checkout'
 import AdminDashboard from './pages/AdminDashboard'
+import Account from './pages/Account'
 import Login from './pages/Login'
 import Register from './pages/Register'
 import ProtectedRoute from './components/ProtectedRoute'
@@ -19,6 +20,7 @@ function App() {
         <Route path="/checkout" element={<Checkout />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
+        <Route path="/account" element={<ProtectedRoute><Account /></ProtectedRoute>} />
         <Route path="/admin" element={<ProtectedRoute adminOnly><AdminDashboard /></ProtectedRoute>} />
       </Routes>
     </Router>

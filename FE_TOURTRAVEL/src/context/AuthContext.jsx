@@ -1,5 +1,5 @@
 import { createContext, useContext, useEffect, useState } from 'react'
-import { getCurrentUser, loginUser, registerUser } from '../api/tourService'
+import { getCurrentUser, loginUser, registerUser, updateCurrentUser } from '../api/tourService'
 
 const AuthContext = createContext(null)
 
@@ -58,6 +58,13 @@ export function AuthProvider({ children }) {
     return payload
   }
 
+  const updateProfile = async (profileData) => {
+    const updatedUser = await updateCurrentUser(profileData, token)
+    setUser(updatedUser)
+    localStorage.setItem(STORAGE_KEY, JSON.stringify({ token, user: updatedUser }))
+    return updatedUser
+  }
+
   const logout = () => {
     setToken('')
     setUser(null)
@@ -65,7 +72,7 @@ export function AuthProvider({ children }) {
   }
 
   return (
-    <AuthContext.Provider value={{ user, token, loading, login, register, logout, isAuthenticated: Boolean(token) }}>
+    <AuthContext.Provider value={{ user, token, loading, login, register, logout, updateProfile, isAuthenticated: Boolean(token) }}>
       {children}
     </AuthContext.Provider>
   )

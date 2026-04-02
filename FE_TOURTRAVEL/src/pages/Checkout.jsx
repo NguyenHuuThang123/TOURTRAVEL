@@ -1,18 +1,20 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import Header from '../components/Header'
 import Footer from '../components/Footer'
 import { createBooking } from '../api/tourService'
+import { useAuth } from '../context/AuthContext'
 
 export default function Checkout() {
   const location = useLocation()
   const navigate = useNavigate()
+  const { user, token } = useAuth()
   const [formData, setFormData] = useState({
-    firstName: '',
-    lastName: '',
-    email: '',
+    firstName: user?.name?.split(' ').slice(0, -1).join(' ') || user?.name || '',
+    lastName: user?.name?.split(' ').slice(-1).join(' ') || '',
+    email: user?.email || '',
     phoneCode: '+1',
-    phone: '',
+    phone: user?.phone || '',
     dateOfBirth: '',
     insurance: false,
     vegetarian: false
@@ -27,6 +29,19 @@ export default function Checkout() {
   const processingFee = useMemo(() => subtotal * 0.1, [subtotal])
   const earlyBirdDiscount = useMemo(() => subtotal * 0.06, [subtotal])
   const total = useMemo(() => subtotal + processingFee - earlyBirdDiscount, [earlyBirdDiscount, processingFee, subtotal])
+
+  useEffect(() => {
+    if (!user) return
+
+    const nameParts = (user.name || '').trim().split(/\s+/)
+    setFormData((prev) => ({
+      ...prev,
+      firstName: nameParts.slice(0, -1).join(' ') || user.name || '',
+      lastName: nameParts.slice(-1).join(' ') || '',
+      email: user.email || '',
+      phone: user.phone || prev.phone
+    }))
+  }, [user])
 
   if (!tour) {
     return (
@@ -52,10 +67,15 @@ export default function Checkout() {
         user_email: formData.email,
         user_phone: `${formData.phoneCode} ${formData.phone}`.trim(),
         quantity
-      })
+      }, token)
       setMessage(`Dat tour thanh cong. Ma don: ${booking.id}`)
       setTimeout(() => {
-        navigate('/admin')
+        if (user?.role === 'admin') {
+          navigate('/admin')
+          return
+        }
+
+        navigate(user ? '/account' : '/tours')
       }, 1400)
     } catch (err) {
       setError(err.response?.data?.detail || 'Dat tour that bai.')

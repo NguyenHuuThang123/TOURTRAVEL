@@ -27,9 +27,14 @@ class Booking(BaseModel):
     id: str
     tour_id: str
     tour_name: str
+    user_id: str | None = None
     user_name: str
     user_email: EmailStr
     user_phone: str
+    tour_destination: str | None = None
+    tour_image: str | None = None
+    start_date: datetime | None = None
+    end_date: datetime | None = None
     quantity: int
     total_price: float
     status: BookingStatus

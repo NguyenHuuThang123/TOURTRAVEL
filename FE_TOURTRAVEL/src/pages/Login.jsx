@@ -12,7 +12,7 @@ export default function Login() {
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
 
-  const redirectTo = location.state?.from || '/'
+  const redirectTo = location.state?.from || '/account'
 
   const handleSubmit = async (event) => {
     event.preventDefault()
@@ -63,9 +63,6 @@ export default function Login() {
 
           <p style={{ marginTop: '20px' }}>
             Chua co tai khoan? <Link to="/register">Dang ky ngay</Link>
-          </p>
-          <p style={{ marginTop: '8px', color: 'var(--text-light)' }}>
-            Tai khoan admin mac dinh: `admin@tourtravel.com` / `Admin123`
           </p>
         </div>
       </main>

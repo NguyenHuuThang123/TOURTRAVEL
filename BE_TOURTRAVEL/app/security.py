@@ -47,7 +47,15 @@ def get_current_user(authorization: str = Header(default="")):
     user = get_collection("users").find_one({"_id": ObjectId(session["user_id"])})
     if not user:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="User not found")
+    if user.get("is_blocked"):
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Tai khoan da bi khoa")
     return serialize_document(user)
+
+
+def get_current_user_optional(authorization: str = Header(default="")):
+    if not authorization:
+        return None
+    return get_current_user(authorization)
 
 
 def require_admin(user=Depends(get_current_user)):

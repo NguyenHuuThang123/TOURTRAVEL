@@ -3,7 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from dotenv import load_dotenv
 
 from app.database import close_database, initialize_database
-from app.routes import auth, tours, bookings
+from app.routes import auth, bookings, tours, users
 
 load_dotenv()
 
@@ -28,6 +28,7 @@ app.add_middleware(
 app.include_router(tours.router)
 app.include_router(bookings.router)
 app.include_router(auth.router)
+app.include_router(users.router)
 
 
 @app.on_event("startup")

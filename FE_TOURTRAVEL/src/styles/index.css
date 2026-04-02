@@ -1897,6 +1897,11 @@ img {
   grid-template-columns: 1.8fr 1fr 0.8fr 0.9fr 0.9fr 0.9fr 0.9fr;
 }
 
+.admin-user-head,
+.admin-user-row {
+  grid-template-columns: 1.3fr 1.3fr 0.8fr 0.8fr 1fr 1fr;
+}
+
 .admin-table-head {
   background: #f8fafc;
   border-top: 1px solid #eef2f7;
@@ -1966,6 +1971,11 @@ img {
   color: #92400e;
 }
 
+.admin-status-neutral {
+  background: #e2e8f0;
+  color: #334155;
+}
+
 .admin-row-actions {
   display: flex;
   flex-wrap: wrap;
@@ -1997,6 +2007,20 @@ img {
   flex-shrink: 0;
 }
 
+.admin-user-mini-avatar {
+  width: 58px;
+  height: 58px;
+  border-radius: 18px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  background: linear-gradient(135deg, #22c55e 0%, #0f766e 100%);
+  color: #ffffff;
+  font-size: 1.25rem;
+  font-weight: 800;
+}
+
 .admin-empty-row {
   padding: 24px 28px;
   color: #64748b;
@@ -2022,7 +2046,8 @@ img {
 }
 
 .admin-editor-field input,
-.admin-editor-field textarea {
+.admin-editor-field textarea,
+.admin-editor-field select {
   width: 100%;
   padding: 14px 16px;
   border: 1px solid #d7dde5;
@@ -2032,7 +2057,8 @@ img {
 }
 
 .admin-editor-field input:focus,
-.admin-editor-field textarea:focus {
+.admin-editor-field textarea:focus,
+.admin-editor-field select:focus {
   border-color: #86efac;
   box-shadow: 0 0 0 4px rgba(34, 197, 94, 0.12);
 }
@@ -2041,9 +2067,291 @@ img {
   grid-column: 1 / -1;
 }
 
+.admin-editor-check {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: #334155;
+  font-weight: 700;
+}
+
+.admin-editor-check input {
+  width: 18px;
+  height: 18px;
+}
+
 .admin-editor-actions {
   display: flex;
   gap: 12px;
+}
+
+.account-shell {
+  min-height: 100vh;
+  background:
+    radial-gradient(circle at top left, rgba(96, 165, 250, 0.18), transparent 30%),
+    #f7f9fc;
+}
+
+.account-main {
+  padding-top: 32px;
+  padding-bottom: 44px;
+}
+
+.account-hero {
+  display: grid;
+  gap: 22px;
+  margin-bottom: 28px;
+}
+
+.account-eyebrow,
+.account-panel-eyebrow {
+  margin-bottom: 8px;
+  color: #2563eb;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.account-hero h1 {
+  margin-bottom: 8px;
+  font-size: 2.5rem;
+  font-weight: 800;
+}
+
+.account-hero p {
+  max-width: 620px;
+  color: #64748b;
+}
+
+.account-stat-row {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.account-stat-card,
+.account-panel {
+  border: 1px solid #e2e8f0;
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.95);
+  box-shadow: 0 18px 42px rgba(15, 23, 42, 0.05);
+}
+
+.account-stat-card {
+  padding: 18px 20px;
+}
+
+.account-stat-card span {
+  display: block;
+  color: #64748b;
+  font-size: 0.9rem;
+}
+
+.account-stat-card strong {
+  display: block;
+  margin-top: 10px;
+  color: #0f172a;
+  font-size: 2rem;
+  line-height: 1;
+}
+
+.account-layout {
+  display: grid;
+  grid-template-columns: 340px minmax(0, 1fr);
+  gap: 24px;
+  align-items: start;
+}
+
+.account-panel {
+  padding: 24px;
+}
+
+.account-panel-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.account-panel-head h2 {
+  font-size: 1.5rem;
+  font-weight: 800;
+}
+
+.account-form {
+  display: grid;
+  gap: 16px;
+}
+
+.account-field {
+  display: grid;
+  gap: 8px;
+}
+
+.account-field span {
+  color: #334155;
+  font-size: 0.92rem;
+  font-weight: 700;
+}
+
+.account-field input {
+  min-height: 48px;
+  border: 1px solid #d7dde5;
+  border-radius: 14px;
+  background: #ffffff;
+  padding: 0 14px;
+  outline: none;
+}
+
+.account-field input:focus {
+  border-color: #7dd3fc;
+  box-shadow: 0 0 0 4px rgba(14, 165, 233, 0.12);
+}
+
+.account-feedback {
+  padding: 12px 14px;
+  border-radius: 14px;
+  font-weight: 600;
+}
+
+.account-feedback.ok {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.account-feedback.error {
+  background: #fee2e2;
+  color: #b91c1c;
+}
+
+.account-primary-btn,
+.account-danger-btn,
+.account-secondary-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+  padding: 0 16px;
+  border-radius: 12px;
+  font-weight: 800;
+}
+
+.account-primary-btn {
+  background: linear-gradient(135deg, #2563eb 0%, #0f172a 100%);
+  color: #ffffff;
+  box-shadow: 0 16px 32px rgba(37, 99, 235, 0.2);
+}
+
+.account-primary-btn.inline {
+  width: fit-content;
+}
+
+.account-secondary-link {
+  color: #0284c7;
+  background: #eff6ff;
+}
+
+.account-danger-btn {
+  background: #fee2e2;
+  color: #b91c1c;
+}
+
+.account-booking-list {
+  display: grid;
+  gap: 16px;
+}
+
+.account-booking-card {
+  display: grid;
+  grid-template-columns: 180px minmax(0, 1fr);
+  gap: 18px;
+  padding: 16px;
+  border: 1px solid #e2e8f0;
+  border-radius: 18px;
+  background: #f8fbff;
+}
+
+.account-booking-image {
+  min-height: 152px;
+  border-radius: 16px;
+  background-size: cover;
+  background-position: center;
+}
+
+.account-booking-content {
+  display: grid;
+  gap: 16px;
+}
+
+.account-booking-top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 14px;
+}
+
+.account-booking-destination {
+  margin-bottom: 8px;
+  color: #64748b;
+  font-size: 0.85rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.account-booking-top h3 {
+  font-size: 1.4rem;
+  font-weight: 800;
+}
+
+.account-status-badge {
+  padding: 8px 12px;
+  border-radius: 999px;
+  font-size: 0.85rem;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.account-status-badge.confirmed {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.account-status-badge.pending {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.account-status-badge.cancelled {
+  background: #fee2e2;
+  color: #b91c1c;
+}
+
+.account-booking-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 16px;
+  color: #475569;
+  font-weight: 600;
+}
+
+.account-booking-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.account-empty-state {
+  display: grid;
+  gap: 14px;
+  justify-items: start;
+  padding: 28px;
+  border: 1px dashed #bfdbfe;
+  border-radius: 18px;
+  background: #f8fbff;
+  color: #64748b;
 }
 
 /* Responsive Design */
@@ -2110,6 +2418,8 @@ img {
   }
 
   .featured-card-grid,
+  .account-layout,
+  .account-stat-row,
   .tour-list-layout,
   .tour-card-grid,
   .tour-detail-layout,
@@ -2129,6 +2439,10 @@ img {
 
   .tour-list-header,
   .tour-list-controls,
+  .account-panel-head,
+  .account-booking-top,
+  .account-booking-card,
+  .account-booking-actions,
   .checkout-step-header,
   .checkout-bottom-actions,
   .checkout-phone-row,
@@ -2141,6 +2455,8 @@ img {
   .tour-list-search,
   .tour-list-sort,
   .tour-list-sort select,
+  .account-primary-btn,
+  .account-danger-btn,
   .checkout-summary-column {
     width: 100%;
   }
@@ -2151,6 +2467,10 @@ img {
 
   .checkout-span-2 {
     grid-column: auto;
+  }
+
+  .account-booking-card {
+    grid-template-columns: 1fr;
   }
 
   .admin-shell {
@@ -2252,6 +2572,7 @@ img {
     align-items: flex-start;
   }
 
+  .account-panel,
   .tour-filter-panel,
   .tour-browser-body,
   .checkout-step-card,
@@ -2279,6 +2600,10 @@ img {
   .checkout-promo-row input,
   .checkout-promo-row button {
     width: 100%;
+  }
+
+  .account-booking-image {
+    min-height: 220px;
   }
 }
 

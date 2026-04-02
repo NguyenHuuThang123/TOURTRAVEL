@@ -104,9 +104,12 @@ def seed_data() -> None:
             {
                 "name": "TourTravel Admin",
                 "email": "admin@tourtravel.com",
+                "phone": None,
                 "password": hash_password("Admin123"),
                 "role": "admin",
+                "is_blocked": False,
                 "created_at": now,
+                "updated_at": now,
             }
         )
 
