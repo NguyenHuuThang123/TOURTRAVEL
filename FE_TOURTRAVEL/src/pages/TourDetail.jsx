@@ -43,88 +43,128 @@ export default function TourDetail() {
   }
 
   const total = quantity * tour.price
+  const guide = {
+    name: 'Erik Hoffmann',
+    title: 'Lead Expeditionist',
+    experience: '12 years experience',
+    avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=120'
+  }
+  const quickInfo = [
+    { label: 'Duration', value: `${tour.duration_days} Days`, icon: '◔' },
+    { label: 'Group Size', value: `Max ${tour.max_participants}`, icon: '⌘' },
+    { label: 'Activity Level', value: 'Moderate', icon: '↟' },
+    { label: 'Language', value: 'English, German', icon: '◎' }
+  ]
 
   return (
-    <div style={{ minHeight: '100vh', backgroundColor: 'var(--bg-gray-50)' }}>
+    <div className="tour-detail-shell">
       <Header />
 
-      <main style={{ maxWidth: 'var(--container-max)', margin: '0 auto', padding: 'var(--spacing-2xl) var(--spacing-lg)' }}>
-        <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1.6fr) minmax(320px, 1fr)', gap: 'var(--spacing-2xl)' }}>
-          <section>
-            <div
-              style={{
-                height: '360px',
-                borderRadius: 'var(--border-radius-2xl)',
-                backgroundImage: `url(${tour.image || 'https://images.unsplash.com/photo-1469474968028-56623f02e42e?w=1200'})`,
-                backgroundSize: 'cover',
-                backgroundPosition: 'center',
-                marginBottom: 'var(--spacing-xl)'
-              }}
-            />
-            <p style={{ color: 'var(--primary-color)', fontWeight: 'var(--font-bold)', marginBottom: 'var(--spacing-sm)' }}>{tour.destination}</p>
-            <h1 style={{ fontSize: 'var(--text-4xl)', fontWeight: 'var(--font-black)', marginBottom: 'var(--spacing-md)' }}>{tour.name}</h1>
-            <p style={{ color: 'var(--text-gray-600)', lineHeight: 1.7, marginBottom: 'var(--spacing-xl)' }}>{tour.description}</p>
-
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: 'var(--spacing-md)' }}>
-              <div style={{ backgroundColor: 'var(--bg-white)', padding: 'var(--spacing-lg)', borderRadius: 'var(--border-radius-xl)' }}>
-                <p style={{ color: 'var(--text-gray-500)' }}>Thoi luong</p>
-                <strong>{tour.duration_days} ngay</strong>
+      <main className="container tour-detail-main">
+        <section className="tour-detail-hero">
+          <div
+            className="tour-detail-hero-image"
+            style={{ backgroundImage: `url(${tour.image || 'https://images.unsplash.com/photo-1469474968028-56623f02e42e?w=1400'})` }}
+          >
+            <div className="tour-detail-overlay" />
+            <div className="tour-detail-hero-content">
+              <div className="tour-detail-tags">
+                <span>Most Popular</span>
+                <span>Eco-Certified</span>
               </div>
-              <div style={{ backgroundColor: 'var(--bg-white)', padding: 'var(--spacing-lg)', borderRadius: 'var(--border-radius-xl)' }}>
-                <p style={{ color: 'var(--text-gray-500)' }}>Suc chua</p>
-                <strong>{tour.max_participants} khach</strong>
-              </div>
-              <div style={{ backgroundColor: 'var(--bg-white)', padding: 'var(--spacing-lg)', borderRadius: 'var(--border-radius-xl)' }}>
-                <p style={{ color: 'var(--text-gray-500)' }}>Con lai</p>
-                <strong>{tour.available_slots} cho</strong>
-              </div>
-              <div style={{ backgroundColor: 'var(--bg-white)', padding: 'var(--spacing-lg)', borderRadius: 'var(--border-radius-xl)' }}>
-                <p style={{ color: 'var(--text-gray-500)' }}>Khoi hanh</p>
-                <strong>{new Date(tour.start_date).toLocaleDateString()}</strong>
+              <h1>{tour.name}</h1>
+              <div className="tour-detail-rating">
+                <span>★ 4.9 (128 Reviews)</span>
+                <span>◉ {tour.destination}</span>
               </div>
             </div>
+          </div>
+        </section>
+
+        <div className="tour-detail-layout">
+          <section className="tour-detail-content">
+            <div className="tour-quick-grid">
+              {quickInfo.map((item) => (
+                <article key={item.label} className="tour-quick-card">
+                  <span className="tour-quick-icon">{item.icon}</span>
+                  <p>{item.label}</p>
+                  <strong>{item.value}</strong>
+                </article>
+              ))}
+            </div>
+
+            <section className="tour-guide-section">
+              <h2>Meet your guide</h2>
+              <div className="tour-guide-card">
+                <div className="tour-guide-profile">
+                  <img src={guide.avatar} alt={guide.name} />
+                  <div>
+                    <strong>{guide.name}</strong>
+                    <p>{guide.title} • {guide.experience}</p>
+                    <div className="tour-guide-links">
+                      <span>Message Guide</span>
+                      <span>Verified Guide</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </section>
+
+            <section className="tour-overview-section">
+              <h2>Overview</h2>
+              <p>{tour.description}</p>
+            </section>
           </section>
 
-          <aside style={{ alignSelf: 'start', position: 'sticky', top: '100px' }}>
-            <div style={{ backgroundColor: 'var(--bg-white)', borderRadius: 'var(--border-radius-2xl)', padding: 'var(--spacing-xl)', boxShadow: 'var(--shadow-xl)' }}>
-              <p style={{ color: 'var(--text-gray-500)', marginBottom: 'var(--spacing-xs)' }}>Gia tour</p>
-              <div style={{ fontSize: 'var(--text-4xl)', fontWeight: 'var(--font-black)', color: 'var(--primary-color)', marginBottom: 'var(--spacing-lg)' }}>
-                ${tour.price}
+          <aside className="tour-booking-column">
+            <div className="tour-booking-card">
+              <div className="tour-booking-price">
+                <div>
+                  <strong>${tour.price}</strong>
+                  <span>/ person</span>
+                </div>
+                <span className="tour-booking-spots">{tour.available_slots} spots left</span>
               </div>
 
-              <label style={{ display: 'block', marginBottom: 'var(--spacing-sm)', fontWeight: 'var(--font-medium)' }}>
-                So luong nguoi
-              </label>
-              <input
-                type="number"
-                min="1"
-                max={tour.available_slots || 1}
-                value={quantity}
-                onChange={(event) => setQuantity(Math.max(1, Number(event.target.value) || 1))}
-                style={{ width: '100%', padding: 'var(--spacing-md)', borderRadius: 'var(--border-radius-lg)', border: '1px solid var(--border-gray-300)', marginBottom: 'var(--spacing-lg)' }}
-              />
+              <div className="tour-booking-field">
+                <span>Select dates</span>
+                <strong>{new Date(tour.start_date).toLocaleDateString()} - {new Date(tour.end_date).toLocaleDateString()}</strong>
+              </div>
 
-              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 'var(--spacing-xl)' }}>
-                <span>Tam tinh</span>
-                <strong>${total}</strong>
+              <div className="tour-booking-field">
+                <span>Travelers</span>
+                <div className="tour-booking-travelers">
+                  <input
+                    type="number"
+                    min="1"
+                    max={tour.available_slots || 1}
+                    value={quantity}
+                    onChange={(event) => setQuantity(Math.max(1, Number(event.target.value) || 1))}
+                  />
+                  <strong>{quantity} Adults</strong>
+                </div>
               </div>
 
               <button
                 onClick={() => navigate('/checkout', { state: { tour, quantity } })}
                 disabled={tour.available_slots < 1}
-                style={{
-                  width: '100%',
-                  padding: 'var(--spacing-lg)',
-                  borderRadius: 'var(--border-radius-xl)',
-                  border: 'none',
-                  backgroundColor: tour.available_slots < 1 ? 'var(--bg-gray-300)' : 'var(--primary-color)',
-                  color: 'white',
-                  fontWeight: 'var(--font-bold)',
-                  cursor: tour.available_slots < 1 ? 'not-allowed' : 'pointer'
-                }}
+                className="tour-booking-button"
               >
-                {tour.available_slots < 1 ? 'Da het cho' : 'Mua tour ngay'}
+                {tour.available_slots < 1 ? 'Sold Out' : 'Reserve Now'}
               </button>
+
+              <p className="tour-booking-note">No payment required today • 100% Secure</p>
+
+              <div className="tour-booking-benefits">
+                <span>Free cancellation up to 30 days before</span>
+                <span>Travel protection included</span>
+                <span>Best price guaranteed</span>
+              </div>
+
+              <div className="tour-booking-total">
+                <span>Total amount</span>
+                <strong>${total}</strong>
+              </div>
             </div>
           </aside>
         </div>

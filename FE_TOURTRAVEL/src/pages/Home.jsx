@@ -149,148 +149,46 @@ export default function Home() {
       </section>
 
       {/* Featured Tours */}
-      <section style={{ padding: 'var(--spacing-3xl) 0', backgroundColor: 'var(--bg-white)' }}>
-        <div style={{ maxWidth: 'var(--container-max)', margin: '0 auto', padding: '0 var(--spacing-lg)' }}>
-          <div style={{ textAlign: 'center', marginBottom: 'var(--spacing-2xl)' }}>
-            <h2 style={{
-              fontSize: 'var(--text-4xl)',
-              fontWeight: 'var(--font-black)',
-              color: 'var(--text-gray-900)',
-              marginBottom: 'var(--spacing-lg)'
-            }}>
-              Featured Tours
-            </h2>
-            <p style={{
-              fontSize: 'var(--text-lg)',
-              color: 'var(--text-gray-600)',
-              maxWidth: '600px',
-              margin: '0 auto'
-            }}>
-              Handpicked destinations that offer unforgettable experiences and memories that last a lifetime.
-            </p>
+      <section className="featured-showcase">
+        <div className="container">
+          <div className="featured-showcase-head">
+            <div>
+              <h2>Featured Tours</h2>
+              <p>Most popular adventures chosen by our community</p>
+            </div>
+            <Link to="/tours" className="featured-view-link">View all</Link>
           </div>
 
           {loading ? (
-            <div style={{ textAlign: 'center', padding: 'var(--spacing-2xl)' }}>
-              <p style={{ fontSize: 'var(--text-lg)', color: 'var(--text-gray-600)' }}>Loading tours...</p>
-            </div>
+            <div className="featured-loading">Loading tours...</div>
           ) : (
-            <div style={{
-              display: 'grid',
-              gridTemplateColumns: 'repeat(auto-fit, minmax(350px, 1fr))',
-              gap: 'var(--spacing-xl)'
-            }}>
-              {tours.map(tour => (
-                <Link key={tour.id} to={`/tours/${tour.id}`} style={{ textDecoration: 'none' }}>
-                  <div style={{
-                    backgroundColor: 'var(--bg-white)',
-                    borderRadius: 'var(--border-radius-2xl)',
-                    overflow: 'hidden',
-                    boxShadow: 'var(--shadow-lg)',
-                    transition: 'transform 0.3s ease, box-shadow 0.3s ease',
-                    cursor: 'pointer'
-                  }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.transform = 'translateY(-4px)'
-                    e.currentTarget.style.boxShadow = 'var(--shadow-2xl)'
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.transform = 'translateY(0)'
-                    e.currentTarget.style.boxShadow = 'var(--shadow-lg)'
-                  }}
+            <div className="featured-card-grid">
+              {tours.slice(0, 3).map((tour, index) => (
+                <Link key={tour.id} to={`/tours/${tour.id}`} className="featured-tour-card">
+                  <div
+                    className="featured-tour-image"
+                    style={{ backgroundImage: `url(${tour.image || 'https://images.unsplash.com/photo-1469474968028-56623f02e42e?w=800'})` }}
                   >
-                    <div style={{
-                      height: '240px',
-                      backgroundColor: 'var(--bg-gray-200)',
-                      backgroundImage: `url(${tour.image || 'https://images.unsplash.com/photo-1469474968028-56623f02e42e?w=400'})`,
-                      backgroundSize: 'cover',
-                      backgroundPosition: 'center',
-                      position: 'relative'
-                    }}>
-                      <div style={{
-                        position: 'absolute',
-                        top: 'var(--spacing-md)',
-                        left: 'var(--spacing-md)',
-                        padding: 'var(--spacing-xs) var(--spacing-sm)',
-                        backgroundColor: 'rgba(0, 119, 182, 0.9)',
-                        color: 'white',
-                        fontSize: 'var(--text-xs)',
-                        fontWeight: 'var(--font-bold)',
-                        borderRadius: 'var(--border-radius-full)',
-                        textTransform: 'uppercase'
-                      }}>
-                        Featured
+                    {index === 0 && <span className="featured-tour-badge">New</span>}
+                    <span className="featured-tour-rating">★ 4.{9 - index}</span>
+                  </div>
+
+                  <div className="featured-tour-body">
+                    <h3>{tour.name}</h3>
+                    <p>{tour.description}</p>
+
+                    <div className="featured-tour-footer">
+                      <div>
+                        <strong>${tour.price}</strong>
+                        <span>/ person</span>
                       </div>
-                    </div>
-                    <div style={{ padding: 'var(--spacing-xl)' }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--spacing-sm)', marginBottom: 'var(--spacing-sm)' }}>
-                        <div style={{ display: 'flex', gap: '2px' }}>
-                          {[...Array(5)].map((_, i) => (
-                            <span key={i} style={{ color: '#fbbf24', fontSize: '14px' }}>⭐</span>
-                          ))}
-                        </div>
-                        <span style={{ fontSize: 'var(--text-sm)', color: 'var(--text-gray-500)' }}>
-                          ({tour.reviews || 0} reviews)
-                        </span>
-                      </div>
-                      <h3 style={{
-                        fontSize: 'var(--text-xl)',
-                        fontWeight: 'var(--font-bold)',
-                        color: 'var(--text-gray-900)',
-                        marginBottom: 'var(--spacing-sm)'
-                      }}>
-                        {tour.name}
-                      </h3>
-                      <p style={{
-                        fontSize: 'var(--text-sm)',
-                        color: 'var(--text-gray-600)',
-                        marginBottom: 'var(--spacing-lg)',
-                        display: '-webkit-box',
-                        WebkitLineClamp: 2,
-                        WebkitBoxOrient: 'vertical',
-                        overflow: 'hidden'
-                      }}>
-                        {tour.description}
-                      </p>
-                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                        <div>
-                          <span style={{
-                            fontSize: 'var(--text-2xl)',
-                            fontWeight: 'var(--font-black)',
-                            color: 'var(--primary-color)'
-                          }}>
-                            ${tour.price}
-                          </span>
-                          <span style={{ fontSize: 'var(--text-sm)', color: 'var(--text-gray-500)' }}> / person</span>
-                        </div>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--spacing-xs)' }}>
-                          <span style={{ fontSize: 'var(--text-sm)', color: 'var(--text-gray-500)' }}>📍</span>
-                          <span style={{ fontSize: 'var(--text-sm)', color: 'var(--text-gray-600)' }}>{tour.destination}</span>
-                        </div>
-                      </div>
+                      <span className="featured-tour-action">Details</span>
                     </div>
                   </div>
                 </Link>
               ))}
             </div>
           )}
-
-          <div style={{ textAlign: 'center', marginTop: 'var(--spacing-2xl)' }}>
-            <Link to="/tours" style={{
-              display: 'inline-block',
-              padding: 'var(--spacing-lg) var(--spacing-2xl)',
-              backgroundColor: 'var(--primary-color)',
-              color: 'white',
-              textDecoration: 'none',
-              borderRadius: 'var(--border-radius-xl)',
-              fontWeight: 'var(--font-bold)',
-              fontSize: 'var(--text-base)',
-              boxShadow: 'var(--shadow-lg)',
-              transition: 'background-color 0.3s ease'
-            }}>
-              View All Tours
-            </Link>
-          </div>
         </div>
       </section>
 

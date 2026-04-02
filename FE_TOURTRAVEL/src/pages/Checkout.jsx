@@ -4,24 +4,29 @@ import Header from '../components/Header'
 import Footer from '../components/Footer'
 import { createBooking } from '../api/tourService'
 
-const emptyForm = {
-  user_name: '',
-  user_email: '',
-  user_phone: ''
-}
-
 export default function Checkout() {
   const location = useLocation()
   const navigate = useNavigate()
-  const [formData, setFormData] = useState(emptyForm)
+  const [formData, setFormData] = useState({
+    firstName: '',
+    lastName: '',
+    email: '',
+    phoneCode: '+1',
+    phone: '',
+    dateOfBirth: '',
+    insurance: false,
+    vegetarian: false
+  })
   const [loading, setLoading] = useState(false)
   const [message, setMessage] = useState('')
   const [error, setError] = useState('')
 
   const tour = location.state?.tour
   const quantity = location.state?.quantity || 1
-
-  const total = useMemo(() => (tour ? tour.price * quantity : 0), [quantity, tour])
+  const subtotal = useMemo(() => (tour ? tour.price * quantity : 0), [quantity, tour])
+  const processingFee = useMemo(() => subtotal * 0.1, [subtotal])
+  const earlyBirdDiscount = useMemo(() => subtotal * 0.06, [subtotal])
+  const total = useMemo(() => subtotal + processingFee - earlyBirdDiscount, [earlyBirdDiscount, processingFee, subtotal])
 
   if (!tour) {
     return (
@@ -42,8 +47,10 @@ export default function Checkout() {
       setLoading(true)
       setError('')
       const booking = await createBooking({
-        ...formData,
         tour_id: tour.id,
+        user_name: `${formData.firstName} ${formData.lastName}`.trim(),
+        user_email: formData.email,
+        user_phone: `${formData.phoneCode} ${formData.phone}`.trim(),
         quantity
       })
       setMessage(`Dat tour thanh cong. Ma don: ${booking.id}`)
@@ -58,80 +65,150 @@ export default function Checkout() {
   }
 
   return (
-    <div style={{ minHeight: '100vh', backgroundColor: 'var(--bg-gray-50)' }}>
+    <div className="checkout-shell">
       <Header />
 
-      <main style={{ maxWidth: 'var(--container-max)', margin: '0 auto', padding: 'var(--spacing-2xl) var(--spacing-lg)' }}>
-        <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1.2fr) minmax(300px, 0.8fr)', gap: 'var(--spacing-2xl)' }}>
-          <form onSubmit={handleSubmit} style={{ backgroundColor: 'var(--bg-white)', borderRadius: 'var(--border-radius-2xl)', padding: 'var(--spacing-xl)', boxShadow: 'var(--shadow-xl)' }}>
-            <h1 style={{ fontSize: 'var(--text-3xl)', fontWeight: 'var(--font-black)', marginBottom: 'var(--spacing-xl)' }}>
-              Hoan tat mua tour
-            </h1>
+      <main className="container checkout-main">
+        <nav className="checkout-breadcrumbs">
+          <Link to="/">Home</Link>
+          <span>›</span>
+          <Link to="/tours">Tours</Link>
+          <span>›</span>
+          <span>Checkout</span>
+        </nav>
 
-            <div style={{ display: 'grid', gap: 'var(--spacing-lg)' }}>
-              <input
-                required
-                value={formData.user_name}
-                onChange={(event) => setFormData((prev) => ({ ...prev, user_name: event.target.value }))}
-                placeholder="Ho va ten"
-                style={{ padding: 'var(--spacing-md)', borderRadius: 'var(--border-radius-lg)', border: '1px solid var(--border-gray-300)' }}
-              />
-              <input
-                required
-                type="email"
-                value={formData.user_email}
-                onChange={(event) => setFormData((prev) => ({ ...prev, user_email: event.target.value }))}
-                placeholder="Email"
-                style={{ padding: 'var(--spacing-md)', borderRadius: 'var(--border-radius-lg)', border: '1px solid var(--border-gray-300)' }}
-              />
-              <input
-                required
-                value={formData.user_phone}
-                onChange={(event) => setFormData((prev) => ({ ...prev, user_phone: event.target.value }))}
-                placeholder="So dien thoai"
-                style={{ padding: 'var(--spacing-md)', borderRadius: 'var(--border-radius-lg)', border: '1px solid var(--border-gray-300)' }}
-              />
+        <div className="checkout-layout">
+          <section className="checkout-form-column">
+            <div className="checkout-step-card">
+              <div className="checkout-step-header">
+                <div>
+                  <p className="checkout-step-eyebrow">Current Step</p>
+                  <h1>Traveler Information</h1>
+                </div>
+                <div className="checkout-step-progress">
+                  <strong>Step 1 of 3</strong>
+                  <span>33% Complete</span>
+                </div>
+              </div>
+
+              <div className="checkout-step-tabs">
+                <div className="active">1 Information</div>
+                <div>2 Payment</div>
+                <div>3 Confirmation</div>
+              </div>
             </div>
 
-            {error && <p style={{ color: '#dc2626', marginTop: 'var(--spacing-lg)' }}>{error}</p>}
-            {message && <p style={{ color: '#166534', marginTop: 'var(--spacing-lg)' }}>{message}</p>}
+            <form onSubmit={handleSubmit} className="checkout-form-stack">
+              <section className="checkout-panel">
+                <div className="checkout-panel-head">
+                  <h2>Lead Traveler Details</h2>
+                  <span>Primary Contact</span>
+                </div>
 
-            <button
-              type="submit"
-              disabled={loading}
-              style={{
-                marginTop: 'var(--spacing-xl)',
-                width: '100%',
-                padding: 'var(--spacing-lg)',
-                border: 'none',
-                borderRadius: 'var(--border-radius-xl)',
-                backgroundColor: 'var(--primary-color)',
-                color: 'white',
-                fontWeight: 'var(--font-bold)',
-                cursor: loading ? 'wait' : 'pointer',
-                opacity: loading ? 0.7 : 1
-              }}
-            >
-              {loading ? 'Dang xu ly...' : 'Xac nhan mua tour'}
-            </button>
-          </form>
+                <div className="checkout-grid">
+                  <label className="checkout-field">
+                    <span>First Name</span>
+                    <input required value={formData.firstName} onChange={(event) => setFormData((prev) => ({ ...prev, firstName: event.target.value }))} placeholder="John" />
+                  </label>
+                  <label className="checkout-field">
+                    <span>Last Name</span>
+                    <input required value={formData.lastName} onChange={(event) => setFormData((prev) => ({ ...prev, lastName: event.target.value }))} placeholder="Doe" />
+                  </label>
+                  <label className="checkout-field checkout-span-2">
+                    <span>Email Address</span>
+                    <input required type="email" value={formData.email} onChange={(event) => setFormData((prev) => ({ ...prev, email: event.target.value }))} placeholder="john.doe@example.com" />
+                  </label>
+                  <label className="checkout-field">
+                    <span>Phone Number</span>
+                    <div className="checkout-phone-row">
+                      <select value={formData.phoneCode} onChange={(event) => setFormData((prev) => ({ ...prev, phoneCode: event.target.value }))}>
+                        <option value="+1">+1</option>
+                        <option value="+84">+84</option>
+                        <option value="+44">+44</option>
+                      </select>
+                      <input required value={formData.phone} onChange={(event) => setFormData((prev) => ({ ...prev, phone: event.target.value }))} placeholder="123 456 7890" />
+                    </div>
+                  </label>
+                  <label className="checkout-field">
+                    <span>Date of Birth</span>
+                    <input value={formData.dateOfBirth} onChange={(event) => setFormData((prev) => ({ ...prev, dateOfBirth: event.target.value }))} placeholder="mm/dd/yyyy" />
+                  </label>
+                </div>
+              </section>
 
-          <aside style={{ backgroundColor: 'var(--bg-white)', borderRadius: 'var(--border-radius-2xl)', padding: 'var(--spacing-xl)', boxShadow: 'var(--shadow-xl)', height: 'fit-content' }}>
-            <h2 style={{ fontSize: 'var(--text-xl)', fontWeight: 'var(--font-bold)', marginBottom: 'var(--spacing-lg)' }}>Don hang</h2>
-            <p style={{ fontWeight: 'var(--font-bold)' }}>{tour.name}</p>
-            <p style={{ color: 'var(--text-gray-500)' }}>{tour.destination}</p>
-            <div style={{ margin: 'var(--spacing-lg) 0', paddingTop: 'var(--spacing-lg)', borderTop: '1px solid var(--border-gray-200)' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 'var(--spacing-sm)' }}>
-                <span>Don gia</span>
-                <span>${tour.price}</span>
+              <section className="checkout-panel">
+                <div className="checkout-panel-head">
+                  <h2>Additional Information</h2>
+                </div>
+
+                <label className="checkout-option-row">
+                  <input type="checkbox" checked={formData.insurance} onChange={(event) => setFormData((prev) => ({ ...prev, insurance: event.target.checked }))} />
+                  <div>
+                    <strong>Add Travel Insurance (+$45.00)</strong>
+                    <span>Protect your trip against unforeseen cancellations and medical emergencies.</span>
+                  </div>
+                </label>
+
+                <label className="checkout-option-row">
+                  <input type="checkbox" checked={formData.vegetarian} onChange={(event) => setFormData((prev) => ({ ...prev, vegetarian: event.target.checked }))} />
+                  <div>
+                    <strong>Vegetarian Meal Preference</strong>
+                    <span>Request special dietary requirements for your tour meals.</span>
+                  </div>
+                </label>
+              </section>
+
+              {error && <div className="checkout-feedback error">{error}</div>}
+              {message && <div className="checkout-feedback ok">{message}</div>}
+
+              <div className="checkout-bottom-actions">
+                <Link to={`/tours/${tour.id}`} className="checkout-back-link">Back to Selection</Link>
+                <button type="submit" disabled={loading} className="checkout-submit-btn">
+                  {loading ? 'Processing...' : 'Continue to Payment'}
+                </button>
               </div>
-              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 'var(--spacing-sm)' }}>
-                <span>So luong</span>
-                <span>{quantity}</span>
+            </form>
+          </section>
+
+          <aside className="checkout-summary-column">
+            <div className="checkout-summary-card">
+              <h2>Order Summary</h2>
+
+              <div className="checkout-summary-tour">
+                <div
+                  className="checkout-summary-image"
+                  style={{ backgroundImage: `url(${tour.image || 'https://images.unsplash.com/photo-1469474968028-56623f02e42e?w=400'})` }}
+                />
+                <div>
+                  <strong>{tour.name}</strong>
+                  <span>{new Date(tour.start_date).toLocaleDateString()} - {new Date(tour.end_date).toLocaleDateString()}</span>
+                  <span>{quantity} Adults</span>
+                </div>
               </div>
-              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 'var(--text-lg)', fontWeight: 'var(--font-black)', marginTop: 'var(--spacing-md)' }}>
-                <span>Tong</span>
-                <span>${total}</span>
+
+              <div className="checkout-summary-lines">
+                <div><span>Adult (x{quantity})</span><strong>${subtotal.toFixed(2)}</strong></div>
+                <div><span>Processing Fee</span><strong>${processingFee.toFixed(2)}</strong></div>
+                <div className="discount"><span>Early Bird Discount</span><strong>-${earlyBirdDiscount.toFixed(2)}</strong></div>
+              </div>
+
+              <div className="checkout-summary-total">
+                <span>Total Price</span>
+                <strong>${total.toFixed(2)}</strong>
+              </div>
+
+              <div className="checkout-promo-row">
+                <input placeholder="Promo code" />
+                <button type="button">Apply</button>
+              </div>
+
+              <div className="checkout-secure-box">
+                <strong>Secure Payment</strong>
+                <span>Your data is protected by 256-bit SSL encryption.</span>
+              </div>
+
+              <div className="checkout-summary-note">
+                Free cancellation and 48 hours before the trip. Terms and conditions apply.
               </div>
             </div>
           </aside>
