@@ -44,148 +44,106 @@ export default function Home() {
       <Header />
 
       {/* Hero Section */}
-      <section style={{
-        position: 'relative',
-        height: '600px',
-        width: '100%',
-        backgroundImage: 'url(https://images.unsplash.com/photo-1469474968028-56623f02e42e?w=1200)',
-        backgroundSize: 'cover',
-        backgroundPosition: 'center',
-        display: 'flex',
-        alignItems: 'center'
-      }}>
-        <div style={{
-          position: 'absolute',
-          inset: 0,
-          background: 'linear-gradient(to right, rgba(0, 0, 0, 0.7) 0%, rgba(0, 0, 0, 0.3) 100%)'
-        }}></div>
-        <div style={{ maxWidth: 'var(--container-max)', margin: '0 auto', padding: '0 var(--spacing-lg)', position: 'relative', zIndex: 10 }}>
-          <div style={{ maxWidth: '600px' }}>
-            <h1 style={{
-              fontSize: 'var(--text-5xl)',
-              fontWeight: 'var(--font-black)',
-              color: 'white',
-              lineHeight: 1.2,
-              marginBottom: 'var(--spacing-lg)'
-            }}>
-              Discover Your Next Adventure
+      <section className="hero-shell">
+        <div className="hero-backdrop"></div>
+        <div className="hero-orb hero-orb-left"></div>
+        <div className="hero-orb hero-orb-right"></div>
+        <div className="container hero-grid">
+          <div className="hero-copy">
+            <div className="hero-badge">Curated journeys across mountains, seas and cities</div>
+            <h1 className="hero-title">
+              Travel Beyond
+              <span className="hero-title-accent"> the ordinary</span>
             </h1>
-            <p style={{
-              fontSize: 'var(--text-xl)',
-              color: 'rgba(255, 255, 255, 0.9)',
-              marginBottom: 'var(--spacing-2xl)',
-              lineHeight: 1.6
-            }}>
-              Explore breathtaking destinations around the world with expertly curated tours and unforgettable experiences.
+            <p className="hero-description">
+              Build your next escape with premium itineraries, handpicked local experiences and flexible departures for every kind of explorer.
             </p>
 
-            {/* Search Form */}
-            <form onSubmit={handleSearch} style={{
-              backgroundColor: 'var(--bg-white)',
-              borderRadius: 'var(--border-radius-2xl)',
-              padding: 'var(--spacing-xl)',
-              boxShadow: 'var(--shadow-2xl)',
-              display: 'grid',
-              gridTemplateColumns: '1fr 1fr 1fr auto',
-              gap: 'var(--spacing-md)',
-              alignItems: 'end'
-            }}>
-              <div>
-                <label style={{
-                  display: 'block',
-                  fontSize: 'var(--text-sm)',
-                  fontWeight: 'var(--font-medium)',
-                  color: 'var(--text-gray-700)',
-                  marginBottom: 'var(--spacing-xs)'
-                }}>
-                  Destination
-                </label>
-                <input
-                  type="text"
-                  placeholder="Where to?"
-                  value={destination}
-                  onChange={(e) => setDestination(e.target.value)}
-                  style={{
-                    width: '100%',
-                    padding: 'var(--spacing-md)',
-                    border: '1px solid var(--border-gray-300)',
-                    borderRadius: 'var(--border-radius-lg)',
-                    fontSize: 'var(--text-base)'
-                  }}
-                />
+            <div className="hero-stat-row">
+              <div className="hero-stat-card">
+                <strong>120+</strong>
+                <span>premium tours</span>
+              </div>
+              <div className="hero-stat-card">
+                <strong>4.9/5</strong>
+                <span>traveler rating</span>
+              </div>
+              <div className="hero-stat-card">
+                <strong>24/7</strong>
+                <span>support team</span>
+              </div>
+            </div>
+
+            <form onSubmit={handleSearch} className="hero-search-card">
+              <div className="hero-search-header">
+                <div>
+                  <p className="hero-search-eyebrow">Start planning</p>
+                  <h2 className="hero-search-title">Find a trip that fits your pace</h2>
+                </div>
+                <div className="hero-search-pill">No booking fees</div>
               </div>
 
-              <div>
-                <label style={{
-                  display: 'block',
-                  fontSize: 'var(--text-sm)',
-                  fontWeight: 'var(--font-medium)',
-                  color: 'var(--text-gray-700)',
-                  marginBottom: 'var(--spacing-xs)'
-                }}>
-                  Duration
+              <div className="hero-search-grid">
+                <label className="hero-field">
+                  <span>Destination</span>
+                  <input
+                    type="text"
+                    placeholder="Bali, Kyoto, Da Nang..."
+                    value={destination}
+                    onChange={(e) => setDestination(e.target.value)}
+                  />
                 </label>
-                <select
-                  value={duration}
-                  onChange={(e) => setDuration(e.target.value)}
-                  style={{
-                    width: '100%',
-                    padding: 'var(--spacing-md)',
-                    border: '1px solid var(--border-gray-300)',
-                    borderRadius: 'var(--border-radius-lg)',
-                    fontSize: 'var(--text-base)',
-                    backgroundColor: 'var(--bg-white)'
-                  }}
-                >
-                  <option value="">Any duration</option>
-                  <option value="1-3">1-3 days</option>
-                  <option value="4-7">4-7 days</option>
-                  <option value="8-14">1-2 weeks</option>
-                  <option value="15+">2+ weeks</option>
-                </select>
-              </div>
 
-              <div>
-                <label style={{
-                  display: 'block',
-                  fontSize: 'var(--text-sm)',
-                  fontWeight: 'var(--font-medium)',
-                  color: 'var(--text-gray-700)',
-                  marginBottom: 'var(--spacing-xs)'
-                }}>
-                  Search tours
+                <label className="hero-field">
+                  <span>Duration</span>
+                  <select
+                    value={duration}
+                    onChange={(e) => setDuration(e.target.value)}
+                  >
+                    <option value="">Any duration</option>
+                    <option value="1-3">1-3 days</option>
+                    <option value="4-7">4-7 days</option>
+                    <option value="8-14">1-2 weeks</option>
+                    <option value="15+">2+ weeks</option>
+                  </select>
                 </label>
-                <input
-                  type="text"
-                  placeholder="Tour name or keyword"
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  style={{
-                    width: '100%',
-                    padding: 'var(--spacing-md)',
-                    border: '1px solid var(--border-gray-300)',
-                    borderRadius: 'var(--border-radius-lg)',
-                    fontSize: 'var(--text-base)'
-                  }}
-                />
-              </div>
 
-              <button
-                type="submit"
-                style={{
-                  padding: 'var(--spacing-md) var(--spacing-xl)',
-                  backgroundColor: 'var(--primary-color)',
-                  color: 'white',
-                  border: 'none',
-                  borderRadius: 'var(--border-radius-lg)',
-                  fontWeight: 'var(--font-bold)',
-                  cursor: 'pointer',
-                  boxShadow: 'var(--shadow-lg)'
-                }}
-              >
-                Search
-              </button>
+                <label className="hero-field">
+                  <span>Tour style</span>
+                  <input
+                    type="text"
+                    placeholder="Luxury, culture, nature..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                  />
+                </label>
+
+                <button type="submit" className="hero-search-button">
+                  Explore Tours
+                </button>
+              </div>
             </form>
+          </div>
+
+          <div className="hero-visual">
+            <div className="hero-feature-card hero-feature-main">
+              <p className="hero-feature-label">Trending escape</p>
+              <h3>Alpine Sunrise Route</h3>
+              <p>7 days of panoramic train rides, ridge hikes and boutique stays above the clouds.</p>
+              <div className="hero-feature-meta">
+                <span>From $1,280</span>
+                <span>12 seats left</span>
+              </div>
+            </div>
+
+            <div className="hero-feature-card hero-feature-floating">
+              <p className="hero-feature-label">This week</p>
+              <h3>Japan city-light edit</h3>
+              <p>Tokyo, Kyoto and Osaka packed into a sleek, culture-first itinerary.</p>
+            </div>
+
+            <div className="hero-feature-chip hero-chip-top">Flexible departure dates</div>
+            <div className="hero-feature-chip hero-chip-bottom">Tailored for couples, groups and solo travelers</div>
           </div>
         </div>
       </section>

@@ -1,6 +1,4 @@
-import { useEffect, useState } from 'react'
-import Header from '../components/Header'
-import Footer from '../components/Footer'
+import { useEffect, useMemo, useState } from 'react'
 import { useAuth } from '../context/AuthContext'
 import {
   createTour,
@@ -27,56 +25,48 @@ const initialTour = {
   travel_style: ''
 }
 
-const inputStyle = {
-  padding: 'var(--spacing-md)',
-  borderRadius: 'var(--border-radius-lg)',
-  border: '1px solid var(--border-gray-300)'
-}
-
-const primaryButton = {
-  border: 'none',
-  borderRadius: 'var(--border-radius-lg)',
-  padding: 'var(--spacing-md) var(--spacing-lg)',
-  backgroundColor: 'var(--primary-color)',
-  color: 'white',
-  fontWeight: 'var(--font-bold)',
-  cursor: 'pointer'
-}
-
-const secondaryButton = {
-  border: '1px solid var(--border-gray-300)',
-  borderRadius: 'var(--border-radius-lg)',
-  padding: 'var(--spacing-md) var(--spacing-lg)',
-  backgroundColor: 'var(--bg-white)',
-  color: 'var(--text-gray-900)',
-  fontWeight: 'var(--font-bold)',
-  cursor: 'pointer'
-}
-
-const dangerButton = {
-  ...secondaryButton,
-  border: '1px solid #fecaca',
-  color: '#dc2626',
-  backgroundColor: '#fef2f2'
-}
+const sidebarItems = [
+  { id: 'bookings', label: 'Bookings', icon: 'BK' },
+  { id: 'tours', label: 'Tours', icon: 'TR' },
+  { id: 'editor', label: 'Editor', icon: 'ED' }
+]
 
 function toDateTimeLocal(value) {
   if (!value) return ''
   return new Date(value).toISOString().slice(0, 16)
 }
 
+function formatCurrency(value) {
+  return new Intl.NumberFormat('vi-VN', {
+    style: 'currency',
+    currency: 'VND',
+    maximumFractionDigits: 0
+  }).format((value || 0) * 26000)
+}
+
+function formatDateTime(value) {
+  if (!value) return '-'
+  return new Date(value).toLocaleString('vi-VN')
+}
+
 export default function AdminDashboard() {
-  const { token, user } = useAuth()
+  const { token, user, logout } = useAuth()
+  const [activeSection, setActiveSection] = useState('bookings')
   const [tourForm, setTourForm] = useState(initialTour)
   const [tours, setTours] = useState([])
   const [bookings, setBookings] = useState([])
   const [loading, setLoading] = useState(true)
   const [message, setMessage] = useState('')
   const [error, setError] = useState('')
+  const [search, setSearch] = useState('')
+  const [bookingStatusFilter, setBookingStatusFilter] = useState('all')
+  const [tourStockFilter, setTourStockFilter] = useState('all')
 
   useEffect(() => {
-    loadData()
-  }, [])
+    if (token) {
+      loadData()
+    }
+  }, [token])
 
   const loadData = async () => {
     try {
@@ -86,13 +76,58 @@ export default function AdminDashboard() {
       setBookings(bookingData)
       setError('')
     } catch (err) {
-      setError(err.response?.data?.detail || 'Khong the tai du lieu quan tri.')
+      setError(err.response?.data?.detail || 'Không thể tải dữ liệu quản trị.')
     } finally {
       setLoading(false)
     }
   }
 
-  const resetForm = () => setTourForm(initialTour)
+  const dashboardStats = useMemo(() => {
+    const confirmedRevenue = bookings
+      .filter((booking) => booking.status === 'confirmed')
+      .reduce((sum, booking) => sum + booking.total_price, 0)
+
+    return [
+      { label: 'All bookings', value: bookings.length, note: 'Tổng booking trong hệ thống' },
+      { label: 'Confirmed', value: bookings.filter((booking) => booking.status === 'confirmed').length, note: 'Đơn đã xác nhận' },
+      { label: 'Low stock tours', value: tours.filter((tour) => tour.available_slots <= 5).length, note: 'Tour cần được ưu tiên' },
+      { label: 'Revenue', value: formatCurrency(confirmedRevenue), note: 'Thu nhập từ đơn đã chốt' }
+    ]
+  }, [bookings, tours])
+
+  const filteredBookings = useMemo(() => {
+    return bookings.filter((booking) => {
+      const matchesStatus = bookingStatusFilter === 'all' || booking.status === bookingStatusFilter
+      const keyword = search.trim().toLowerCase()
+      const matchesSearch =
+        !keyword ||
+        booking.tour_name.toLowerCase().includes(keyword) ||
+        booking.user_name.toLowerCase().includes(keyword) ||
+        booking.user_email.toLowerCase().includes(keyword)
+      return matchesStatus && matchesSearch
+    })
+  }, [bookingStatusFilter, bookings, search])
+
+  const filteredTours = useMemo(() => {
+    return tours.filter((tour) => {
+      const keyword = search.trim().toLowerCase()
+      const matchesSearch =
+        !keyword ||
+        tour.name.toLowerCase().includes(keyword) ||
+        tour.destination.toLowerCase().includes(keyword)
+
+      const matchesStock =
+        tourStockFilter === 'all' ||
+        (tourStockFilter === 'low' && tour.available_slots <= 5) ||
+        (tourStockFilter === 'available' && tour.available_slots > 5)
+
+      return matchesSearch && matchesStock
+    })
+  }, [search, tourStockFilter, tours])
+
+  const resetForm = () => {
+    setTourForm(initialTour)
+  }
 
   const handleTourSubmit = async (event) => {
     event.preventDefault()
@@ -112,16 +147,17 @@ export default function AdminDashboard() {
 
       if (tourForm.id) {
         await updateTour(tourForm.id, payload, token)
-        setMessage('Cap nhat tour thanh cong.')
+        setMessage('Cập nhật tour thành công.')
       } else {
         await createTour(payload, token)
-        setMessage('Them tour moi thanh cong.')
+        setMessage('Thêm tour mới thành công.')
       }
 
       resetForm()
+      setActiveSection('tours')
       await loadData()
     } catch (err) {
-      setError(err.response?.data?.detail || 'Khong the luu tour.')
+      setError(err.response?.data?.detail || 'Không thể lưu tour.')
     }
   }
 
@@ -131,139 +167,327 @@ export default function AdminDashboard() {
       start_date: toDateTimeLocal(tour.start_date),
       end_date: toDateTimeLocal(tour.end_date)
     })
+    setActiveSection('editor')
   }
 
   const handleDeleteTour = async (tourId) => {
     try {
       await deleteTour(tourId, true, token)
-      setMessage('Da xoa tour.')
+      setMessage('Đã xóa tour.')
       await loadData()
     } catch (err) {
-      setError(err.response?.data?.detail || 'Khong the xoa tour.')
+      setError(err.response?.data?.detail || 'Không thể xóa tour.')
     }
   }
 
   const handleBookingStatus = async (bookingId, status) => {
     try {
       await updateBooking(bookingId, { status }, token)
-      setMessage('Da cap nhat trang thai don.')
+      setMessage('Đã cập nhật trạng thái đơn.')
       await loadData()
     } catch (err) {
-      setError(err.response?.data?.detail || 'Khong the cap nhat don.')
+      setError(err.response?.data?.detail || 'Không thể cập nhật đơn.')
     }
   }
 
   const handleDeleteBooking = async (bookingId) => {
     try {
       await deleteBooking(bookingId, token)
-      setMessage('Da xoa don dat.')
+      setMessage('Đã xóa đơn.')
       await loadData()
     } catch (err) {
-      setError(err.response?.data?.detail || 'Khong the xoa don.')
+      setError(err.response?.data?.detail || 'Không thể xóa đơn.')
     }
   }
 
-  return (
-    <div style={{ minHeight: '100vh', backgroundColor: 'var(--bg-gray-50)' }}>
-      <Header />
+  const renderBookingsTable = () => (
+    <div className="admin-table-wrap">
+      <div className="admin-section-header">
+        <div>
+          <h2>All Bookings</h2>
+          <p>Danh sách booking mới nhất và trạng thái xử lý.</p>
+        </div>
+      </div>
 
-      <main style={{ maxWidth: 'var(--container-max)', margin: '0 auto', padding: 'var(--spacing-2xl) var(--spacing-lg)' }}>
-        <div style={{ marginBottom: 'var(--spacing-2xl)' }}>
-          <h1 style={{ fontSize: 'var(--text-4xl)', fontWeight: 'var(--font-black)', marginBottom: 'var(--spacing-sm)' }}>
-            Quan Tri Tour va Don Ban
-          </h1>
-          <p style={{ color: 'var(--text-gray-500)' }}>
-            Them, sua, xoa tour va xu ly don mua ngay tren du lieu MongoDB.
-          </p>
-          <p style={{ color: 'var(--text-light)', marginTop: '6px' }}>
-            Dang dang nhap: {user?.name} ({user?.role})
-          </p>
+      <div className="admin-table">
+        <div className="admin-table-head">
+          <span>Service / Tour</span>
+          <span>Customer</span>
+          <span>Created Date</span>
+          <span>Schedule</span>
+          <span>List Price</span>
+          <span>Total Amount</span>
+          <span>Status</span>
+          <span>Actions</span>
         </div>
 
-        {message && <p style={{ color: '#166534' }}>{message}</p>}
-        {error && <p style={{ color: '#dc2626' }}>{error}</p>}
-        {loading && <p>Dang tai du lieu...</p>}
+        {filteredBookings.map((booking) => (
+          <article key={booking.id} className="admin-table-row">
+            <div>
+              <strong>{booking.tour_name}</strong>
+              <small>ID: {booking.id.slice(-6)}</small>
+            </div>
+            <div>
+              <strong>{booking.user_name}</strong>
+              <small>{booking.user_email}</small>
+            </div>
+            <div>
+              <strong>{new Date(booking.created_at).toLocaleDateString('vi-VN')}</strong>
+              <small>{new Date(booking.created_at).toLocaleTimeString('vi-VN')}</small>
+            </div>
+            <div>
+              <strong>{booking.quantity} khach</strong>
+              <small>{booking.user_phone}</small>
+            </div>
+            <div>{formatCurrency(booking.total_price / booking.quantity)}</div>
+            <div>
+              <span className="admin-amount-chip">{formatCurrency(booking.total_price)}</span>
+            </div>
+            <div>
+              <span className={`admin-status-chip admin-status-${booking.status}`}>{booking.status}</span>
+            </div>
+            <div className="admin-row-actions">
+              <button className="admin-link-btn" onClick={() => handleBookingStatus(booking.id, 'confirmed')}>Confirm</button>
+              <button className="admin-link-btn danger" onClick={() => handleBookingStatus(booking.id, 'cancelled')}>Cancel</button>
+              <button className="admin-link-btn" onClick={() => handleDeleteBooking(booking.id)}>Delete</button>
+            </div>
+          </article>
+        ))}
 
-        <section style={{ display: 'grid', gridTemplateColumns: 'minmax(320px, 0.95fr) minmax(0, 1.05fr)', gap: 'var(--spacing-2xl)', marginBottom: 'var(--spacing-2xl)' }}>
-          <form onSubmit={handleTourSubmit} style={{ backgroundColor: 'var(--bg-white)', borderRadius: 'var(--border-radius-2xl)', padding: 'var(--spacing-xl)', boxShadow: 'var(--shadow-xl)' }}>
-            <h2 style={{ fontSize: 'var(--text-2xl)', fontWeight: 'var(--font-bold)', marginBottom: 'var(--spacing-lg)' }}>
-              {tourForm.id ? 'Sua tour' : 'Them tour moi'}
-            </h2>
-            <div style={{ display: 'grid', gap: 'var(--spacing-md)' }}>
-              <input required value={tourForm.name} onChange={(event) => setTourForm((prev) => ({ ...prev, name: event.target.value }))} placeholder="Ten tour" style={inputStyle} />
-              <textarea required value={tourForm.description} onChange={(event) => setTourForm((prev) => ({ ...prev, description: event.target.value }))} placeholder="Mo ta tour" rows="4" style={{ ...inputStyle, resize: 'vertical' }} />
-              <input required value={tourForm.destination} onChange={(event) => setTourForm((prev) => ({ ...prev, destination: event.target.value }))} placeholder="Diem den" style={inputStyle} />
-              <input value={tourForm.image} onChange={(event) => setTourForm((prev) => ({ ...prev, image: event.target.value }))} placeholder="Link hinh anh" style={inputStyle} />
-              <input value={tourForm.travel_style} onChange={(event) => setTourForm((prev) => ({ ...prev, travel_style: event.target.value }))} placeholder="Loai hinh du lich" style={inputStyle} />
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0, 1fr))', gap: 'var(--spacing-md)' }}>
-                <input required type="number" min="1" value={tourForm.price} onChange={(event) => setTourForm((prev) => ({ ...prev, price: event.target.value }))} placeholder="Gia" style={inputStyle} />
-                <input required type="number" min="1" value={tourForm.duration_days} onChange={(event) => setTourForm((prev) => ({ ...prev, duration_days: event.target.value }))} placeholder="So ngay" style={inputStyle} />
-                <input required type="number" min="1" value={tourForm.max_participants} onChange={(event) => setTourForm((prev) => ({ ...prev, max_participants: event.target.value }))} placeholder="Suc chua toi da" style={inputStyle} />
-                <input required type="number" min="0" value={tourForm.available_slots} onChange={(event) => setTourForm((prev) => ({ ...prev, available_slots: event.target.value }))} placeholder="Cho trong" style={inputStyle} />
-                <input required type="datetime-local" value={tourForm.start_date} onChange={(event) => setTourForm((prev) => ({ ...prev, start_date: event.target.value }))} style={inputStyle} />
-                <input required type="datetime-local" value={tourForm.end_date} onChange={(event) => setTourForm((prev) => ({ ...prev, end_date: event.target.value }))} style={inputStyle} />
+        {!filteredBookings.length && !loading && <div className="admin-empty-row">Không có booking phù hợp.</div>}
+      </div>
+    </div>
+  )
+
+  const renderToursTable = () => (
+    <div className="admin-table-wrap">
+      <div className="admin-section-header">
+        <div>
+          <h2>All Tours</h2>
+          <p>Quản lý sản phẩm tour và tồn kho cho trong.</p>
+        </div>
+      </div>
+
+      <div className="admin-table">
+        <div className="admin-table-head admin-tour-head">
+          <span>Tour</span>
+          <span>Destination</span>
+          <span>Duration</span>
+          <span>Price</span>
+          <span>Slots</span>
+          <span>Style</span>
+          <span>Actions</span>
+        </div>
+
+        {filteredTours.map((tour) => (
+          <article key={tour.id} className="admin-table-row admin-tour-row">
+            <div className="admin-tour-name-cell">
+              <div className="admin-tour-thumb" style={{ backgroundImage: `url(${tour.image || 'https://images.unsplash.com/photo-1469474968028-56623f02e42e?w=800'})` }} />
+              <div>
+                <strong>{tour.name}</strong>
+                <small>{new Date(tour.start_date).toLocaleDateString('vi-VN')}</small>
               </div>
             </div>
-
-            <div style={{ display: 'flex', gap: 'var(--spacing-md)', marginTop: 'var(--spacing-lg)' }}>
-              <button type="submit" style={primaryButton}>
-                {tourForm.id ? 'Luu cap nhat' : 'Them tour'}
-              </button>
-              <button type="button" onClick={resetForm} style={secondaryButton}>
-                Tao moi
-              </button>
+            <div>{tour.destination}</div>
+            <div>{tour.duration_days} ngay</div>
+            <div>{formatCurrency(tour.price)}</div>
+            <div>
+              <span className={`admin-status-chip ${tour.available_slots <= 5 ? 'admin-status-low' : 'admin-status-open'}`}>
+                {tour.available_slots}/{tour.max_participants}
+              </span>
             </div>
-          </form>
-
-          <div style={{ backgroundColor: 'var(--bg-white)', borderRadius: 'var(--border-radius-2xl)', padding: 'var(--spacing-xl)', boxShadow: 'var(--shadow-xl)' }}>
-            <h2 style={{ fontSize: 'var(--text-2xl)', fontWeight: 'var(--font-bold)', marginBottom: 'var(--spacing-lg)' }}>Danh sach tour</h2>
-            <div style={{ display: 'grid', gap: 'var(--spacing-md)' }}>
-              {tours.map((tour) => (
-                <article key={tour.id} style={{ border: '1px solid var(--border-gray-200)', borderRadius: 'var(--border-radius-xl)', padding: 'var(--spacing-lg)' }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', gap: 'var(--spacing-md)', alignItems: 'start' }}>
-                    <div>
-                      <h3 style={{ marginBottom: 'var(--spacing-xs)' }}>{tour.name}</h3>
-                      <p style={{ color: 'var(--text-gray-500)', marginBottom: 'var(--spacing-sm)' }}>{tour.destination}</p>
-                      <p style={{ color: 'var(--text-gray-600)' }}>${tour.price} • {tour.available_slots}/{tour.max_participants} cho</p>
-                    </div>
-                    <div style={{ display: 'flex', gap: 'var(--spacing-sm)' }}>
-                      <button onClick={() => handleEditTour(tour)} style={secondaryButton}>Sua</button>
-                      <button onClick={() => handleDeleteTour(tour.id)} style={dangerButton}>Xoa</button>
-                    </div>
-                  </div>
-                </article>
-              ))}
+            <div>{tour.travel_style || 'General'}</div>
+            <div className="admin-row-actions">
+              <button className="admin-link-btn" onClick={() => handleEditTour(tour)}>Edit</button>
+              <button className="admin-link-btn danger" onClick={() => handleDeleteTour(tour.id)}>Delete</button>
             </div>
+          </article>
+        ))}
+
+        {!filteredTours.length && !loading && <div className="admin-empty-row">Không có tour phù hợp.</div>}
+      </div>
+    </div>
+  )
+
+  const renderEditor = () => (
+    <div className="admin-editor-wrap">
+      <div className="admin-section-header">
+        <div>
+          <h2>{tourForm.id ? 'Edit Tour' : 'Create Tour'}</h2>
+          <p>Tạo mới hoặc cập nhật tour trong dashboard admin.</p>
+        </div>
+      </div>
+
+      <form onSubmit={handleTourSubmit} className="admin-editor-form">
+        <label className="admin-editor-field admin-span-2">
+          <span>Tour name</span>
+          <input required value={tourForm.name} onChange={(event) => setTourForm((prev) => ({ ...prev, name: event.target.value }))} />
+        </label>
+
+        <label className="admin-editor-field admin-span-2">
+          <span>Description</span>
+          <textarea required rows="4" value={tourForm.description} onChange={(event) => setTourForm((prev) => ({ ...prev, description: event.target.value }))} />
+        </label>
+
+        <label className="admin-editor-field">
+          <span>Destination</span>
+          <input required value={tourForm.destination} onChange={(event) => setTourForm((prev) => ({ ...prev, destination: event.target.value }))} />
+        </label>
+
+        <label className="admin-editor-field">
+          <span>Style</span>
+          <input value={tourForm.travel_style} onChange={(event) => setTourForm((prev) => ({ ...prev, travel_style: event.target.value }))} />
+        </label>
+
+        <label className="admin-editor-field admin-span-2">
+          <span>Image URL</span>
+          <input value={tourForm.image} onChange={(event) => setTourForm((prev) => ({ ...prev, image: event.target.value }))} />
+        </label>
+
+        <label className="admin-editor-field">
+          <span>Price</span>
+          <input required type="number" min="1" value={tourForm.price} onChange={(event) => setTourForm((prev) => ({ ...prev, price: event.target.value }))} />
+        </label>
+
+        <label className="admin-editor-field">
+          <span>Duration</span>
+          <input required type="number" min="1" value={tourForm.duration_days} onChange={(event) => setTourForm((prev) => ({ ...prev, duration_days: event.target.value }))} />
+        </label>
+
+        <label className="admin-editor-field">
+          <span>Max participants</span>
+          <input required type="number" min="1" value={tourForm.max_participants} onChange={(event) => setTourForm((prev) => ({ ...prev, max_participants: event.target.value }))} />
+        </label>
+
+        <label className="admin-editor-field">
+          <span>Available slots</span>
+          <input required type="number" min="0" value={tourForm.available_slots} onChange={(event) => setTourForm((prev) => ({ ...prev, available_slots: event.target.value }))} />
+        </label>
+
+        <label className="admin-editor-field">
+          <span>Start date</span>
+          <input required type="datetime-local" value={tourForm.start_date} onChange={(event) => setTourForm((prev) => ({ ...prev, start_date: event.target.value }))} />
+        </label>
+
+        <label className="admin-editor-field">
+          <span>End date</span>
+          <input required type="datetime-local" value={tourForm.end_date} onChange={(event) => setTourForm((prev) => ({ ...prev, end_date: event.target.value }))} />
+        </label>
+
+        <div className="admin-editor-actions admin-span-2">
+          <button type="submit" className="admin-green-btn">{tourForm.id ? 'Save changes' : 'Create tour'}</button>
+          <button type="button" className="admin-ghost-btn" onClick={resetForm}>Reset</button>
+        </div>
+      </form>
+    </div>
+  )
+
+  return (
+    <div className="admin-shell">
+      <aside className="admin-side-nav">
+        <div className="admin-brand">Tour<span>Travel</span></div>
+        <div className="admin-side-icons">
+          {sidebarItems.map((item) => (
+            <button
+              key={item.id}
+              className={`admin-side-link ${activeSection === item.id ? 'active' : ''}`}
+              onClick={() => setActiveSection(item.id)}
+              title={item.label}
+            >
+              <span>{item.icon}</span>
+            </button>
+          ))}
+        </div>
+        <button className="admin-side-link logout" onClick={logout} title="Logout">
+          <span>LO</span>
+        </button>
+      </aside>
+
+      <div className="admin-main">
+        <header className="admin-topbar">
+          <div>
+            <p className="admin-topbar-eyebrow">Admin dashboard</p>
+            <h1>{activeSection === 'bookings' ? 'All Bookings' : activeSection === 'tours' ? 'Tour Inventory' : 'Create / Update Tour'}</h1>
           </div>
+
+          <div className="admin-topbar-actions">
+            <button className="admin-icon-btn">🔔</button>
+            <div className="admin-userbox">
+              <div className="admin-user-avatar">{user?.name?.slice(0, 1) || 'A'}</div>
+              <div>
+                <strong>{user?.name}</strong>
+                <span>Administrator</span>
+              </div>
+            </div>
+            <button className="admin-logout-top" onClick={logout}>
+              Đăng xuất
+            </button>
+          </div>
+        </header>
+
+        <section className="admin-metric-row">
+          {dashboardStats.map((item) => (
+            <article key={item.label} className="admin-metric-card">
+              <span>{item.label}</span>
+              <strong>{item.value}</strong>
+              <small>{item.note}</small>
+            </article>
+          ))}
         </section>
 
-        <section style={{ backgroundColor: 'var(--bg-white)', borderRadius: 'var(--border-radius-2xl)', padding: 'var(--spacing-xl)', boxShadow: 'var(--shadow-xl)' }}>
-          <h2 style={{ fontSize: 'var(--text-2xl)', fontWeight: 'var(--font-bold)', marginBottom: 'var(--spacing-lg)' }}>Don mua / ban</h2>
-          <div style={{ display: 'grid', gap: 'var(--spacing-md)' }}>
-            {bookings.map((booking) => (
-              <article key={booking.id} style={{ border: '1px solid var(--border-gray-200)', borderRadius: 'var(--border-radius-xl)', padding: 'var(--spacing-lg)' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', gap: 'var(--spacing-md)', flexWrap: 'wrap' }}>
-                  <div>
-                    <h3 style={{ marginBottom: 'var(--spacing-xs)' }}>{booking.tour_name}</h3>
-                    <p style={{ color: 'var(--text-gray-500)', marginBottom: 'var(--spacing-xs)' }}>{booking.user_name} • {booking.user_email}</p>
-                    <p style={{ color: 'var(--text-gray-600)' }}>
-                      {booking.quantity} khach • ${booking.total_price} • {booking.status}
-                    </p>
-                  </div>
-                  <div style={{ display: 'flex', gap: 'var(--spacing-sm)', flexWrap: 'wrap' }}>
-                    <button onClick={() => handleBookingStatus(booking.id, 'confirmed')} style={secondaryButton}>Xac nhan</button>
-                    <button onClick={() => handleBookingStatus(booking.id, 'cancelled')} style={dangerButton}>Huy</button>
-                    <button onClick={() => handleDeleteBooking(booking.id)} style={secondaryButton}>Xoa don</button>
-                  </div>
-                </div>
-              </article>
-            ))}
-            {!bookings.length && !loading && <p>Chua co don dat nao.</p>}
-          </div>
-        </section>
-      </main>
+        <section className="admin-toolbar">
+          {activeSection === 'bookings' && (
+            <>
+              <select value={bookingStatusFilter} onChange={(event) => setBookingStatusFilter(event.target.value)} className="admin-toolbar-control">
+                <option value="all">All Status</option>
+                <option value="confirmed">Confirmed</option>
+                <option value="pending">Pending</option>
+                <option value="cancelled">Cancelled</option>
+              </select>
+              <select className="admin-toolbar-control">
+                <option>All Services</option>
+                <option>Adventure</option>
+                <option>Luxury</option>
+                <option>Cultural</option>
+              </select>
+            </>
+          )}
 
-      <Footer />
+          {activeSection === 'tours' && (
+            <select value={tourStockFilter} onChange={(event) => setTourStockFilter(event.target.value)} className="admin-toolbar-control">
+              <option value="all">All Tours</option>
+              <option value="available">Healthy Stock</option>
+              <option value="low">Low Stock</option>
+            </select>
+          )}
+
+          <input
+            className="admin-toolbar-search"
+            placeholder={activeSection === 'bookings' ? 'Search customer or booking...' : 'Search tours...'}
+            value={search}
+            onChange={(event) => setSearch(event.target.value)}
+          />
+
+          <button className="admin-green-btn" onClick={() => setActiveSection('editor')}>
+            {tourForm.id ? 'Update Tour' : 'Create Tour'}
+          </button>
+          <button className="admin-ghost-btn" onClick={loadData}>Refresh</button>
+        </section>
+
+        {(message || error || loading) && (
+          <section className="admin-feedback-bar">
+            {loading && <span>Dang tai du lieu...</span>}
+            {message && <span className="ok">{message}</span>}
+            {error && <span className="err">{error}</span>}
+          </section>
+        )}
+
+        <main className="admin-content-area">
+          {activeSection === 'bookings' && renderBookingsTable()}
+          {activeSection === 'tours' && renderToursTable()}
+          {activeSection === 'editor' && renderEditor()}
+        </main>
+      </div>
     </div>
   )
 }

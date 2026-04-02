@@ -19,8 +19,9 @@ export default function Login() {
     try {
       setLoading(true)
       setError('')
-      await login(formData)
-      navigate(redirectTo, { replace: true })
+      const auth = await login(formData)
+      const destination = auth?.user?.role === 'admin' ? '/admin' : redirectTo
+      navigate(destination, { replace: true })
     } catch (err) {
       setError(err.response?.data?.detail || 'Dang nhap that bai.')
     } finally {
