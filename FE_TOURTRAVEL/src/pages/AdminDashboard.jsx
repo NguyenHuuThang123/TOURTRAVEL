@@ -640,7 +640,8 @@ export default function AdminDashboard() {
               onClick={() => setActiveSection(item.id)}
               title={item.label}
             >
-              <span>{item.icon}</span>
+              <span className="admin-side-link-icon">{item.icon}</span>
+              <span className="admin-side-link-label">{item.label}</span>
             </button>
           ))}
           <button
@@ -648,11 +649,13 @@ export default function AdminDashboard() {
             onClick={() => setActiveSection('user-editor')}
             title="User Editor"
           >
-            <span>UE</span>
+            <span className="admin-side-link-icon">UE</span>
+            <span className="admin-side-link-label">User Editor</span>
           </button>
         </div>
         <button className="admin-side-link logout" onClick={logout} title="Logout">
-          <span>LO</span>
+          <span className="admin-side-link-icon">LO</span>
+          <span className="admin-side-link-label">Logout</span>
         </button>
       </aside>
 

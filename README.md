@@ -34,6 +34,33 @@ TOURTRAVEL/
 
 ## 🚀 Quick Start
 
+### Run With Docker
+
+1. **Open terminal at project root:**
+   ```bash
+   cd TOURTRAVEL
+   ```
+
+2. **Build and start all services:**
+   ```bash
+   docker compose up --build
+   ```
+
+3. **Access the app:**
+   - Frontend: http://localhost:3000
+   - Backend API: http://localhost:8000
+   - Swagger Docs: http://localhost:8000/docs
+
+4. **Stop containers:**
+   ```bash
+   docker compose down
+   ```
+
+5. **Stop and remove volume data:**
+   ```bash
+   docker compose down -v
+   ```
+
 ### Backend (FastAPI)
 
 1. **Navigate to backend folder:**

@@ -1610,26 +1610,28 @@ img {
 .admin-shell {
   min-height: 100vh;
   display: grid;
-  grid-template-columns: 74px minmax(0, 1fr);
+  grid-template-columns: 240px minmax(0, 1fr);
   background: #f3f5f7;
 }
 
 .admin-side-nav {
   display: flex;
   flex-direction: column;
-  align-items: center;
+  align-items: stretch;
   gap: 18px;
-  padding: 22px 0 18px;
+  padding: 22px 14px 18px;
   background: #ffffff;
   border-right: 1px solid #e5e7eb;
 }
 
 .admin-brand {
+  padding: 0 10px;
   margin-bottom: 10px;
   color: #16a34a;
   font-size: 1.45rem;
   font-weight: 900;
   line-height: 1;
+  white-space: nowrap;
 }
 
 .admin-brand span {
@@ -1641,20 +1643,23 @@ img {
   flex-direction: column;
   gap: 12px;
   width: 100%;
-  align-items: center;
+  align-items: stretch;
 }
 
 .admin-side-link {
-  width: 42px;
-  height: 42px;
-  border-radius: 14px;
+  width: 100%;
+  min-height: 50px;
+  padding: 0 14px;
+  border-radius: 16px;
   background: transparent;
   color: #64748b;
   display: inline-flex;
   align-items: center;
-  justify-content: center;
-  font-size: 11px;
+  justify-content: flex-start;
+  gap: 12px;
+  font-size: 14px;
   font-weight: 800;
+  text-align: left;
   border: 1px solid transparent;
 }
 
@@ -1667,6 +1672,32 @@ img {
   margin-top: auto;
   background: #fff1f2;
   color: #dc2626;
+}
+
+.admin-side-link-icon {
+  width: 34px;
+  height: 34px;
+  border-radius: 12px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  background: rgba(148, 163, 184, 0.14);
+  font-size: 11px;
+  font-weight: 900;
+  letter-spacing: 0.04em;
+}
+
+.admin-side-link.active .admin-side-link-icon {
+  background: rgba(34, 197, 94, 0.14);
+}
+
+.admin-side-link.logout .admin-side-link-icon {
+  background: rgba(239, 68, 68, 0.12);
+}
+
+.admin-side-link-label {
+  white-space: nowrap;
 }
 
 .admin-main {
@@ -2488,6 +2519,16 @@ img {
   .admin-side-icons {
     flex-direction: row;
     width: auto;
+  }
+
+  .admin-side-link {
+    width: auto;
+    min-height: 42px;
+    padding: 0 10px;
+  }
+
+  .admin-side-link-label {
+    display: none;
   }
 
   .admin-topbar,
