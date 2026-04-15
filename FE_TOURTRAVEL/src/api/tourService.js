@@ -17,6 +17,11 @@ export const loginUser = async (payload) => {
   return response.data
 }
 
+export const loginWithGoogle = async (credential) => {
+  const response = await axios.post(`${API_BASE}/auth/google`, { credential })
+  return response.data
+}
+
 export const getCurrentUser = async (token) => {
   const response = await axios.get(`${API_BASE}/auth/me`, authHeaders(token))
   return response.data

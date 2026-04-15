@@ -1,4 +1,5 @@
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
+import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom'
+import { useEffect } from 'react'
 import Home from './pages/Home'
 import TourList from './pages/TourList'
 import TourDetail from './pages/TourDetail'
@@ -10,9 +11,20 @@ import Register from './pages/Register'
 import ProtectedRoute from './components/ProtectedRoute'
 import './App.css'
 
+function ScrollToTop() {
+  const location = useLocation()
+
+  useEffect(() => {
+    window.scrollTo({ top: 0, left: 0, behavior: 'auto' })
+  }, [location.pathname, location.search])
+
+  return null
+}
+
 function App() {
   return (
     <Router>
+      <ScrollToTop />
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/tours" element={<TourList />} />

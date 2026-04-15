@@ -2,11 +2,12 @@ import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import Header from '../components/Header'
 import Footer from '../components/Footer'
+import GoogleAuthButton from '../components/GoogleAuthButton'
 import { useAuth } from '../context/AuthContext'
 
 export default function Register() {
   const navigate = useNavigate()
-  const { register } = useAuth()
+  const { googleLogin, register } = useAuth()
   const [formData, setFormData] = useState({ name: '', email: '', password: '' })
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
@@ -20,6 +21,19 @@ export default function Register() {
       navigate('/account', { replace: true })
     } catch (err) {
       setError(err.response?.data?.detail || 'Dang ky that bai.')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const handleGoogleRegister = async (credential) => {
+    try {
+      setLoading(true)
+      setError('')
+      const auth = await googleLogin(credential)
+      navigate(auth?.user?.role === 'admin' ? '/admin' : '/account', { replace: true })
+    } catch (err) {
+      setError(err.response?.data?.detail || 'Dang ky bang Google that bai.')
     } finally {
       setLoading(false)
     }
@@ -63,6 +77,8 @@ export default function Register() {
               {loading ? 'Dang tao tai khoan...' : 'Dang ky'}
             </button>
           </form>
+
+          <GoogleAuthButton onCredential={handleGoogleRegister} text="signup_with" />
 
           <p style={{ marginTop: '20px' }}>
             Da co tai khoan? <Link to="/login">Dang nhap</Link>

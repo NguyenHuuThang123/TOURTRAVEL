@@ -2,12 +2,13 @@ import { useState } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import Header from '../components/Header'
 import Footer from '../components/Footer'
+import GoogleAuthButton from '../components/GoogleAuthButton'
 import { useAuth } from '../context/AuthContext'
 
 export default function Login() {
   const navigate = useNavigate()
   const location = useLocation()
-  const { login } = useAuth()
+  const { googleLogin, login } = useAuth()
   const [formData, setFormData] = useState({ email: '', password: '' })
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
@@ -29,23 +30,37 @@ export default function Login() {
     }
   }
 
-  return (
-    <div style={{ minHeight: '100vh', backgroundColor: 'var(--bg-gray-50)' }}>
-      <Header />
-      <main style={{ maxWidth: '480px', margin: '0 auto', padding: '48px 20px' }}>
-        <div style={authCardStyle}>
-          <p style={eyebrowStyle}>Welcome back</p>
-          <h1 style={titleStyle}>Dang nhap</h1>
-          <p style={subtitleStyle}>Dang nhap de quan ly tour, xem tai khoan va thao tac admin neu ban duoc cap quyen.</p>
+  const handleGoogleLogin = async (credential) => {
+    try {
+      setLoading(true)
+      setError('')
+      const auth = await googleLogin(credential)
+      const destination = auth?.user?.role === 'admin' ? '/admin' : redirectTo
+      navigate(destination, { replace: true })
+    } catch (err) {
+      setError(err.response?.data?.detail || 'Dang nhap bang Google that bai.')
+    } finally {
+      setLoading(false)
+    }
+  }
 
-          <form onSubmit={handleSubmit} style={{ display: 'grid', gap: '16px' }}>
+  return (
+    <div className="auth-shell">
+      <Header />
+      <main className="auth-main">
+        <div className="auth-card">
+          <p className="auth-eyebrow">Welcome back</p>
+          <h1 className="auth-title">Dang nhap</h1>
+          <p className="auth-subtitle">Dang nhap de quan ly tour, xem tai khoan va thao tac admin neu ban duoc cap quyen.</p>
+
+          <form onSubmit={handleSubmit} className="auth-form">
             <input
               type="email"
               required
               placeholder="Email"
               value={formData.email}
               onChange={(event) => setFormData((prev) => ({ ...prev, email: event.target.value }))}
-              style={inputStyle}
+              className="auth-input"
             />
             <input
               type="password"
@@ -53,62 +68,24 @@ export default function Login() {
               placeholder="Mat khau"
               value={formData.password}
               onChange={(event) => setFormData((prev) => ({ ...prev, password: event.target.value }))}
-              style={inputStyle}
+              className="auth-input"
             />
             {error && <p style={{ color: '#dc2626' }}>{error}</p>}
-            <button type="submit" disabled={loading} style={primaryButton}>
+            <button type="submit" disabled={loading} className="auth-button">
               {loading ? 'Dang dang nhap...' : 'Dang nhap'}
             </button>
           </form>
 
-          <p style={{ marginTop: '20px' }}>
-            Chua co tai khoan? <Link to="/register">Dang ky ngay</Link>
+          <div style={{ marginTop: '24px', marginBottom: '24px' }}>
+            <GoogleAuthButton onCredential={handleGoogleLogin} text="continue_with" />
+          </div>
+
+          <p className="auth-footer-text">
+            Chua co tai khoan? <Link to="/register" style={{ color: 'var(--primary-color)', fontWeight: 'bold' }}>Dang ky ngay</Link>
           </p>
         </div>
       </main>
       <Footer />
     </div>
   )
-}
-
-const authCardStyle = {
-  background: 'linear-gradient(180deg, #ffffff 0%, #f8fbff 100%)',
-  borderRadius: '24px',
-  padding: '32px',
-  border: '1px solid #dbe7ff',
-  boxShadow: '0 24px 80px rgba(37, 99, 235, 0.12)'
-}
-
-const eyebrowStyle = {
-  color: '#2563eb',
-  fontWeight: 700,
-  textTransform: 'uppercase',
-  letterSpacing: '0.08em',
-  fontSize: '12px',
-  marginBottom: '8px'
-}
-
-const titleStyle = {
-  fontSize: '36px',
-  fontWeight: 800,
-  marginBottom: '10px'
-}
-
-const subtitleStyle = {
-  marginBottom: '20px'
-}
-
-const inputStyle = {
-  padding: '14px 16px',
-  borderRadius: '14px',
-  border: '1px solid #cbd5e1'
-}
-
-const primaryButton = {
-  padding: '14px 18px',
-  borderRadius: '14px',
-  border: 'none',
-  background: 'linear-gradient(135deg, #2563eb 0%, #0f172a 100%)',
-  color: 'white',
-  fontWeight: 700
 }

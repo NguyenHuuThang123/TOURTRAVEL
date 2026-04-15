@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useSearchParams } from 'react-router-dom'
 import Header from '../components/Header'
 import Footer from '../components/Footer'
 import { getTours } from '../api/tourService'
@@ -19,14 +19,15 @@ const formatCurrency = (value) =>
   `$${Math.round(value).toLocaleString('en-US')}`
 
 export default function TourList() {
+  const [searchParams] = useSearchParams()
   const [tours, setTours] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
-  const [search, setSearch] = useState('')
+  const [search, setSearch] = useState(() => searchParams.get('search') || '')
   const [sortBy, setSortBy] = useState('latest')
-  const [selectedDuration, setSelectedDuration] = useState('')
-  const [selectedDestination, setSelectedDestination] = useState('')
-  const [selectedStyle, setSelectedStyle] = useState('')
+  const [selectedDuration, setSelectedDuration] = useState(() => searchParams.get('duration') || '')
+  const [selectedDestination, setSelectedDestination] = useState(() => searchParams.get('destination') || '')
+  const [selectedStyle, setSelectedStyle] = useState(() => searchParams.get('style') || '')
   const [priceBounds, setPriceBounds] = useState({
     min: FALLBACK_PRICE_MIN,
     max: FALLBACK_PRICE_MAX
@@ -39,6 +40,13 @@ export default function TourList() {
   useEffect(() => {
     loadTours()
   }, [])
+
+  useEffect(() => {
+    setSearch(searchParams.get('search') || '')
+    setSelectedDuration(searchParams.get('duration') || '')
+    setSelectedDestination(searchParams.get('destination') || '')
+    setSelectedStyle(searchParams.get('style') || '')
+  }, [searchParams])
 
   useEffect(() => {
     if (!tours.length) return
@@ -82,7 +90,7 @@ export default function TourList() {
         !selectedDestination || tour.destination.toLowerCase().includes(selectedDestination.toLowerCase())
 
       const matchesStyle =
-        !selectedStyle || (tour.travel_style || '').toLowerCase() === selectedStyle.toLowerCase()
+        !selectedStyle || (tour.travel_style || '').toLowerCase().includes(selectedStyle.toLowerCase())
 
       const matchesDuration =
         !selectedDuration ||

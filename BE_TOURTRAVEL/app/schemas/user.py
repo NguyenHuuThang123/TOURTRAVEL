@@ -19,6 +19,10 @@ class UserLogin(BaseModel):
     password: str = Field(..., min_length=6, max_length=128)
 
 
+class GoogleAuthRequest(BaseModel):
+    credential: str = Field(..., min_length=10)
+
+
 class UserPublic(BaseModel):
     id: str
     name: str

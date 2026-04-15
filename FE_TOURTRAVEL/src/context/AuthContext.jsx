@@ -1,5 +1,5 @@
 import { createContext, useContext, useEffect, useState } from 'react'
-import { getCurrentUser, loginUser, registerUser, updateCurrentUser } from '../api/tourService'
+import { getCurrentUser, loginUser, loginWithGoogle, registerUser, updateCurrentUser } from '../api/tourService'
 
 const AuthContext = createContext(null)
 
@@ -58,6 +58,12 @@ export function AuthProvider({ children }) {
     return payload
   }
 
+  const googleLogin = async (credential) => {
+    const payload = await loginWithGoogle(credential)
+    persistAuth(payload)
+    return payload
+  }
+
   const updateProfile = async (profileData) => {
     const updatedUser = await updateCurrentUser(profileData, token)
     setUser(updatedUser)
@@ -72,7 +78,7 @@ export function AuthProvider({ children }) {
   }
 
   return (
-    <AuthContext.Provider value={{ user, token, loading, login, register, logout, updateProfile, isAuthenticated: Boolean(token) }}>
+    <AuthContext.Provider value={{ user, token, loading, login, register, googleLogin, logout, updateProfile, isAuthenticated: Boolean(token) }}>
       {children}
     </AuthContext.Provider>
   )
