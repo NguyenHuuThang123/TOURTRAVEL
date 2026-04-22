@@ -1,6 +1,8 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useAuth } from '../context/AuthContext'
 import {
+  getAdminChatConversationDetail,
+  getAdminChatConversations,
   createTour,
   createUserByAdmin,
   deleteBooking,
@@ -9,6 +11,7 @@ import {
   getBookings,
   getTours,
   getUsers,
+  sendAdminChatMessage,
   toggleUserBlock,
   updateBooking,
   updateTour,
@@ -42,6 +45,7 @@ const initialUser = {
 
 const sidebarItems = [
   { id: 'bookings', label: 'Bookings', icon: 'BK' },
+  { id: 'chats', label: 'Chats', icon: 'CH' },
   { id: 'tours', label: 'Tours', icon: 'TR' },
   { id: 'users', label: 'Users', icon: 'US' },
   { id: 'editor', label: 'Tour Editor', icon: 'ED' }
@@ -67,6 +71,7 @@ function formatDateTime(value) {
 
 function titleForSection(section) {
   if (section === 'bookings') return 'All Bookings'
+  if (section === 'chats') return 'Customer Chats'
   if (section === 'tours') return 'Tour Inventory'
   if (section === 'users') return 'User Management'
   if (section === 'user-editor') return 'Create / Update User'
@@ -81,6 +86,9 @@ export default function AdminDashboard() {
   const [tours, setTours] = useState([])
   const [bookings, setBookings] = useState([])
   const [users, setUsers] = useState([])
+  const [chatConversations, setChatConversations] = useState([])
+  const [activeChat, setActiveChat] = useState(null)
+  const [chatReply, setChatReply] = useState('')
   const [loading, setLoading] = useState(true)
   const [message, setMessage] = useState('')
   const [error, setError] = useState('')
@@ -99,10 +107,20 @@ export default function AdminDashboard() {
   const loadData = async () => {
     try {
       setLoading(true)
-      const [tourData, bookingData, userData] = await Promise.all([getTours(), getBookings(token), getUsers(token)])
+      const [tourData, bookingData, userData, chatData] = await Promise.all([
+        getTours(),
+        getBookings(token),
+        getUsers(token),
+        getAdminChatConversations(token)
+      ])
       setTours(tourData)
       setBookings(bookingData)
       setUsers(userData)
+      setChatConversations(chatData)
+      if (chatData.length && !activeChat) {
+        const detail = await getAdminChatConversationDetail(chatData[0].id, token)
+        setActiveChat(detail)
+      }
       setError('')
     } catch (err) {
       setError(err.response?.data?.detail || 'Không thể tải dữ liệu quản trị.')
@@ -136,6 +154,18 @@ export default function AdminDashboard() {
       return matchesStatus && matchesSearch
     })
   }, [bookingStatusFilter, bookings, search])
+
+  const filteredChats = useMemo(() => {
+    return chatConversations.filter((item) => {
+      const keyword = search.trim().toLowerCase()
+      return (
+        !keyword ||
+        item.user_name.toLowerCase().includes(keyword) ||
+        (item.user_email || '').toLowerCase().includes(keyword) ||
+        item.last_message_preview.toLowerCase().includes(keyword)
+      )
+    })
+  }, [chatConversations, search])
 
   const filteredTours = useMemo(() => {
     return tours.filter((tour) => {
@@ -315,6 +345,40 @@ export default function AdminDashboard() {
     }
   }
 
+  const handleOpenChat = async (conversationId) => {
+    try {
+      setLoading(true)
+      const detail = await getAdminChatConversationDetail(conversationId, token)
+      setActiveChat(detail)
+      setChatConversations((prev) => prev.map((item) => (item.id === detail.conversation.id ? detail.conversation : item)))
+      setError('')
+    } catch (err) {
+      setError(err.response?.data?.detail || 'Không thể tải hội thoại.')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const handleSendChatReply = async (event) => {
+    event.preventDefault()
+    if (!activeChat?.conversation?.id || !chatReply.trim()) return
+
+    try {
+      setError('')
+      setMessage('')
+      const detail = await sendAdminChatMessage(activeChat.conversation.id, { content: chatReply.trim() }, token)
+      setActiveChat(detail)
+      setChatReply('')
+      setMessage('Đã gửi phản hồi cho khách hàng.')
+      setChatConversations((prev) => {
+        const next = prev.filter((item) => item.id !== detail.conversation.id)
+        return [detail.conversation, ...next]
+      })
+    } catch (err) {
+      setError(err.response?.data?.detail || 'Không thể gửi phản hồi.')
+    }
+  }
+
   const renderBookingsTable = () => (
     <div className="admin-table-wrap">
       <div className="admin-section-header">
@@ -421,6 +485,79 @@ export default function AdminDashboard() {
 
         {!filteredTours.length && !loading && <div className="admin-empty-row">Không có tour phù hợp.</div>}
       </div>
+    </div>
+  )
+
+  const renderChatsPanel = () => (
+    <div className="admin-chat-layout">
+      <section className="admin-chat-list-wrap">
+        <div className="admin-section-header">
+          <div>
+            <h2>Customer chats</h2>
+            <p>Theo dõi yêu cầu mới và mở từng hội thoại để trả lời.</p>
+          </div>
+        </div>
+
+        <div className="admin-chat-list">
+          {filteredChats.map((item) => (
+            <button
+              key={item.id}
+              type="button"
+              className={`admin-chat-list-item ${activeChat?.conversation?.id === item.id ? 'active' : ''}`}
+              onClick={() => handleOpenChat(item.id)}
+            >
+              <div>
+                <strong>{item.user_name}</strong>
+                <span>{item.user_email || 'Khach vang lai'}</span>
+                <p>{item.last_message_preview}</p>
+              </div>
+              <div className="admin-chat-item-side">
+                <small>{formatDateTime(item.last_message_at)}</small>
+                {!!item.unread_for_admin && <em>{item.unread_for_admin} moi</em>}
+              </div>
+            </button>
+          ))}
+
+          {!filteredChats.length && !loading && <div className="admin-empty-row">Chưa có hội thoại phù hợp.</div>}
+        </div>
+      </section>
+
+      <section className="admin-chat-thread">
+        <div className="admin-section-header">
+          <div>
+            <h2>{activeChat?.conversation?.user_name || 'Chon mot hoi thoai'}</h2>
+            <p>
+              {activeChat?.conversation
+                ? `${activeChat.conversation.user_email || 'Khach vang lai'} • Trang thai ${activeChat.conversation.status}`
+                : 'Chọn một cuộc trò chuyện bên trái để xem nội dung.'}
+            </p>
+          </div>
+        </div>
+
+        <div className="admin-chat-messages">
+          {activeChat?.messages?.map((message) => (
+            <article key={message.id} className={`admin-chat-bubble ${message.sender_type === 'admin' ? 'admin' : 'customer'}`}>
+              <strong>{message.sender_name}</strong>
+              <p>{message.content}</p>
+              <small>{formatDateTime(message.created_at)}</small>
+            </article>
+          ))}
+
+          {!activeChat?.messages?.length && <div className="admin-empty-row">Chưa có tin nhắn để hiển thị.</div>}
+        </div>
+
+        <form className="admin-chat-compose" onSubmit={handleSendChatReply}>
+          <textarea
+            rows="4"
+            placeholder="Nhap phan hoi cho khach hang..."
+            value={chatReply}
+            onChange={(event) => setChatReply(event.target.value)}
+          />
+          <button type="submit" className="admin-green-btn" disabled={!activeChat?.conversation?.id || !chatReply.trim()}>
+            Gui phan hoi
+          </button>
+        </form>
+      </section>
     </div>
   )
 
@@ -621,6 +758,9 @@ export default function AdminDashboard() {
       : (tourForm.id ? 'Update Tour' : 'Create Tour')
 
   const createButtonAction = () => {
+    if (activeSection === 'chats') {
+      return
+    }
     if (activeSection === 'users' || activeSection === 'user-editor') {
       setActiveSection('user-editor')
       return
@@ -737,6 +877,8 @@ export default function AdminDashboard() {
             placeholder={
               activeSection === 'bookings'
                 ? 'Search customer or booking...'
+                : activeSection === 'chats'
+                  ? 'Search chat by customer, email or message...'
                 : activeSection === 'users'
                   ? 'Search user by name, email or phone...'
                   : 'Search tours...'
@@ -745,9 +887,11 @@ export default function AdminDashboard() {
             onChange={(event) => setSearch(event.target.value)}
           />
 
-          <button className="admin-green-btn" onClick={createButtonAction}>
-            {createButtonLabel}
-          </button>
+          {activeSection !== 'chats' && (
+            <button className="admin-green-btn" onClick={createButtonAction}>
+              {createButtonLabel}
+            </button>
+          )}
           <button className="admin-ghost-btn" onClick={loadData}>Refresh</button>
         </section>
 
@@ -761,6 +905,7 @@ export default function AdminDashboard() {
 
         <main className="admin-content-area">
           {activeSection === 'bookings' && renderBookingsTable()}
+          {activeSection === 'chats' && renderChatsPanel()}
           {activeSection === 'tours' && renderToursTable()}
           {activeSection === 'users' && renderUsersTable()}
           {activeSection === 'editor' && renderTourEditor()}

@@ -9,6 +9,7 @@ import Account from './pages/Account'
 import Login from './pages/Login'
 import Register from './pages/Register'
 import ProtectedRoute from './components/ProtectedRoute'
+import ChatWidget from './components/ChatWidget'
 import './App.css'
 
 function ScrollToTop() {
@@ -35,6 +36,7 @@ function App() {
         <Route path="/account" element={<ProtectedRoute><Account /></ProtectedRoute>} />
         <Route path="/admin" element={<ProtectedRoute adminOnly><AdminDashboard /></ProtectedRoute>} />
       </Routes>
+      <ChatWidget />
     </Router>
   )
 }

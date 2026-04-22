@@ -40,6 +40,11 @@ def ensure_indexes() -> None:
     get_collection("bookings").create_index("status")
     get_collection("users").create_index("email", unique=True)
     get_collection("sessions").create_index("token", unique=True)
+    get_collection("chat_conversations").create_index("user_id")
+    get_collection("chat_conversations").create_index("session_key")
+    get_collection("chat_conversations").create_index("last_message_at")
+    get_collection("chat_messages").create_index("conversation_id")
+    get_collection("chat_messages").create_index("created_at")
 
 
 def seed_data() -> None:
