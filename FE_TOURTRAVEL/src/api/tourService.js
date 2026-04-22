@@ -119,3 +119,44 @@ export const updateBooking = async (id, bookingData, token) => {
 export const deleteBooking = async (id, token) => {
   await axios.delete(`${API_BASE}/bookings/${id}`, authHeaders(token))
 }
+
+export const getMyChatConversations = async (sessionKey, token) => {
+  const response = await axios.get(`${API_BASE}/chat/conversations`, {
+    params: { session_key: sessionKey || undefined },
+    ...(token ? authHeaders(token) : {})
+  })
+  return response.data
+}
+
+export const getChatConversationDetail = async (conversationId, sessionKey, token) => {
+  const response = await axios.get(`${API_BASE}/chat/conversations/${conversationId}`, {
+    params: { session_key: sessionKey || undefined },
+    ...(token ? authHeaders(token) : {})
+  })
+  return response.data
+}
+
+export const createChatConversation = async (payload, token) => {
+  const response = await axios.post(`${API_BASE}/chat/conversations`, payload, token ? authHeaders(token) : undefined)
+  return response.data
+}
+
+export const sendChatMessage = async (conversationId, payload, token) => {
+  const response = await axios.post(`${API_BASE}/chat/conversations/${conversationId}/messages`, payload, token ? authHeaders(token) : undefined)
+  return response.data
+}
+
+export const getAdminChatConversations = async (token) => {
+  const response = await axios.get(`${API_BASE}/chat/admin/conversations`, authHeaders(token))
+  return response.data
+}
+
+export const getAdminChatConversationDetail = async (conversationId, token) => {
+  const response = await axios.get(`${API_BASE}/chat/admin/conversations/${conversationId}`, authHeaders(token))
+  return response.data
+}
+
+export const sendAdminChatMessage = async (conversationId, payload, token) => {
+  const response = await axios.post(`${API_BASE}/chat/admin/conversations/${conversationId}/messages`, payload, authHeaders(token))
+  return response.data
+}
