@@ -3320,3 +3320,93 @@ img {
   gap: 12px;
   padding: 0 24px 24px;
 }
+
+.chat-widget-panel-compact {
+  width: min(360px, calc(100vw - 24px));
+  border-radius: 22px;
+}
+
+.chat-widget-header-compact {
+  padding: 14px 16px;
+}
+
+.chat-widget-header-compact div {
+  display: grid;
+  gap: 2px;
+}
+
+.chat-widget-header-compact span {
+  color: #64748b;
+  font-size: 0.82rem;
+}
+
+.chat-widget-header-compact button {
+  min-width: 36px;
+  min-height: 36px;
+  padding: 0;
+  border-radius: 10px;
+}
+
+.chat-widget-main-compact {
+  grid-template-rows: auto 1fr auto auto;
+  min-height: 420px;
+  padding: 14px;
+}
+
+.chat-widget-guest-fields-compact {
+  grid-template-columns: 1fr;
+}
+
+.chat-widget-messages-compact {
+  min-height: 250px;
+  max-height: 250px;
+  padding-right: 2px;
+}
+
+.chat-widget-message strong {
+  display: none;
+}
+
+.chat-widget-message {
+  max-width: 88%;
+  gap: 4px;
+  padding: 10px 12px;
+  border-radius: 16px;
+}
+
+.chat-widget-message p {
+  font-size: 0.95rem;
+  line-height: 1.5;
+}
+
+.chat-widget-composer-compact {
+  grid-template-columns: 1fr auto;
+  align-items: end;
+}
+
+.chat-widget-composer-compact textarea {
+  min-height: 48px;
+  max-height: 96px;
+  resize: none;
+}
+
+.chat-widget-composer-compact button {
+  min-width: 58px;
+  min-height: 48px;
+  padding: 0 14px;
+}
+
+.chat-widget-status-row {
+  min-height: 18px;
+  color: #64748b;
+  font-size: 0.8rem;
+}
+
+.chat-widget-status-error {
+  color: #b91c1c;
+}
+
+.chat-widget-trigger-compact {
+  min-height: 52px;
+  padding: 0 16px;
+}

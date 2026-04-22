@@ -104,6 +104,29 @@ export default function AdminDashboard() {
     }
   }, [token])
 
+  useEffect(() => {
+    if (!token || activeSection !== 'chats') return
+
+    const timerId = window.setInterval(async () => {
+      try {
+        const latestChats = await getAdminChatConversations(token)
+        setChatConversations(latestChats)
+
+        if (activeChat?.conversation?.id) {
+          const detail = await getAdminChatConversationDetail(activeChat.conversation.id, token)
+          setActiveChat(detail)
+        } else if (latestChats.length) {
+          const detail = await getAdminChatConversationDetail(latestChats[0].id, token)
+          setActiveChat(detail)
+        }
+      } catch {
+        // Keep current UI state if background sync fails.
+      }
+    }, 2000)
+
+    return () => window.clearInterval(timerId)
+  }, [activeSection, activeChat?.conversation?.id, token])
+
   const loadData = async () => {
     try {
       setLoading(true)

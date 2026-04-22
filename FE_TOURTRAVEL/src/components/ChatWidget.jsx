@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { useAuth } from '../context/AuthContext'
 import {
   createChatConversation,
@@ -26,14 +26,14 @@ export default function ChatWidget() {
   const { token, user, isAuthenticated } = useAuth()
   const [open, setOpen] = useState(false)
   const [sessionKey, setSessionKey] = useState('')
-  const [conversations, setConversations] = useState([])
-  const [activeConversation, setActiveConversation] = useState(null)
+  const [conversation, setConversation] = useState(null)
   const [messages, setMessages] = useState([])
   const [draft, setDraft] = useState('')
   const [guestName, setGuestName] = useState('')
-  const [guestEmail, setGuestEmail] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
+  const [syncing, setSyncing] = useState(false)
+  const messagesRef = useRef(null)
 
   useEffect(() => {
     setSessionKey(getOrCreateSessionKey())
@@ -41,54 +41,61 @@ export default function ChatWidget() {
 
   useEffect(() => {
     if (!sessionKey) return
-    loadConversations(false)
+    loadLatestConversation(false)
   }, [sessionKey, token])
 
   useEffect(() => {
-    if (!open || !activeConversation?.id) return
+    if (!sessionKey) return
 
+    const intervalMs = open ? 2000 : 5000
     const timerId = window.setInterval(() => {
-      loadConversationDetail(activeConversation.id, false)
-    }, 10000)
+      loadLatestConversation(false, true)
+    }, intervalMs)
 
     return () => window.clearInterval(timerId)
-  }, [activeConversation?.id, open])
+  }, [sessionKey, token, open, conversation?.id])
 
-  const unreadCount = useMemo(
-    () => conversations.reduce((sum, item) => sum + (item.unread_for_customer || 0), 0),
-    [conversations]
-  )
+  useEffect(() => {
+    if (!open || !messagesRef.current) return
+    messagesRef.current.scrollTop = messagesRef.current.scrollHeight
+  }, [messages, open])
 
-  const loadConversations = async (showLoader = true) => {
+  const unreadCount = useMemo(() => conversation?.unread_for_customer || 0, [conversation])
+
+  const loadLatestConversation = async (showLoader = true, silent = false) => {
     try {
       if (showLoader) setLoading(true)
+      if (silent) setSyncing(true)
+
       const data = await getMyChatConversations(sessionKey, token)
-      setConversations(data)
-      if (!activeConversation && data.length) {
-        await loadConversationDetail(data[0].id, false)
+      if (!data.length) {
+        setConversation(null)
+        setMessages([])
+        setError('')
+        return
       }
-      setError('')
-    } catch (err) {
-      setError(err.response?.data?.detail || 'Khong the tai hoi thoai luc nay.')
-    } finally {
-      if (showLoader) setLoading(false)
-    }
-  }
 
-  const loadConversationDetail = async (conversationId, showLoader = true) => {
-    try {
-      if (showLoader) setLoading(true)
-      const detail = await getChatConversationDetail(conversationId, sessionKey, token)
-      setActiveConversation(detail.conversation)
-      setMessages(detail.messages)
-      setConversations((prev) =>
-        prev.map((item) => (item.id === detail.conversation.id ? detail.conversation : item))
-      )
+      const latestConversation = data[0]
+      const shouldLoadDetail =
+        !conversation ||
+        conversation.id !== latestConversation.id ||
+        conversation.last_message_at !== latestConversation.last_message_at ||
+        (open && latestConversation.unread_for_customer > 0)
+
+      setConversation(latestConversation)
+
+      if (shouldLoadDetail || open) {
+        const detail = await getChatConversationDetail(latestConversation.id, sessionKey, token)
+        setConversation(detail.conversation)
+        setMessages(detail.messages)
+      }
+
       setError('')
     } catch (err) {
-      setError(err.response?.data?.detail || 'Khong the tai tin nhan.')
+      setError(err.response?.data?.detail || 'Khong the dong bo chat luc nay.')
     } finally {
       if (showLoader) setLoading(false)
+      if (silent) setSyncing(false)
     }
   }
 
@@ -101,9 +108,9 @@ export default function ChatWidget() {
       setError('')
 
       let detail
-      if (activeConversation?.id) {
+      if (conversation?.id) {
         detail = await sendChatMessage(
-          activeConversation.id,
+          conversation.id,
           {
             session_key: sessionKey,
             content: draft.trim()
@@ -115,7 +122,6 @@ export default function ChatWidget() {
           {
             session_key: sessionKey,
             guest_name: isAuthenticated ? undefined : guestName.trim() || undefined,
-            guest_email: isAuthenticated ? undefined : guestEmail.trim() || undefined,
             message: draft.trim()
           },
           token
@@ -123,12 +129,9 @@ export default function ChatWidget() {
       }
 
       setDraft('')
-      setActiveConversation(detail.conversation)
+      setConversation(detail.conversation)
       setMessages(detail.messages)
-      setConversations((prev) => {
-        const filtered = prev.filter((item) => item.id !== detail.conversation.id)
-        return [detail.conversation, ...filtered]
-      })
+      setOpen(true)
     } catch (err) {
       setError(err.response?.data?.detail || 'Khong gui duoc tin nhan.')
     } finally {
@@ -139,104 +142,66 @@ export default function ChatWidget() {
   return (
     <div className={`chat-widget ${open ? 'open' : ''}`}>
       {open && (
-        <section className="chat-widget-panel">
-          <header className="chat-widget-header">
+        <section className="chat-widget-panel chat-widget-panel-compact">
+          <header className="chat-widget-header chat-widget-header-compact">
             <div>
-              <p>Customer support</p>
-              <strong>Chat voi TourTravel</strong>
+              <strong>TourTravel chat</strong>
+              <span>{conversation ? 'Dang hoat dong' : 'Ho tro nhanh'}</span>
             </div>
-            <button type="button" onClick={() => setOpen(false)}>Thu gon</button>
+            <button type="button" onClick={() => setOpen(false)}>−</button>
           </header>
 
-          <div className="chat-widget-body">
-            <aside className="chat-widget-sidebar">
-              <div className="chat-widget-sidebar-head">
-                <strong>Hoi thoai</strong>
-                <button type="button" onClick={() => loadConversations(false)}>Tai lai</button>
+          <div className="chat-widget-main chat-widget-main-compact">
+            {!isAuthenticated && !conversation && (
+              <div className="chat-widget-guest-fields chat-widget-guest-fields-compact">
+                <input
+                  placeholder="Ten cua ban"
+                  value={guestName}
+                  onChange={(event) => setGuestName(event.target.value)}
+                />
               </div>
+            )}
 
-              <div className="chat-widget-conversation-list">
-                {conversations.map((item) => (
-                  <button
-                    key={item.id}
-                    type="button"
-                    className={`chat-widget-conversation-item ${activeConversation?.id === item.id ? 'active' : ''}`}
-                    onClick={() => loadConversationDetail(item.id)}
-                  >
-                    <div>
-                      <strong>{item.user_name}</strong>
-                      <span>{item.last_message_preview}</span>
-                    </div>
-                    <div className="chat-widget-conversation-meta">
-                      <small>{formatTime(item.last_message_at)}</small>
-                      {!!item.unread_for_customer && <em>{item.unread_for_customer}</em>}
-                    </div>
-                  </button>
-                ))}
-
-                {!conversations.length && <div className="chat-widget-empty">Chua co hoi thoai nao. Hay gui tin nhan dau tien.</div>}
-              </div>
-            </aside>
-
-            <div className="chat-widget-main">
-              <div className="chat-widget-intro">
-                <strong>{activeConversation ? activeConversation.user_name : (user?.name || 'Ban')}</strong>
-                <span>
-                  {activeConversation ? `Trang thai: ${activeConversation.status}` : 'Nhan vien se phan hoi trong khung chat nay.'}
-                </span>
-              </div>
-
-              {!isAuthenticated && !activeConversation && (
-                <div className="chat-widget-guest-fields">
-                  <input
-                    placeholder="Ten cua ban"
-                    value={guestName}
-                    onChange={(event) => setGuestName(event.target.value)}
-                  />
-                  <input
-                    type="email"
-                    placeholder="Email lien he (khong bat buoc)"
-                    value={guestEmail}
-                    onChange={(event) => setGuestEmail(event.target.value)}
-                  />
+            <div className="chat-widget-messages chat-widget-messages-compact" ref={messagesRef}>
+              {!messages.length && (
+                <div className="chat-widget-empty">
+                  Hoi ve tour, lich khoi hanh hoac booking. Ben minh se tra loi ngay trong khung nay.
                 </div>
               )}
 
-              <div className="chat-widget-messages">
-                {messages.map((message) => (
-                  <article
-                    key={message.id}
-                    className={`chat-widget-message ${message.sender_type === 'admin' ? 'admin' : 'customer'}`}
-                  >
-                    <strong>{message.sender_name}</strong>
-                    <p>{message.content}</p>
-                    <small>{formatTime(message.created_at)}</small>
-                  </article>
-                ))}
+              {messages.map((message) => (
+                <article
+                  key={message.id}
+                  className={`chat-widget-message ${message.sender_type === 'admin' ? 'admin' : 'customer'}`}
+                >
+                  <p>{message.content}</p>
+                  <small>{formatTime(message.created_at)}</small>
+                </article>
+              ))}
+            </div>
 
-                {!messages.length && <div className="chat-widget-empty">Chua co tin nhan nao. Ban co the dat cau hoi ve tour, lich khoi hanh hoac booking.</div>}
-              </div>
+            <form className="chat-widget-composer chat-widget-composer-compact" onSubmit={handleSubmit}>
+              <textarea
+                rows="2"
+                placeholder="Nhap tin nhan..."
+                value={draft}
+                onChange={(event) => setDraft(event.target.value)}
+              />
+              <button type="submit" disabled={loading || !draft.trim()}>
+                Gui
+              </button>
+            </form>
 
-              <form className="chat-widget-composer" onSubmit={handleSubmit}>
-                <textarea
-                  rows="3"
-                  placeholder="Nhap noi dung can ho tro..."
-                  value={draft}
-                  onChange={(event) => setDraft(event.target.value)}
-                />
-                <button type="submit" disabled={loading || !draft.trim()}>
-                  {loading ? 'Dang gui...' : 'Gui tin nhan'}
-                </button>
-              </form>
-
-              {error && <div className="chat-widget-error">{error}</div>}
+            <div className="chat-widget-status-row">
+              {syncing && <span>Dang cap nhat...</span>}
+              {error && <span className="chat-widget-status-error">{error}</span>}
             </div>
           </div>
         </section>
       )}
 
-      <button type="button" className="chat-widget-trigger" onClick={() => setOpen((prev) => !prev)}>
-        <span>Chat voi chung toi</span>
+      <button type="button" className="chat-widget-trigger chat-widget-trigger-compact" onClick={() => setOpen((prev) => !prev)}>
+        <span>Chat</span>
         {!!unreadCount && <strong>{unreadCount}</strong>}
       </button>
     </div>
