@@ -83,6 +83,18 @@ function titleForSection(section) {
   return 'Create / Update Tour'
 }
 
+function bubbleClass(senderType) {
+  if (senderType === 'customer') return 'customer'
+  if (senderType === 'guide') return 'guide'
+  return 'admin'
+}
+
+function senderLabel(senderType) {
+  if (senderType === 'guide') return 'Guide'
+  if (senderType === 'admin') return 'Admin'
+  return 'Customer'
+}
+
 export default function AdminDashboard() {
   const { token, user, logout } = useAuth()
   const [activeSection, setActiveSection] = useState('bookings')
@@ -577,8 +589,8 @@ export default function AdminDashboard() {
 
         <div className="admin-chat-messages">
           {activeChat?.messages?.map((message) => (
-            <article key={message.id} className={`admin-chat-bubble ${message.sender_type === 'admin' ? 'admin' : 'customer'}`}>
-              <strong>{message.sender_name}</strong>
+            <article key={message.id} className={`admin-chat-bubble ${bubbleClass(message.sender_type)}`}>
+              <strong>{senderLabel(message.sender_type)} • {message.sender_name}</strong>
               <p>{message.content}</p>
               <small>{formatDateTime(message.created_at)}</small>
             </article>

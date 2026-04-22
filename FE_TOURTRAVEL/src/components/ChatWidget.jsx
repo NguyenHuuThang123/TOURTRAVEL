@@ -22,10 +22,17 @@ function formatTime(value) {
   return new Date(value).toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })
 }
 
+function labelForSender(message) {
+  if (message.sender_type === 'guide') return 'Guide'
+  if (message.sender_type === 'admin') return 'Admin'
+  return 'Ban'
+}
+
 export default function ChatWidget() {
   const { token, user, isAuthenticated } = useAuth()
   const [open, setOpen] = useState(false)
   const [sessionKey, setSessionKey] = useState('')
+  const [conversations, setConversations] = useState([])
   const [conversation, setConversation] = useState(null)
   const [activeTour, setActiveTour] = useState(null)
   const [messages, setMessages] = useState([])
@@ -43,8 +50,12 @@ export default function ChatWidget() {
   useEffect(() => {
     const handleOpenGuideChat = (event) => {
       const detail = event.detail || {}
-      setActiveTour(detail.tourId ? { tourId: detail.tourId, guideName: detail.guideName || '' } : null)
+      const nextTour = detail.tourId ? { tourId: detail.tourId, guideName: detail.guideName || '' } : null
+      setActiveTour(nextTour)
       setOpen(true)
+      if (nextTour?.tourId) {
+        loadLatestConversation(false, false, nextTour.tourId)
+      }
     }
 
     window.addEventListener('tourtravel:open-guide-chat', handleOpenGuideChat)
@@ -72,14 +83,18 @@ export default function ChatWidget() {
     messagesRef.current.scrollTop = messagesRef.current.scrollHeight
   }, [messages, open])
 
-  const unreadCount = useMemo(() => conversation?.unread_for_customer || 0, [conversation])
+  const unreadCount = useMemo(
+    () => conversations.reduce((sum, item) => sum + Number(item.unread_for_customer || 0), 0),
+    [conversations]
+  )
 
-  const loadLatestConversation = async (showLoader = true, silent = false) => {
+  const loadLatestConversation = async (showLoader = true, silent = false, preferredTourId = null) => {
     try {
       if (showLoader) setLoading(true)
       if (silent) setSyncing(true)
 
       const data = await getMyChatConversations(sessionKey, token)
+      setConversations(data)
       if (!data.length) {
         setConversation(null)
         setMessages([])
@@ -87,19 +102,25 @@ export default function ChatWidget() {
         return
       }
 
-      const latestConversation = data[0]
+      const selectedConversation =
+        (preferredTourId && data.find((item) => item.tour_id === preferredTourId)) ||
+        (activeTour?.tourId && data.find((item) => item.tour_id === activeTour.tourId)) ||
+        (conversation?.id && data.find((item) => item.id === conversation.id)) ||
+        data[0]
+
       const shouldLoadDetail =
         !conversation ||
-        conversation.id !== latestConversation.id ||
-        conversation.last_message_at !== latestConversation.last_message_at ||
-        (open && latestConversation.unread_for_customer > 0)
+        conversation.id !== selectedConversation.id ||
+        conversation.last_message_at !== selectedConversation.last_message_at ||
+        (open && selectedConversation.unread_for_customer > 0)
 
-      setConversation(latestConversation)
+      setConversation(selectedConversation)
 
       if (shouldLoadDetail || open) {
-        const detail = await getChatConversationDetail(latestConversation.id, sessionKey, token)
+        const detail = await getChatConversationDetail(selectedConversation.id, sessionKey, token)
         setConversation(detail.conversation)
         setMessages(detail.messages)
+        setConversations((prev) => prev.map((item) => (item.id === detail.conversation.id ? detail.conversation : item)))
       }
 
       setError('')
@@ -120,9 +141,13 @@ export default function ChatWidget() {
       setError('')
 
       let detail
-      if (conversation?.id) {
+      const targetConversation =
+        (activeTour?.tourId && conversations.find((item) => item.tour_id === activeTour.tourId)) ||
+        (!activeTour?.tourId ? conversation : null)
+
+      if (targetConversation?.id) {
         detail = await sendChatMessage(
-          conversation.id,
+          targetConversation.id,
           {
             session_key: sessionKey,
             content: draft.trim()
@@ -142,9 +167,13 @@ export default function ChatWidget() {
       }
 
       setDraft('')
-      setActiveTour(null)
       setConversation(detail.conversation)
       setMessages(detail.messages)
+      setConversations((prev) => {
+        const filtered = prev.filter((item) => item.id !== detail.conversation.id)
+        return [detail.conversation, ...filtered]
+      })
+      setActiveTour(null)
       setOpen(true)
     } catch (err) {
       setError(err.response?.data?.detail || 'Khong gui duoc tin nhan.')
@@ -188,8 +217,9 @@ export default function ChatWidget() {
               {messages.map((message) => (
                 <article
                   key={message.id}
-                  className={`chat-widget-message ${message.sender_type === 'admin' ? 'admin' : 'customer'}`}
+                  className={`chat-widget-message ${message.sender_type}`}
                 >
+                  <strong>{labelForSender(message)}</strong>
                   <p>{message.content}</p>
                   <small>{formatTime(message.created_at)}</small>
                 </article>

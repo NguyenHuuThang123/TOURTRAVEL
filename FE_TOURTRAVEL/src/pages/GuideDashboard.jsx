@@ -16,6 +16,18 @@ function formatDate(value) {
   return new Date(value).toLocaleString('vi-VN')
 }
 
+function bubbleClass(senderType) {
+  if (senderType === 'customer') return 'customer'
+  if (senderType === 'guide') return 'guide'
+  return 'admin'
+}
+
+function senderLabel(senderType) {
+  if (senderType === 'guide') return 'Guide'
+  if (senderType === 'admin') return 'Admin'
+  return 'Customer'
+}
+
 export default function GuideDashboard() {
   const { token, user, logout } = useAuth()
   const [activeSection, setActiveSection] = useState('overview')
@@ -277,8 +289,8 @@ export default function GuideDashboard() {
               </div>
               <div className="admin-chat-messages">
                 {activeChat?.messages?.map((item) => (
-                  <article key={item.id} className={`admin-chat-bubble ${item.sender_type === 'customer' ? 'customer' : 'admin'}`}>
-                    <strong>{item.sender_name}</strong>
+                  <article key={item.id} className={`admin-chat-bubble ${bubbleClass(item.sender_type)}`}>
+                    <strong>{senderLabel(item.sender_type)} • {item.sender_name}</strong>
                     <p>{item.content}</p>
                     <small>{formatDate(item.created_at)}</small>
                   </article>

@@ -3386,6 +3386,12 @@ img {
   background: #dbeafe;
 }
 
+.chat-widget-message.guide {
+  justify-self: start;
+  background: #dcfce7;
+  border: 1px solid #bbf7d0;
+}
+
 .chat-widget-message.admin {
   justify-self: start;
   background: #f8fafc;
@@ -3528,6 +3534,12 @@ img {
   justify-self: end;
 }
 
+.admin-chat-bubble.guide {
+  background: #e0f2fe;
+  border: 1px solid #bae6fd;
+  justify-self: end;
+}
+
 .admin-chat-compose {
   display: grid;
   gap: 12px;
@@ -3576,15 +3588,19 @@ img {
   padding-right: 2px;
 }
 
-.chat-widget-message strong {
-  display: none;
-}
-
 .chat-widget-message {
   max-width: 88%;
   gap: 4px;
   padding: 10px 12px;
   border-radius: 16px;
+}
+
+.chat-widget-message strong {
+  display: block;
+  font-size: 0.73rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  opacity: 0.8;
 }
 
 .chat-widget-message p {
