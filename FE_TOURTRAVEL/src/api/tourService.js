@@ -160,3 +160,28 @@ export const sendAdminChatMessage = async (conversationId, payload, token) => {
   const response = await axios.post(`${API_BASE}/chat/admin/conversations/${conversationId}/messages`, payload, authHeaders(token))
   return response.data
 }
+
+export const getGuideTours = async (token) => {
+  const response = await axios.get(`${API_BASE}/guides/me/tours`, authHeaders(token))
+  return response.data
+}
+
+export const getGuideBookings = async (token) => {
+  const response = await axios.get(`${API_BASE}/guides/me/bookings`, authHeaders(token))
+  return response.data
+}
+
+export const getGuideChatConversations = async (token) => {
+  const response = await axios.get(`${API_BASE}/chat/guide/conversations`, authHeaders(token))
+  return response.data
+}
+
+export const getGuideChatConversationDetail = async (conversationId, token) => {
+  const response = await axios.get(`${API_BASE}/chat/guide/conversations/${conversationId}`, authHeaders(token))
+  return response.data
+}
+
+export const sendGuideChatMessage = async (conversationId, payload, token) => {
+  const response = await axios.post(`${API_BASE}/chat/guide/conversations/${conversationId}/messages`, payload, authHeaders(token))
+  return response.data
+}

@@ -14,6 +14,11 @@ export default function Login() {
   const [loading, setLoading] = useState(false)
 
   const redirectTo = location.state?.from || '/account'
+  const destinationForRole = (role) => {
+    if (role === 'admin') return '/admin'
+    if (role === 'guide') return '/guide'
+    return redirectTo
+  }
 
   const handleSubmit = async (event) => {
     event.preventDefault()
@@ -21,7 +26,7 @@ export default function Login() {
       setLoading(true)
       setError('')
       const auth = await login(formData)
-      const destination = auth?.user?.role === 'admin' ? '/admin' : redirectTo
+      const destination = destinationForRole(auth?.user?.role)
       navigate(destination, { replace: true })
     } catch (err) {
       setError(err.response?.data?.detail || 'Dang nhap that bai.')
@@ -35,7 +40,7 @@ export default function Login() {
       setLoading(true)
       setError('')
       const auth = await googleLogin(credential)
-      const destination = auth?.user?.role === 'admin' ? '/admin' : redirectTo
+      const destination = destinationForRole(auth?.user?.role)
       navigate(destination, { replace: true })
     } catch (err) {
       setError(err.response?.data?.detail || 'Dang nhap bang Google that bai.')

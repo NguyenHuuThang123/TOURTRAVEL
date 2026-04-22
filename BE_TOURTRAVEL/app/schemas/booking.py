@@ -33,6 +33,8 @@ class Booking(BaseModel):
     user_phone: str
     tour_destination: str | None = None
     tour_image: str | None = None
+    guide_id: str | None = None
+    guide_name: str | None = None
     start_date: datetime | None = None
     end_date: datetime | None = None
     quantity: int

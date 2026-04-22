@@ -5,11 +5,13 @@ import TourList from './pages/TourList'
 import TourDetail from './pages/TourDetail'
 import Checkout from './pages/Checkout'
 import AdminDashboard from './pages/AdminDashboard'
+import GuideDashboard from './pages/GuideDashboard'
 import Account from './pages/Account'
 import Login from './pages/Login'
 import Register from './pages/Register'
 import ProtectedRoute from './components/ProtectedRoute'
 import ChatWidget from './components/ChatWidget'
+import { useAuth } from './context/AuthContext'
 import './App.css'
 
 function ScrollToTop() {
@@ -23,6 +25,8 @@ function ScrollToTop() {
 }
 
 function App() {
+  const { user } = useAuth()
+
   return (
     <Router>
       <ScrollToTop />
@@ -33,10 +37,11 @@ function App() {
         <Route path="/checkout" element={<Checkout />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
-        <Route path="/account" element={<ProtectedRoute><Account /></ProtectedRoute>} />
+        <Route path="/account" element={<ProtectedRoute allowedRoles={['user', 'admin']}><Account /></ProtectedRoute>} />
         <Route path="/admin" element={<ProtectedRoute adminOnly><AdminDashboard /></ProtectedRoute>} />
+        <Route path="/guide" element={<ProtectedRoute allowedRoles={['guide']}><GuideDashboard /></ProtectedRoute>} />
       </Routes>
-      <ChatWidget />
+      {!['admin', 'guide'].includes(user?.role) && <ChatWidget />}
     </Router>
   )
 }

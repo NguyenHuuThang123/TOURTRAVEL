@@ -16,6 +16,12 @@ class TourBase(BaseModel):
     end_date: datetime
     image: Optional[str] = None
     travel_style: Optional[str] = None
+    guide_id: Optional[str] = None
+    guide_name: Optional[str] = None
+    guide_title: Optional[str] = None
+    guide_avatar: Optional[str] = None
+    guide_bio: Optional[str] = None
+    guide_experience_years: Optional[int] = Field(default=None, ge=0, le=60)
 
 
 class TourCreate(TourBase):
@@ -34,6 +40,12 @@ class TourUpdate(BaseModel):
     end_date: Optional[datetime] = None
     image: Optional[str] = None
     travel_style: Optional[str] = None
+    guide_id: Optional[str] = None
+    guide_name: Optional[str] = None
+    guide_title: Optional[str] = None
+    guide_avatar: Optional[str] = None
+    guide_bio: Optional[str] = None
+    guide_experience_years: Optional[int] = Field(default=None, ge=0, le=60)
 
 
 class Tour(TourBase):

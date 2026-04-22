@@ -36,7 +36,9 @@ def ping_database() -> None:
 def ensure_indexes() -> None:
     get_collection("tours").create_index("name")
     get_collection("tours").create_index("destination")
+    get_collection("tours").create_index("guide_id")
     get_collection("bookings").create_index("tour_id")
+    get_collection("bookings").create_index("guide_id")
     get_collection("bookings").create_index("status")
     get_collection("users").create_index("email", unique=True)
     get_collection("sessions").create_index("token", unique=True)
@@ -112,6 +114,26 @@ def seed_data() -> None:
                 "phone": None,
                 "password": hash_password("Admin123"),
                 "role": "admin",
+                "is_blocked": False,
+                "created_at": now,
+                "updated_at": now,
+            }
+        )
+
+    if users.count_documents({"email": "guide@tourtravel.com"}) == 0:
+        from app.security import hash_password
+
+        users.insert_one(
+            {
+                "name": "Erik Hoffmann",
+                "email": "guide@tourtravel.com",
+                "phone": "+84 912 345 678",
+                "password": hash_password("Guide123"),
+                "role": "guide",
+                "guide_title": "Lead Expeditionist",
+                "guide_bio": "Specializes in small-group journeys and on-trip guest support.",
+                "guide_avatar": "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=120",
+                "guide_experience_years": 12,
                 "is_blocked": False,
                 "created_at": now,
                 "updated_at": now,

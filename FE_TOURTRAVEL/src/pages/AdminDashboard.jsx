@@ -30,7 +30,8 @@ const initialTour = {
   start_date: '',
   end_date: '',
   image: '',
-  travel_style: ''
+  travel_style: '',
+  guide_id: ''
 }
 
 const initialUser = {
@@ -40,6 +41,10 @@ const initialUser = {
   phone: '',
   password: '',
   role: 'user',
+  guide_title: '',
+  guide_bio: '',
+  guide_avatar: '',
+  guide_experience_years: '',
   is_blocked: false
 }
 
@@ -76,6 +81,18 @@ function titleForSection(section) {
   if (section === 'users') return 'User Management'
   if (section === 'user-editor') return 'Create / Update User'
   return 'Create / Update Tour'
+}
+
+function bubbleClass(senderType) {
+  if (senderType === 'customer') return 'customer'
+  if (senderType === 'guide') return 'guide'
+  return 'admin'
+}
+
+function senderLabel(senderType) {
+  if (senderType === 'guide') return 'Guide'
+  if (senderType === 'admin') return 'Admin'
+  return 'Customer'
 }
 
 export default function AdminDashboard() {
@@ -226,6 +243,8 @@ export default function AdminDashboard() {
     })
   }, [search, userRoleFilter, userBlockFilter, users])
 
+  const guideOptions = useMemo(() => users.filter((item) => item.role === 'guide'), [users])
+
   const resetTourForm = () => {
     setTourForm(initialTour)
   }
@@ -246,6 +265,7 @@ export default function AdminDashboard() {
         duration_days: Number(tourForm.duration_days),
         max_participants: Number(tourForm.max_participants),
         available_slots: Number(tourForm.available_slots),
+        guide_id: tourForm.guide_id || null,
         start_date: new Date(tourForm.start_date).toISOString(),
         end_date: new Date(tourForm.end_date).toISOString()
       }
@@ -277,6 +297,12 @@ export default function AdminDashboard() {
         email: userForm.email,
         phone: userForm.phone || null,
         role: userForm.role,
+        guide_title: userForm.role === 'guide' ? (userForm.guide_title || null) : null,
+        guide_bio: userForm.role === 'guide' ? (userForm.guide_bio || null) : null,
+        guide_avatar: userForm.role === 'guide' ? (userForm.guide_avatar || null) : null,
+        guide_experience_years: userForm.role === 'guide' && userForm.guide_experience_years !== ''
+          ? Number(userForm.guide_experience_years)
+          : null,
         is_blocked: userForm.is_blocked
       }
 
@@ -313,6 +339,10 @@ export default function AdminDashboard() {
       phone: selectedUser.phone || '',
       password: '',
       role: selectedUser.role,
+      guide_title: selectedUser.guide_title || '',
+      guide_bio: selectedUser.guide_bio || '',
+      guide_avatar: selectedUser.guide_avatar || '',
+      guide_experience_years: selectedUser.guide_experience_years ?? '',
       is_blocked: Boolean(selectedUser.is_blocked)
     })
     setActiveSection('user-editor')
@@ -559,8 +589,8 @@ export default function AdminDashboard() {
 
         <div className="admin-chat-messages">
           {activeChat?.messages?.map((message) => (
-            <article key={message.id} className={`admin-chat-bubble ${message.sender_type === 'admin' ? 'admin' : 'customer'}`}>
-              <strong>{message.sender_name}</strong>
+            <article key={message.id} className={`admin-chat-bubble ${bubbleClass(message.sender_type)}`}>
+              <strong>{senderLabel(message.sender_type)} • {message.sender_name}</strong>
               <p>{message.content}</p>
               <small>{formatDateTime(message.created_at)}</small>
             </article>
@@ -673,6 +703,18 @@ export default function AdminDashboard() {
         </label>
 
         <label className="admin-editor-field admin-span-2">
+          <span>Assigned guide</span>
+          <select value={tourForm.guide_id || ''} onChange={(event) => setTourForm((prev) => ({ ...prev, guide_id: event.target.value }))}>
+            <option value="">Chua gan guide</option>
+            {guideOptions.map((item) => (
+              <option key={item.id} value={item.id}>
+                {item.name}{item.guide_title ? ` - ${item.guide_title}` : ''}
+              </option>
+            ))}
+          </select>
+        </label>
+
+        <label className="admin-editor-field admin-span-2">
           <span>Image URL</span>
           <input value={tourForm.image} onChange={(event) => setTourForm((prev) => ({ ...prev, image: event.target.value }))} />
         </label>
@@ -744,9 +786,39 @@ export default function AdminDashboard() {
           <span>Role</span>
           <select value={userForm.role} onChange={(event) => setUserForm((prev) => ({ ...prev, role: event.target.value }))}>
             <option value="user">User</option>
+            <option value="guide">Guide</option>
             <option value="admin">Admin</option>
           </select>
         </label>
+
+        {userForm.role === 'guide' && (
+          <>
+            <label className="admin-editor-field">
+              <span>Guide title</span>
+              <input value={userForm.guide_title} onChange={(event) => setUserForm((prev) => ({ ...prev, guide_title: event.target.value }))} />
+            </label>
+
+            <label className="admin-editor-field">
+              <span>Years of experience</span>
+              <input
+                type="number"
+                min="0"
+                value={userForm.guide_experience_years}
+                onChange={(event) => setUserForm((prev) => ({ ...prev, guide_experience_years: event.target.value }))}
+              />
+            </label>
+
+            <label className="admin-editor-field admin-span-2">
+              <span>Guide avatar URL</span>
+              <input value={userForm.guide_avatar} onChange={(event) => setUserForm((prev) => ({ ...prev, guide_avatar: event.target.value }))} />
+            </label>
+
+            <label className="admin-editor-field admin-span-2">
+              <span>Guide bio</span>
+              <textarea rows="4" value={userForm.guide_bio} onChange={(event) => setUserForm((prev) => ({ ...prev, guide_bio: event.target.value }))} />
+            </label>
+          </>
+        )}
 
         <label className="admin-editor-field admin-span-2">
           <span>{userForm.id ? 'New password (optional)' : 'Password'}</span>
@@ -885,6 +957,7 @@ export default function AdminDashboard() {
               <select value={userRoleFilter} onChange={(event) => setUserRoleFilter(event.target.value)} className="admin-toolbar-control">
                 <option value="all">All Roles</option>
                 <option value="user">Users</option>
+                <option value="guide">Guides</option>
                 <option value="admin">Admins</option>
               </select>
               <select value={userBlockFilter} onChange={(event) => setUserBlockFilter(event.target.value)} className="admin-toolbar-control">

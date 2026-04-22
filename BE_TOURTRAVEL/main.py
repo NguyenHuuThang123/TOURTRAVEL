@@ -5,7 +5,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from dotenv import load_dotenv
 
 from app.database import close_database, initialize_database
-from app.routes import auth, bookings, chat, tours, users
+from app.routes import auth, bookings, chat, guides, tours, users
 
 load_dotenv(Path(__file__).resolve().with_name(".env"))
 
@@ -32,6 +32,7 @@ app.include_router(bookings.router)
 app.include_router(auth.router)
 app.include_router(users.router)
 app.include_router(chat.router)
+app.include_router(guides.router)
 
 
 @app.on_event("startup")

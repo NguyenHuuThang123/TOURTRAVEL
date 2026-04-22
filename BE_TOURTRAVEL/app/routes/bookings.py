@@ -69,6 +69,9 @@ async def create_booking(booking: BookingCreate, user=Depends(get_current_user_o
     tours_collection = get_collection("tours")
     bookings_collection = get_collection("bookings")
 
+    if user and user.get("role") == "guide":
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Guide khong the dat tour")
+
     tour = _get_tour_or_400(booking.tour_id)
     if booking.quantity > tour["available_slots"]:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Not enough available slots")
@@ -79,6 +82,8 @@ async def create_booking(booking: BookingCreate, user=Depends(get_current_user_o
     payload["tour_name"] = tour["name"]
     payload["tour_destination"] = tour.get("destination")
     payload["tour_image"] = tour.get("image")
+    payload["guide_id"] = tour.get("guide_id")
+    payload["guide_name"] = tour.get("guide_name")
     payload["start_date"] = tour.get("start_date")
     payload["end_date"] = tour.get("end_date")
     payload["total_price"] = booking.quantity * float(tour["price"])
@@ -126,6 +131,8 @@ async def update_booking(booking_id: str, booking: BookingUpdate, _admin=Depends
     updates["tour_name"] = tour["name"]
     updates["tour_destination"] = tour.get("destination")
     updates["tour_image"] = tour.get("image")
+    updates["guide_id"] = tour.get("guide_id")
+    updates["guide_name"] = tour.get("guide_name")
     updates["start_date"] = tour.get("start_date")
     updates["end_date"] = tour.get("end_date")
     updates["updated_at"] = datetime.utcnow()
