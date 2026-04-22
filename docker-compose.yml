@@ -13,6 +13,8 @@ services:
       context: ./BE_TOURTRAVEL
     container_name: tourtravel-backend
     restart: unless-stopped
+    env_file:
+      - ./BE_TOURTRAVEL/.env
     environment:
       MONGODB_URL: mongodb://mongodb:27017
       MONGODB_DB_NAME: tourtravel

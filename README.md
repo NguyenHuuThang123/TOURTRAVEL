@@ -85,6 +85,11 @@ TOURTRAVEL/
    copy .env.example .env
    ```
 
+   Google Sign-In:
+   - Set `GOOGLE_CLIENT_ID` in `BE_TOURTRAVEL/.env`
+   - Set `VITE_GOOGLE_CLIENT_ID` in `FE_TOURTRAVEL/.env`
+   - Both values should be the same Google OAuth Web Client ID
+
 5. **Run server:**
    ```bash
    python main.py
@@ -106,7 +111,12 @@ TOURTRAVEL/
    npm install
    ```
 
-3. **Run development server:**
+3. **Create frontend env file if needed:**
+   ```bash
+   copy .env.example .env
+   ```
+
+4. **Run development server:**
    ```bash
    npm run dev
    ```

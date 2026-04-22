@@ -1,3 +1,5 @@
+from pathlib import Path
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from dotenv import load_dotenv
@@ -5,7 +7,7 @@ from dotenv import load_dotenv
 from app.database import close_database, initialize_database
 from app.routes import auth, bookings, tours, users
 
-load_dotenv()
+load_dotenv(Path(__file__).resolve().with_name(".env"))
 
 app = FastAPI(title="TourTravel API", version="1.0.0")
 
