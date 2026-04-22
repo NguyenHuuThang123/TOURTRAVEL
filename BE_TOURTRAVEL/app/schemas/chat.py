@@ -5,13 +5,14 @@ from pydantic import BaseModel, EmailStr, Field
 
 
 ChatStatus = Literal["open", "replied", "closed"]
-SenderType = Literal["customer", "admin"]
+SenderType = Literal["customer", "guide", "admin"]
 
 
 class ChatConversationCreate(BaseModel):
     session_key: str | None = Field(default=None, min_length=8, max_length=128)
     guest_name: str | None = Field(default=None, min_length=2, max_length=120)
     guest_email: EmailStr | None = None
+    tour_id: str | None = Field(default=None, min_length=8, max_length=40)
     message: str = Field(..., min_length=1, max_length=2000)
 
 
@@ -35,6 +36,11 @@ class ChatConversationPublic(BaseModel):
     user_name: str
     user_email: EmailStr | None = None
     session_key: str | None = None
+    tour_id: str | None = None
+    tour_name: str | None = None
+    booking_id: str | None = None
+    guide_id: str | None = None
+    guide_name: str | None = None
     status: ChatStatus = "open"
     last_message_preview: str
     last_message_at: datetime
