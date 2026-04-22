@@ -45,6 +45,7 @@ class ChatConversationPublic(BaseModel):
     last_message_preview: str
     last_message_at: datetime
     unread_for_admin: int = 0
+    unread_for_guide: int = 0
     unread_for_customer: int = 0
     created_at: datetime
     updated_at: datetime

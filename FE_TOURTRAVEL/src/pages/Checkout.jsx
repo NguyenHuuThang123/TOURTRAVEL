@@ -43,6 +43,12 @@ export default function Checkout() {
     }))
   }, [user])
 
+  useEffect(() => {
+    if (user?.role === 'guide') {
+      navigate('/guide', { replace: true })
+    }
+  }, [navigate, user])
+
   if (!tour) {
     return (
       <div style={{ minHeight: '100vh', backgroundColor: 'var(--bg-gray-50)' }}>
@@ -58,6 +64,10 @@ export default function Checkout() {
 
   const handleSubmit = async (event) => {
     event.preventDefault()
+    if (user?.role === 'guide') {
+      setError('Huong dan vien khong the dat tour.')
+      return
+    }
     try {
       setLoading(true)
       setError('')

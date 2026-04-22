@@ -27,6 +27,7 @@ export default function ChatWidget() {
   const [open, setOpen] = useState(false)
   const [sessionKey, setSessionKey] = useState('')
   const [conversation, setConversation] = useState(null)
+  const [activeTour, setActiveTour] = useState(null)
   const [messages, setMessages] = useState([])
   const [draft, setDraft] = useState('')
   const [guestName, setGuestName] = useState('')
@@ -37,6 +38,17 @@ export default function ChatWidget() {
 
   useEffect(() => {
     setSessionKey(getOrCreateSessionKey())
+  }, [])
+
+  useEffect(() => {
+    const handleOpenGuideChat = (event) => {
+      const detail = event.detail || {}
+      setActiveTour(detail.tourId ? { tourId: detail.tourId, guideName: detail.guideName || '' } : null)
+      setOpen(true)
+    }
+
+    window.addEventListener('tourtravel:open-guide-chat', handleOpenGuideChat)
+    return () => window.removeEventListener('tourtravel:open-guide-chat', handleOpenGuideChat)
   }, [])
 
   useEffect(() => {
@@ -122,6 +134,7 @@ export default function ChatWidget() {
           {
             session_key: sessionKey,
             guest_name: isAuthenticated ? undefined : guestName.trim() || undefined,
+            tour_id: activeTour?.tourId,
             message: draft.trim()
           },
           token
@@ -129,6 +142,7 @@ export default function ChatWidget() {
       }
 
       setDraft('')
+      setActiveTour(null)
       setConversation(detail.conversation)
       setMessages(detail.messages)
       setOpen(true)
@@ -165,7 +179,9 @@ export default function ChatWidget() {
             <div className="chat-widget-messages chat-widget-messages-compact" ref={messagesRef}>
               {!messages.length && (
                 <div className="chat-widget-empty">
-                  Hoi ve tour, lich khoi hanh hoac booking. Ben minh se tra loi ngay trong khung nay.
+                  {activeTour?.guideName
+                    ? `Ban dang nhan tin cho ${activeTour.guideName}. Hay dat cau hoi ve tour nay.`
+                    : 'Hoi ve tour, lich khoi hanh hoac booking. Ben minh se tra loi ngay trong khung nay.'}
                 </div>
               )}
 

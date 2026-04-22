@@ -69,6 +69,9 @@ async def create_booking(booking: BookingCreate, user=Depends(get_current_user_o
     tours_collection = get_collection("tours")
     bookings_collection = get_collection("bookings")
 
+    if user and user.get("role") == "guide":
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Guide khong the dat tour")
+
     tour = _get_tour_or_400(booking.tour_id)
     if booking.quantity > tour["available_slots"]:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Not enough available slots")

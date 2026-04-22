@@ -98,18 +98,32 @@ export default function Header() {
                 Admin
               </Link>
             )}
-            {isAuthenticated && (
+            {user?.role === 'guide' && (
               <Link
-                to="/account"
+                to="/guide"
                 style={{
                   padding: '10px 14px',
                   borderRadius: '999px',
-                  color: location.pathname === '/account' ? '#0f172a' : '#475569',
-                  background: location.pathname === '/account' ? 'rgba(37, 99, 235, 0.1)' : 'transparent',
+                  color: location.pathname === '/guide' ? '#0f172a' : '#475569',
+                  background: location.pathname === '/guide' ? 'rgba(37, 99, 235, 0.1)' : 'transparent',
                   fontWeight: 600
                 }}
               >
-                Tai khoan
+                Guide
+              </Link>
+            )}
+            {isAuthenticated && (
+              <Link
+                to={user?.role === 'guide' ? '/guide' : '/account'}
+                style={{
+                  padding: '10px 14px',
+                  borderRadius: '999px',
+                  color: ['/account', '/guide'].includes(location.pathname) ? '#0f172a' : '#475569',
+                  background: ['/account', '/guide'].includes(location.pathname) ? 'rgba(37, 99, 235, 0.1)' : 'transparent',
+                  fontWeight: 600
+                }}
+              >
+                {user?.role === 'guide' ? 'Bang guide' : 'Tai khoan'}
               </Link>
             )}
           </nav>

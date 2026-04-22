@@ -31,7 +31,7 @@ export default function Register() {
       setLoading(true)
       setError('')
       const auth = await googleLogin(credential)
-      navigate(auth?.user?.role === 'admin' ? '/admin' : '/account', { replace: true })
+      navigate(auth?.user?.role === 'admin' ? '/admin' : auth?.user?.role === 'guide' ? '/guide' : '/account', { replace: true })
     } catch (err) {
       setError(err.response?.data?.detail || 'Dang ky bang Google that bai.')
     } finally {

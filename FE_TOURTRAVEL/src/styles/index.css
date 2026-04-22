@@ -854,6 +854,14 @@ img {
   font-weight: 700;
 }
 
+.tour-guide-links button {
+  padding: 0;
+  background: transparent;
+  color: #0284c7;
+  font-size: 0.9rem;
+  font-weight: 700;
+}
+
 .tour-overview-section {
   padding: 20px;
 }
@@ -2491,6 +2499,10 @@ img {
   .featured-card-grid,
   .account-layout,
   .account-stat-row,
+  .guide-hero,
+  .guide-grid,
+  .guide-message-layout,
+  .guide-stat-row,
   .chat-widget-body,
   .chat-widget-guest-fields,
   .admin-chat-layout,
@@ -2515,6 +2527,7 @@ img {
   .tour-list-controls,
   .chat-widget-header,
   .account-panel-head,
+  .guide-note,
   .account-booking-top,
   .account-booking-card,
   .account-booking-actions,
@@ -2554,6 +2567,12 @@ img {
   .chat-widget-message,
   .admin-chat-bubble {
     max-width: 100%;
+  }
+
+  .guide-traveler-head,
+  .guide-traveler-row,
+  .guide-tour-card {
+    grid-template-columns: 1fr;
   }
 
   .checkout-span-2 {
@@ -2950,6 +2969,200 @@ img {
 .auth-footer-text {
   margin-top: 20px;
   color: var(--text-secondary);
+}
+
+.guide-shell {
+  min-height: 100vh;
+  background:
+    radial-gradient(circle at top right, rgba(14, 165, 233, 0.12), transparent 30%),
+    #f7f9fc;
+}
+
+.guide-main {
+  padding-top: 32px;
+  padding-bottom: 44px;
+}
+
+.guide-hero {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 320px;
+  gap: 20px;
+  align-items: stretch;
+  margin-bottom: 24px;
+}
+
+.guide-hero h1 {
+  margin-bottom: 8px;
+  font-size: 2.4rem;
+  font-weight: 800;
+}
+
+.guide-hero-card,
+.guide-panel {
+  border: 1px solid #e2e8f0;
+  border-radius: 22px;
+  background: rgba(255, 255, 255, 0.96);
+  box-shadow: 0 18px 42px rgba(15, 23, 42, 0.05);
+}
+
+.guide-hero-card {
+  display: grid;
+  gap: 10px;
+  align-content: start;
+  padding: 22px;
+}
+
+.guide-hero-card strong {
+  color: #0f172a;
+  font-size: 1.4rem;
+}
+
+.guide-hero-card span {
+  color: #64748b;
+}
+
+.guide-stat-row {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.guide-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 18px;
+}
+
+.guide-tabs button {
+  min-height: 44px;
+  padding: 0 16px;
+  border-radius: 999px;
+  background: #ffffff;
+  border: 1px solid #dbe7ff;
+  color: #334155;
+  font-weight: 700;
+}
+
+.guide-tabs button.active {
+  background: #eff6ff;
+  color: #1d4ed8;
+}
+
+.guide-grid,
+.guide-message-layout {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 24px;
+}
+
+.guide-panel {
+  overflow: hidden;
+}
+
+.guide-panel-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 14px;
+  padding: 22px 24px 18px;
+}
+
+.guide-panel-head h2 {
+  font-size: 1.5rem;
+  font-weight: 800;
+}
+
+.guide-panel-head span {
+  color: #64748b;
+}
+
+.guide-tour-list,
+.guide-conversation-list,
+.guide-traveler-table {
+  display: grid;
+}
+
+.guide-tour-card,
+.guide-traveler-head,
+.guide-traveler-row {
+  display: grid;
+  gap: 16px;
+  padding: 18px 24px;
+  border-top: 1px solid #eef2f7;
+}
+
+.guide-tour-card {
+  grid-template-columns: minmax(0, 1.4fr) minmax(160px, 0.8fr);
+}
+
+.guide-tour-card strong,
+.guide-traveler-row strong,
+.guide-profile-card strong {
+  color: #0f172a;
+}
+
+.guide-tour-card p,
+.guide-tour-card span,
+.guide-tour-card small,
+.guide-traveler-row small,
+.guide-profile-card p,
+.guide-profile-card span {
+  color: #64748b;
+}
+
+.guide-profile-card {
+  display: grid;
+  grid-template-columns: 88px minmax(0, 1fr);
+  gap: 18px;
+  padding: 0 24px 24px;
+}
+
+.guide-profile-card img {
+  width: 88px;
+  height: 88px;
+  border-radius: 24px;
+  object-fit: cover;
+}
+
+.guide-traveler-head,
+.guide-traveler-row {
+  grid-template-columns: 1.3fr 1fr 0.7fr 1fr 0.7fr;
+}
+
+.guide-traveler-head {
+  background: #f8fafc;
+  color: #475569;
+  font-size: 13px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.guide-message-layout {
+  grid-template-columns: 360px minmax(0, 1fr);
+}
+
+.guide-chat-panel {
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+}
+
+.guide-note {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  margin-top: 22px;
+  padding: 18px 22px;
+  border: 1px solid #e2e8f0;
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.96);
+}
+
+.guide-note p {
+  color: #475569;
 }
 
 .chat-widget {
