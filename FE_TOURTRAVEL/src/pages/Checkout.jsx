@@ -122,36 +122,36 @@ export default function Checkout() {
             <div className="checkout-step-card">
               <div className="checkout-step-header">
                 <div>
-                  <p className="checkout-step-eyebrow">Current Step</p>
-                  <h1>Traveler Information</h1>
+                  <p className="checkout-step-eyebrow">Bước hiện tại</p>
+                  <h1>Thông tin du khách</h1>
                 </div>
                 <div className="checkout-step-progress">
-                  <strong>Step 1 of 3</strong>
-                  <span>33% Complete</span>
+                  <strong>Bước 1 trên 3</strong>
+                  <span>33% Hoàn thành</span>
                 </div>
               </div>
 
               <div className="checkout-step-tabs">
-                <div className="active">1 Information</div>
-                <div>2 Payment</div>
-                <div>3 Confirmation</div>
+                <div className="active">1 - Thông tin</div>
+                <div>2 - Thanh toán</div>
+                <div>3 - Xác nhận</div>
               </div>
             </div>
 
             <form onSubmit={handleSubmit} className="checkout-form-stack">
               <section className="checkout-panel">
                 <div className="checkout-panel-head">
-                  <h2>Lead Traveler Details</h2>
-                  <span>Primary Contact</span>
+                  <h2>Thông tin chi tiết du khách</h2>
+                  <span>Liên hệ chính</span>
                 </div>
 
                 <div className="checkout-grid">
                   <label className="checkout-field">
-                    <span>First Name</span>
+                    <span>Tên khách hàng</span>
                     <input required value={formData.firstName} onChange={(event) => setFormData((prev) => ({ ...prev, firstName: event.target.value }))} placeholder="John" />
                   </label>
                   <label className="checkout-field">
-                    <span>Last Name</span>
+                    <span>Họ</span>
                     <input required value={formData.lastName} onChange={(event) => setFormData((prev) => ({ ...prev, lastName: event.target.value }))} placeholder="Doe" />
                   </label>
                   <label className="checkout-field checkout-span-2">
@@ -159,7 +159,7 @@ export default function Checkout() {
                     <input required type="email" value={formData.email} onChange={(event) => setFormData((prev) => ({ ...prev, email: event.target.value }))} placeholder="john.doe@example.com" />
                   </label>
                   <label className="checkout-field">
-                    <span>Phone Number</span>
+                    <span>Số điện thoại</span>
                     <div className="checkout-phone-row">
                       <select value={formData.phoneCode} onChange={(event) => setFormData((prev) => ({ ...prev, phoneCode: event.target.value }))}>
                         <option value="+1">+1</option>
@@ -170,7 +170,7 @@ export default function Checkout() {
                     </div>
                   </label>
                   <label className="checkout-field">
-                    <span>Date of Birth</span>
+                    <span>Ngày sinh</span>
                     <input value={formData.dateOfBirth} onChange={(event) => setFormData((prev) => ({ ...prev, dateOfBirth: event.target.value }))} placeholder="mm/dd/yyyy" />
                   </label>
                 </div>
@@ -178,14 +178,14 @@ export default function Checkout() {
 
               <section className="checkout-panel">
                 <div className="checkout-panel-head">
-                  <h2>Additional Information</h2>
+                  <h2>Thông tin bổ sung</h2>
                 </div>
 
                 <label className="checkout-option-row">
                   <input type="checkbox" checked={formData.insurance} onChange={(event) => setFormData((prev) => ({ ...prev, insurance: event.target.checked }))} />
                   <div>
                     <strong>Thêm bảo hiểm du lịch (+45.000 VNĐ)</strong>
-                    <span>Protect your trip against unforeseen cancellations and medical emergencies.</span>
+                    <span>Hãy bảo vệ chuyến đi của bạn khỏi những trường hợp hủy chuyến đột xuất và cấp cứu y tế.</span>
                   </div>
                 </label>
 
@@ -202,7 +202,7 @@ export default function Checkout() {
               {message && <div className="checkout-feedback ok">{message}</div>}
 
               <div className="checkout-bottom-actions">
-                <Link to={`/tours/${tour.id}`} className="checkout-back-link">Back to Selection</Link>
+                <Link to={`/tours/${tour.id}`} className="checkout-back-link">Quay lại</Link>
                 <button type="submit" disabled={loading} className="checkout-submit-btn">
                   {loading ? 'Processing...' : 'Continue to Payment'}
                 </button>
@@ -212,7 +212,7 @@ export default function Checkout() {
 
           <aside className="checkout-summary-column">
             <div className="checkout-summary-card">
-              <h2>Order Summary</h2>
+              <h2>Tóm tắt đơn hàng</h2>
 
               <div className="checkout-summary-tour">
                 <div
@@ -222,36 +222,36 @@ export default function Checkout() {
                 <div>
                   <strong>{tour.name}</strong>
                   <span>{new Date(tour.start_date).toLocaleDateString()} - {new Date(tour.end_date).toLocaleDateString()}</span>
-                  <span>{quantity} Adults</span>
+                  <span>{quantity} Người lớn</span>
                 </div>
               </div>
 
               <div className="checkout-summary-lines">
-                <div><span>Nguoi lon (x{quantity})</span><strong>{formatCurrency(subtotal)}</strong></div>
-                <div><span>Phi xu ly</span><strong>{formatCurrency(processingFee)}</strong></div>
+                <div><span>Người lớn (x{quantity})</span><strong>{formatCurrency(subtotal)}</strong></div>
+                <div><span>Phí xử lý</span><strong>{formatCurrency(processingFee)}</strong></div>
                 {formData.insurance && (
-                  <div><span>Bao hiem du lich</span><strong>{formatCurrency(selectedInsuranceFee)}</strong></div>
+                  <div><span>Bảo hiểm du lịch</span><strong>{formatCurrency(selectedInsuranceFee)}</strong></div>
                 )}
-                <div className="discount"><span>Uu dai dat som</span><strong>-{formatCurrency(earlyBirdDiscount)}</strong></div>
+                <div className="discount"><span>Ưu đãi đặt sớm</span><strong>-{formatCurrency(earlyBirdDiscount)}</strong></div>
               </div>
 
               <div className="checkout-summary-total">
-                <span>Tong thanh toan</span>
+                <span>Tổng thanh toán</span>
                 <strong>{formatCurrency(total)}</strong>
               </div>
 
               <div className="checkout-promo-row">
-                <input placeholder="Promo code" />
-                <button type="button">Apply</button>
+                <input placeholder="Mã giảm giá" />
+                <button type="button">Áp dụng</button>
               </div>
 
               <div className="checkout-secure-box">
-                <strong>Secure Payment</strong>
-                <span>Your data is protected by 256-bit SSL encryption.</span>
+                <strong>Thanh toán an toàn</strong>
+                <span>Dữ liệu của bạn được bảo vệ bởi mã hóa SSL 256-bit.</span>
               </div>
 
               <div className="checkout-summary-note">
-                Free cancellation and 48 hours before the trip. Terms and conditions apply.
+                Hủy chuyến miễn phí và 48 giờ trước khi đi. Điều khoản và điều kiện áp dụng.
               </div>
             </div>
           </aside>

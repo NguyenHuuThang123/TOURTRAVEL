@@ -6,10 +6,10 @@ import { getTours } from '../api/tourService'
 import { formatCurrency } from '../utils/currency'
 
 const durationOptions = [
-  { label: '1-3 Days', key: '1-3' },
-  { label: '4-7 Days', key: '4-7' },
-  { label: '8-14 Days', key: '8-14' },
-  { label: '15+ Days', key: '15+' }
+  { label: '1-3 Ngày', key: '1-3' },
+  { label: '4-7 Ngày', key: '4-7' },
+  { label: '8-14 Ngày', key: '8-14' },
+  { label: '15+ Ngày', key: '15+' }
 ]
 
 const styleOptions = ['Adventure', 'Luxury', 'Cultural', 'Beach']
@@ -137,12 +137,11 @@ export default function TourList() {
         <div className="tour-list-layout">
           <aside className="tour-filter-panel">
             <div className="tour-filter-title-block">
-              <h2>Filters</h2>
-              <p>Refine your perfect trip</p>
+              <h2>Bộ lọc</h2>
             </div>
 
             <section className="tour-filter-group">
-              <h3>Price Range</h3>
+              <h3>Khoảng giá</h3>
               <div className="tour-filter-range">
                 <div className="tour-filter-range-values">
                   <span>{formatCurrency(priceRange.min)}</span>
@@ -181,7 +180,7 @@ export default function TourList() {
             </section>
 
             <section className="tour-filter-group">
-              <h3>Duration</h3>
+              <h3>Thời gian</h3>
               <div className="tour-filter-chip-row">
                 {durationOptions.map((option) => (
                   <button
@@ -197,7 +196,7 @@ export default function TourList() {
             </section>
 
             <section className="tour-filter-group">
-              <h3>Destination</h3>
+              <h3>Địa điểm</h3>
               <div className="tour-filter-checkboxes">
                 {destinations.map((destination) => (
                   <label key={destination}>
@@ -213,7 +212,7 @@ export default function TourList() {
             </section>
 
             <section className="tour-filter-group">
-              <h3>Travel Style</h3>
+              <h3>Phong cách</h3>
               <div className="tour-filter-radios">
                 {styleOptions.map((style) => (
                   <button
@@ -233,30 +232,30 @@ export default function TourList() {
           <section className="tour-list-content">
             <div className="tour-list-header">
               <div>
-                <h1>Explore Our Tours</h1>
-                <p>{visibleTours.length} tours found matching your criteria</p>
+                <h1>Khám phá tour du lịch</h1>
+                <p>{visibleTours.length} tour phù hợp với bạn</p>
               </div>
 
               <div className="tour-list-controls">
                 <input
                   value={search}
                   onChange={(event) => setSearch(event.target.value)}
-                  placeholder="Search tours..."
+                  placeholder="Tìm tour..."
                   className="tour-list-search"
                 />
                 <div className="tour-list-sort">
-                  <span>Sort by:</span>
+                  <span>Xếp theo:</span>
                   <select value={sortBy} onChange={(event) => setSortBy(event.target.value)}>
-                    <option value="latest">Most Popular</option>
-                    <option value="price-asc">Price: Low to High</option>
-                    <option value="price-desc">Price: High to Low</option>
-                    <option value="duration">Duration</option>
+                    <option value="latest">Phổ biến nhất</option>
+                    <option value="price-asc">Giá: Thấp đến cao</option>
+                    <option value="price-desc">Giá: Cao đến thấp</option>
+                    <option value="duration">Thời lượng</option>
                   </select>
                 </div>
               </div>
             </div>
 
-            {loading && <div className="tour-list-feedback">Dang tai tour...</div>}
+            {loading && <div className="tour-list-feedback">Đang tải tour...</div>}
             {error && <div className="tour-list-feedback error">{error}</div>}
 
             {!loading && !error && (
@@ -267,7 +266,7 @@ export default function TourList() {
                       className="tour-browser-image"
                       style={{ backgroundImage: `url(${tour.image || 'https://images.unsplash.com/photo-1469474968028-56623f02e42e?w=800'})` }}
                     >
-                      <span className="tour-browser-duration">{tour.duration_days} Days</span>
+                      <span className="tour-browser-duration">{tour.duration_days} Ngày</span>
                     </div>
 
                     <div className="tour-browser-body">
@@ -277,12 +276,12 @@ export default function TourList() {
 
                       <div className="tour-browser-footer">
                         <div>
-                          <span>From</span>
+                          <span>Từ</span>
                           <strong>{formatCurrency(tour.price)}</strong>
                         </div>
 
                         <Link to={`/tours/${tour.id}`} className="tour-browser-button">
-                          {index % 2 === 0 ? 'Book Now' : 'Details'}
+                          {index % 2 === 0 ? 'Đặt ngay' : 'Chi tiết '}
                         </Link>
                       </div>
                     </div>

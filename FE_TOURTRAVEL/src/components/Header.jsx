@@ -123,7 +123,7 @@ export default function Header() {
                   fontWeight: 600
                 }}
               >
-                {user?.role === 'guide' ? 'Bang guide' : 'Tai khoan'}
+                {user?.role === 'guide' ? 'Bang guide' : 'Tài khoản'}
               </Link>
             )}
           </nav>
@@ -141,7 +141,7 @@ export default function Header() {
                   boxShadow: '0 10px 30px rgba(15, 23, 42, 0.06)'
                 }}
               >
-                <div style={{ fontSize: '13px', color: '#64748b' }}>Xin chao</div>
+                <div style={{ fontSize: '13px', color: '#64748b' }}>Xin chào</div>
                 <div style={{ fontWeight: 700, color: '#0f172a' }}>{user?.name}</div>
               </div>
               <button
@@ -154,7 +154,7 @@ export default function Header() {
                   fontWeight: 700
                 }}
               >
-                Dang xuat
+                Đăng xuất
               </button>
             </>
           ) : (
@@ -170,7 +170,7 @@ export default function Header() {
                   fontWeight: 700
                 }}
               >
-                Dang nhap
+                Đăng nhập
               </Link>
               <Link
                 to="/register"
@@ -183,7 +183,7 @@ export default function Header() {
                   boxShadow: '0 14px 32px rgba(37, 99, 235, 0.22)'
                 }}
               >
-                Dang ky
+                Đăng ký
               </Link>
             </>
           )}

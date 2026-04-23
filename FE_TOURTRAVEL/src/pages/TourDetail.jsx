@@ -33,7 +33,7 @@ export default function TourDetail() {
         setReviews(reviewData)
         setError('')
       } catch (err) {
-        setError(err.response?.data?.detail || 'Khong tim thay tour.')
+        setError(err.response?.data?.detail || 'Không tìm thay tour hoặc có lỗi xảy ra khi tải dữ liệu.')
       } finally {
         setLoading(false)
       }
@@ -65,14 +65,14 @@ export default function TourDetail() {
   }, [id, isAuthenticated, token])
 
   if (loading) {
-    return <div style={{ padding: '40px' }}>Dang tai chi tiet tour...</div>
+    return <div style={{ padding: '40px' }}>Đang tải chi tiết tour...</div>
   }
 
   if (error || !tour) {
     return (
       <div style={{ padding: '40px' }}>
-        <p style={{ color: '#dc2626' }}>{error || 'Khong tim thay tour.'}</p>
-        <Link to="/tours">Quay lai danh sach tour</Link>
+        <p style={{ color: '#dc2626' }}>{error || 'Không tìm thay tour hoặc có lỗi xảy ra khi tải dữ liệu.'}</p>
+        <Link to="/tours">Quay lại danh sách tour</Link>
       </div>
     )
   }
@@ -90,10 +90,10 @@ export default function TourDetail() {
       }
     : null
   const quickInfo = [
-    { label: 'Duration', value: `${tour.duration_days} Days`, icon: '◔' },
-    { label: 'Group Size', value: `Max ${tour.max_participants}`, icon: '⌘' },
-    { label: 'Activity Level', value: 'Moderate', icon: '↟' },
-    { label: 'Language', value: 'English, German', icon: '◎' }
+    { label: 'Thời lượng', value: `${tour.duration_days} ngày`, icon: '◔' },
+    { label: 'Số lượng', value: `Tối đa ${tour.max_participants}`, icon: '⌘' },
+    { label: 'Mức độ hoạt động', value: 'Trung bình', icon: '↟' },
+    { label: 'Ngôn ngữ', value: 'Tiếng Anh, tiếng Đức', icon: '◎' }
   ]
 
   const handleMessageGuide = () => {
@@ -132,9 +132,9 @@ export default function TourDetail() {
       setMyReview(savedReview)
       setReviews(latestReviews)
       setTour(latestTour)
-      setReviewMessage(hadReview ? 'Da cap nhat danh gia cua ban.' : 'Cam on ban da gui danh gia.')
+      setReviewMessage(hadReview ? 'Đã cập nhật đánh giá của bạn.' : 'Cảm ơn bạn đã gửi đánh giá.')
     } catch (err) {
-      setReviewError(err.response?.data?.detail || 'Khong the gui danh gia luc nay.')
+      setReviewError(err.response?.data?.detail || 'Không thể gửi đánh giá lúc này.')
     } finally {
       setReviewSubmitting(false)
     }
@@ -156,8 +156,8 @@ export default function TourDetail() {
             <div className="tour-detail-overlay" />
             <div className="tour-detail-hero-content">
               <div className="tour-detail-tags">
-                <span>Most Popular</span>
-                <span>Eco-Certified</span>
+                <span>Phổ biến nhất</span>
+                
               </div>
               <h1>{tour.name}</h1>
               <div className="tour-detail-rating">
@@ -184,7 +184,7 @@ export default function TourDetail() {
 
             {guide && (
               <section className="tour-guide-section">
-                <h2>Meet your guide</h2>
+                <h2>Hướng dẫn viên</h2>
                 <div className="tour-guide-card">
                   <div className="tour-guide-profile">
                     <img src={guide.avatar} alt={guide.name} />
@@ -192,8 +192,8 @@ export default function TourDetail() {
                       <strong>{guide.name}</strong>
                       <p>{guide.title} • {guide.experience}</p>
                       <div className="tour-guide-links">
-                        <button type="button" onClick={handleMessageGuide}>Message Guide</button>
-                        <span>Verified Guide</span>
+                        <button type="button" onClick={handleMessageGuide}>Nhắn tin</button>
+                        <span>Xem thông tin </span>
                       </div>
                       <p>{guide.bio}</p>
                     </div>
@@ -203,32 +203,32 @@ export default function TourDetail() {
             )}
 
             <section className="tour-overview-section">
-              <h2>Overview</h2>
+              <h2>Tổng quan</h2>
               <p>{tour.description}</p>
             </section>
 
             <section className="tour-reviews-section">
               <div className="tour-reviews-header">
                 <div>
-                  <h2>Reviews & Ratings</h2>
-                  <p>Khach hang co the chia se trai nghiem sau khi dat tour thanh cong.</p>
+                  <h2>Đánh giá & Xếp hạng</h2>
+                  <p>Khách hàng có thể chia sẻ trải nghiệm sau khi đặt tour thành công.</p>
                 </div>
                 <div className="tour-review-summary-card">
                   <strong>{reviewCount ? ratingAverage.toFixed(1) : '0.0'}</strong>
                   <span>{renderStars(Math.round(ratingAverage || 0))}</span>
-                  <small>{reviewCount} danh gia</small>
+                  <small>{reviewCount} đánh giá</small>
                 </div>
               </div>
 
               <div className="tour-reviews-layout">
                 <form className="tour-review-form" onSubmit={handleReviewSubmit}>
-                  <h3>{myReview ? 'Cap nhat danh gia cua ban' : 'Gui danh gia cua ban'}</h3>
+                  <h3>{myReview ? 'Cập nhật đánh giá của bạn' : 'Gửi đánh giá của bạn'}</h3>
                   <p className="tour-review-form-note">
                     {!isAuthenticated
-                      ? 'Dang nhap de gui nhan xet va xep hang bang sao.'
+                      ? 'Đăng nhập để gửi nhận xét và xếp hạng bằng sao.'
                       : canReview
-                        ? 'Ban co the chon tu 1 den 5 sao va de lai binh luan ngan gon.'
-                        : 'Chi tai khoan khach hang moi co the gui danh gia.'}
+                        ? 'Bạn có thể chọn từ 1 đến 5 sao và để lại bình luận ngắn gọn.'
+                        : 'Chỉ tài khoản khách hàng mới có thể gửi đánh giá.'}
                   </p>
 
                   <div className="tour-review-stars-input" role="radiogroup" aria-label="Tour rating">
@@ -246,11 +246,11 @@ export default function TourDetail() {
                   </div>
 
                   <label className="tour-review-textarea">
-                    <span>Binh luan</span>
+                    <span>Bình luận</span>
                     <textarea
                       value={reviewForm.comment}
                       onChange={(event) => setReviewForm((prev) => ({ ...prev, comment: event.target.value }))}
-                      placeholder="Chia se dieu ban thich, luu y cho nguoi di sau, chat luong huong dan vien..."
+                      placeholder="Chia sẻ điều bạn thích, lưu ý cho người đi sau, chất lượng hướng dẫn viên..."
                       rows="5"
                       disabled={!isAuthenticated || !canReview || reviewSubmitting}
                     />
@@ -264,7 +264,7 @@ export default function TourDetail() {
                     className="tour-review-submit"
                     disabled={!isAuthenticated || !canReview || reviewSubmitting}
                   >
-                    {reviewSubmitting ? 'Dang gui...' : myReview ? 'Cap nhat danh gia' : 'Gui danh gia'}
+                    {reviewSubmitting ? 'Đang gửi...' : myReview ? 'Cập nhật đánh giá' : 'Gửi đánh giá'}
                   </button>
                 </form>
 
@@ -300,18 +300,18 @@ export default function TourDetail() {
               <div className="tour-booking-price">
                 <div>
                   <strong>{formatCurrency(tour.price)}</strong>
-                  <span>/ nguoi</span>
+                  <span>/ người</span>
                 </div>
-                <span className="tour-booking-spots">{tour.available_slots} spots left</span>
+                <span className="tour-booking-spots">Còn {tour.available_slots} chỗ trống</span>
               </div>
 
               <div className="tour-booking-field">
-                <span>Select dates</span>
+                <span>Ngày bắt đầu</span>
                 <strong>{new Date(tour.start_date).toLocaleDateString()} - {new Date(tour.end_date).toLocaleDateString()}</strong>
               </div>
 
               <div className="tour-booking-field">
-                <span>Travelers</span>
+                <span>Số người</span>
                 <div className="tour-booking-travelers">
                   <input
                     type="number"
@@ -320,7 +320,7 @@ export default function TourDetail() {
                     value={quantity}
                     onChange={(event) => setQuantity(Math.max(1, Number(event.target.value) || 1))}
                   />
-                  <strong>{quantity} Adults</strong>
+                  <strong>{quantity} Người lớn</strong>
                 </div>
               </div>
 
@@ -329,19 +329,19 @@ export default function TourDetail() {
                 disabled={tour.available_slots < 1 || user?.role === 'guide'}
                 className="tour-booking-button"
               >
-                {user?.role === 'guide' ? 'Guide cannot book' : tour.available_slots < 1 ? 'Sold Out' : 'Reserve Now'}
+                {user?.role === 'guide' ? 'Hướng dẫn viên không thể đặt tour' : tour.available_slots < 1 ? 'Hết chỗ' : 'Đặt ngay'}
               </button>
 
-              <p className="tour-booking-note">No payment required today • 100% Secure</p>
-
               <div className="tour-booking-benefits">
-                <span>Free cancellation up to 30 days before</span>
-                <span>Travel protection included</span>
-                <span>Best price guaranteed</span>
+                <d></d>
+                <span>Đặt tour an toàn với chính sách hủy linh hoạt.</span>
+                <span>Hủy miễn phí đến 30 ngày trước ngày khởi hành.</span>
+                <span>Bảo vệ du lịch được bao gồm</span>
+                <span>Đảm bảo giá tốt nhất</span>
               </div>
 
               <div className="tour-booking-total">
-                <span>Total amount</span>
+                <span>Tổng số tiền</span>
                 <strong>{formatCurrency(total)}</strong>
               </div>
             </div>
