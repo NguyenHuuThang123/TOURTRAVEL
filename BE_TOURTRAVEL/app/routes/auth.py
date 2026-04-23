@@ -118,6 +118,7 @@ async def me(user=Depends(get_current_user)):
 async def update_me(payload: UserUpdate, user=Depends(get_current_user)):
     users = get_collection("users")
     bookings = get_collection("bookings")
+    reviews = get_collection("reviews")
     existing = users.find_one({"email": payload.email.lower()})
     if existing and str(existing["_id"]) != user["id"]:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Email da ton tai")
@@ -143,6 +144,15 @@ async def update_me(payload: UserUpdate, user=Depends(get_current_user)):
                 "user_name": payload.name,
                 "user_email": payload.email.lower(),
                 "updated_at": updates["updated_at"],
+            }
+        },
+    )
+    reviews.update_many(
+        {"user_id": user["id"]},
+        {
+            "$set": {
+                "user_name": payload.name,
+                "user_email": payload.email.lower(),
             }
         },
     )

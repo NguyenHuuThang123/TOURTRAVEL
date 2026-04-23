@@ -917,7 +917,8 @@ img {
 }
 
 .tour-guide-section h2,
-.tour-overview-section h2 {
+.tour-overview-section h2,
+.tour-reviews-section h2 {
   margin-bottom: 14px;
   font-size: 2rem;
   font-weight: 800;
@@ -973,6 +974,212 @@ img {
   color: #475569;
   font-size: 1.08rem;
   line-height: 1.8;
+}
+
+.tour-reviews-section {
+  margin-bottom: 26px;
+}
+
+.tour-reviews-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 18px;
+  margin-bottom: 16px;
+}
+
+.tour-reviews-header p {
+  color: #64748b;
+}
+
+.tour-review-summary-card,
+.tour-review-form,
+.tour-review-card,
+.tour-review-empty {
+  border: 1px solid #e2e8f0;
+  border-radius: 18px;
+  background: #ffffff;
+  box-shadow: 0 12px 32px rgba(15, 23, 42, 0.06);
+}
+
+.tour-review-summary-card {
+  min-width: 140px;
+  padding: 18px;
+  display: grid;
+  gap: 4px;
+  justify-items: center;
+  text-align: center;
+}
+
+.tour-review-summary-card strong {
+  color: #0f172a;
+  font-size: 2rem;
+}
+
+.tour-review-summary-card span {
+  color: #f59e0b;
+  letter-spacing: 0.14em;
+}
+
+.tour-review-summary-card small {
+  color: #64748b;
+}
+
+.tour-reviews-layout {
+  display: grid;
+  grid-template-columns: minmax(280px, 360px) minmax(0, 1fr);
+  gap: 18px;
+}
+
+.tour-review-form {
+  padding: 20px;
+  align-self: start;
+  position: sticky;
+  top: 100px;
+}
+
+.tour-review-form h3 {
+  margin-bottom: 8px;
+  font-size: 1.2rem;
+  font-weight: 800;
+}
+
+.tour-review-form-note {
+  margin-bottom: 16px;
+  color: #64748b;
+  line-height: 1.6;
+}
+
+.tour-review-stars-input {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.tour-review-stars-input button {
+  width: 44px;
+  height: 44px;
+  border: 1px solid #cbd5e1;
+  border-radius: 12px;
+  background: #f8fafc;
+  color: #cbd5e1;
+  font-size: 1.35rem;
+  transition: transform var(--transition-fast), border-color var(--transition-fast), background var(--transition-fast), color var(--transition-fast);
+}
+
+.tour-review-stars-input button.active {
+  border-color: #f59e0b;
+  background: #fff7ed;
+  color: #f59e0b;
+}
+
+.tour-review-stars-input button:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+.tour-review-textarea {
+  display: grid;
+  gap: 8px;
+}
+
+.tour-review-textarea span {
+  color: #334155;
+  font-size: 0.92rem;
+  font-weight: 700;
+}
+
+.tour-review-textarea textarea {
+  width: 100%;
+  padding: 14px 16px;
+  border: 1px solid #dbe7ff;
+  border-radius: 14px;
+  background: #f8fbff;
+  color: #0f172a;
+  font-size: 0.98rem;
+  resize: vertical;
+  outline: none;
+}
+
+.tour-review-textarea textarea:focus {
+  border-color: #60a5fa;
+  box-shadow: 0 0 0 4px rgba(96, 165, 250, 0.18);
+}
+
+.tour-review-feedback {
+  margin-top: 14px;
+  padding: 12px 14px;
+  border-radius: 14px;
+  font-size: 0.95rem;
+  font-weight: 600;
+}
+
+.tour-review-feedback.ok {
+  background: #ecfdf5;
+  color: #166534;
+}
+
+.tour-review-feedback.error {
+  background: #fef2f2;
+  color: #b91c1c;
+}
+
+.tour-review-submit {
+  width: 100%;
+  min-height: 50px;
+  margin-top: 14px;
+  border-radius: 14px;
+  background: linear-gradient(180deg, #2563eb 0%, #0f172a 100%);
+  color: #ffffff;
+  font-size: 0.98rem;
+  font-weight: 800;
+  box-shadow: 0 18px 36px rgba(37, 99, 235, 0.22);
+}
+
+.tour-review-submit:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.tour-review-list {
+  display: grid;
+  gap: 14px;
+}
+
+.tour-review-card,
+.tour-review-empty {
+  padding: 18px 20px;
+}
+
+.tour-review-card-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 14px;
+  margin-bottom: 12px;
+}
+
+.tour-review-card-head strong {
+  display: block;
+  margin-bottom: 4px;
+  color: #0f172a;
+  font-size: 1rem;
+}
+
+.tour-review-card-head span {
+  color: #64748b;
+  font-size: 0.9rem;
+}
+
+.tour-review-card-rating {
+  display: grid;
+  justify-items: end;
+  color: #f59e0b;
+}
+
+.tour-review-card p,
+.tour-review-empty {
+  color: #475569;
+  line-height: 1.7;
 }
 
 .tour-booking-column {
@@ -2621,6 +2828,7 @@ img {
   .tour-card-grid,
   .tour-detail-layout,
   .tour-quick-grid,
+  .tour-reviews-layout,
   .checkout-layout {
     grid-template-columns: 1fr;
   }
@@ -2632,6 +2840,15 @@ img {
 
   .tour-booking-column {
     position: static;
+  }
+
+  .tour-review-form {
+    position: static;
+  }
+
+  .tour-reviews-header,
+  .tour-review-card-head {
+    flex-direction: column;
   }
 
   .tour-list-header,

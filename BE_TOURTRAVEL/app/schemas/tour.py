@@ -50,6 +50,8 @@ class TourUpdate(BaseModel):
 
 class Tour(TourBase):
     id: str
+    rating_average: float = 0
+    review_count: int = 0
     created_at: datetime
     updated_at: datetime
 

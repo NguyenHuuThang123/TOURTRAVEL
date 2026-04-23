@@ -13,6 +13,7 @@ class BookingCreate(BaseModel):
     user_email: EmailStr
     user_phone: str = Field(..., min_length=8, max_length=30)
     quantity: int = Field(..., ge=1)
+    insurance_selected: bool = False
 
 
 class BookingUpdate(BaseModel):
@@ -38,6 +39,9 @@ class Booking(BaseModel):
     start_date: datetime | None = None
     end_date: datetime | None = None
     quantity: int
+    tour_unit_price: float | None = None
+    insurance_selected: bool = False
+    insurance_fee: float = 0
     total_price: float
     status: BookingStatus
     created_at: datetime

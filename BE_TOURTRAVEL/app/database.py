@@ -48,6 +48,10 @@ def ensure_indexes() -> None:
     get_collection("chat_conversations").create_index("last_message_at")
     get_collection("chat_messages").create_index("conversation_id")
     get_collection("chat_messages").create_index("created_at")
+    get_collection("reviews").create_index("tour_id")
+    get_collection("reviews").create_index("user_id")
+    get_collection("reviews").create_index([("tour_id", 1), ("user_id", 1)], unique=True)
+    get_collection("reviews").create_index("created_at")
 
 
 def normalize_legacy_prices_to_vnd() -> None:

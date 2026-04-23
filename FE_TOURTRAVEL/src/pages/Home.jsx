@@ -240,7 +240,9 @@ export default function Home() {
                     style={{ backgroundImage: `url(${tour.image || fallbackImage})` }}
                   >
                     <span className="featured-tour-badge">{tour.duration_days} days</span>
-                    <span className="featured-tour-rating">4.8 rating</span>
+                    <span className="featured-tour-rating">
+                      ★ {tour.review_count ? Number(tour.rating_average || 0).toFixed(1) : 'New'}
+                    </span>
                   </div>
 
                   <div className="featured-tour-body">
@@ -252,7 +254,9 @@ export default function Home() {
                         <span>From</span>
                         <strong>{formatCurrency(tour.price)}</strong>
                       </div>
-                      <span className="featured-tour-action">See details</span>
+                      <span className="featured-tour-action">
+                        {tour.review_count ? `${tour.review_count} reviews` : 'See details'}
+                      </span>
                     </div>
                   </div>
                 </Link>
