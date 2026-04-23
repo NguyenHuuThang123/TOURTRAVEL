@@ -10,6 +10,7 @@ from pymongo.database import Database
 from app.config.settings import get_settings
 
 _client: MongoClient | None = None
+LEGACY_VND_RATE = 26000
 
 
 def get_client() -> MongoClient:
@@ -49,6 +50,26 @@ def ensure_indexes() -> None:
     get_collection("chat_messages").create_index("created_at")
 
 
+def normalize_legacy_prices_to_vnd() -> None:
+    tours = get_collection("tours")
+    bookings = get_collection("bookings")
+    now = datetime.utcnow()
+
+    low_price_tours = list(tours.find({"price": {"$gt": 0, "$lt": 10000}}, {"price": 1}))
+    for item in low_price_tours:
+        tours.update_one(
+            {"_id": item["_id"]},
+            {"$set": {"price": round(float(item["price"]) * LEGACY_VND_RATE, 0), "updated_at": now}},
+        )
+
+    low_price_bookings = list(bookings.find({"total_price": {"$gt": 0, "$lt": 10000}}, {"total_price": 1}))
+    for item in low_price_bookings:
+        bookings.update_one(
+            {"_id": item["_id"]},
+            {"$set": {"total_price": round(float(item["total_price"]) * LEGACY_VND_RATE, 0), "updated_at": now}},
+        )
+
+
 def seed_data() -> None:
     tours = get_collection("tours")
     now = datetime.utcnow()
@@ -59,7 +80,7 @@ def seed_data() -> None:
                     "name": "Da Nang Beach Escape",
                     "description": "Nghi duong ven bien, tham quan Ba Na Hills va am thuc dia phuong.",
                     "destination": "Da Nang, Viet Nam",
-                    "price": 289.0,
+                    "price": 7514000.0,
                     "duration_days": 4,
                     "max_participants": 24,
                     "available_slots": 18,
@@ -74,7 +95,7 @@ def seed_data() -> None:
                     "name": "Ha Long Luxury Cruise",
                     "description": "Du thuyen 5 sao, tham hang dong va cheo kayak tai Vinh Ha Long.",
                     "destination": "Ha Long, Viet Nam",
-                    "price": 399.0,
+                    "price": 10374000.0,
                     "duration_days": 3,
                     "max_participants": 20,
                     "available_slots": 10,
@@ -89,7 +110,7 @@ def seed_data() -> None:
                     "name": "Tokyo Culture Discovery",
                     "description": "Kham pha Tokyo hien dai, den chua co kinh va khu am thuc dem.",
                     "destination": "Tokyo, Japan",
-                    "price": 1299.0,
+                    "price": 33774000.0,
                     "duration_days": 6,
                     "max_participants": 16,
                     "available_slots": 9,
@@ -145,6 +166,7 @@ def initialize_database() -> None:
     ping_database()
     ensure_indexes()
     seed_data()
+    normalize_legacy_prices_to_vnd()
 
 
 def close_database() -> None:

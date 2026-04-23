@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useAuth } from '../context/AuthContext'
+import { formatCurrency } from '../utils/currency'
 import {
   getAdminChatConversationDetail,
   getAdminChatConversations,
@@ -61,14 +62,6 @@ function toDateTimeLocal(value) {
   return new Date(value).toISOString().slice(0, 16)
 }
 
-function formatCurrency(value) {
-  return new Intl.NumberFormat('vi-VN', {
-    style: 'currency',
-    currency: 'VND',
-    maximumFractionDigits: 0
-  }).format((value || 0) * 26000)
-}
-
 function formatDateTime(value) {
   if (!value) return '-'
   return new Date(value).toLocaleString('vi-VN')
@@ -114,6 +107,7 @@ export default function AdminDashboard() {
   const [tourStockFilter, setTourStockFilter] = useState('all')
   const [userRoleFilter, setUserRoleFilter] = useState('all')
   const [userBlockFilter, setUserBlockFilter] = useState('all')
+  const [imagePickerKey, setImagePickerKey] = useState(0)
 
   useEffect(() => {
     if (token) {
@@ -247,6 +241,7 @@ export default function AdminDashboard() {
 
   const resetTourForm = () => {
     setTourForm(initialTour)
+    setImagePickerKey((prev) => prev + 1)
   }
 
   const resetUserForm = () => {
@@ -396,6 +391,20 @@ export default function AdminDashboard() {
     } catch (err) {
       setError(err.response?.data?.detail || 'Không thể xóa đơn.')
     }
+  }
+
+  const handleTourImageChange = (event) => {
+    const file = event.target.files?.[0]
+    if (!file) return
+
+    const reader = new FileReader()
+    reader.onload = () => {
+      setTourForm((prev) => ({
+        ...prev,
+        image: typeof reader.result === 'string' ? reader.result : prev.image
+      }))
+    }
+    reader.readAsDataURL(file)
   }
 
   const handleOpenChat = async (conversationId) => {
@@ -719,8 +728,30 @@ export default function AdminDashboard() {
           <input value={tourForm.image} onChange={(event) => setTourForm((prev) => ({ ...prev, image: event.target.value }))} />
         </label>
 
+        <label className="admin-editor-field admin-span-2">
+          <span>Chon anh tu thu muc</span>
+          <input key={imagePickerKey} type="file" accept="image/*" onChange={handleTourImageChange} />
+        </label>
+
+        {tourForm.image && (
+          <div className="admin-editor-field admin-span-2">
+            <span>Xem truoc anh</span>
+            <div
+              className="admin-tour-thumb"
+              style={{
+                width: '100%',
+                minHeight: '220px',
+                backgroundImage: `url(${tourForm.image})`,
+                backgroundSize: 'cover',
+                backgroundPosition: 'center',
+                borderRadius: '20px'
+              }}
+            />
+          </div>
+        )}
+
         <label className="admin-editor-field">
-          <span>Price</span>
+          <span>Price (VNĐ)</span>
           <input required type="number" min="1" value={tourForm.price} onChange={(event) => setTourForm((prev) => ({ ...prev, price: event.target.value }))} />
         </label>
 

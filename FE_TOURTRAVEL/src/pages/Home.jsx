@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom'
 import Header from '../components/Header'
 import Footer from '../components/Footer'
 import { getTours } from '../api/tourService'
+import { formatCurrency } from '../utils/currency'
 
 const fallbackImage = 'https://images.unsplash.com/photo-1469474968028-56623f02e42e?w=1200'
 
@@ -177,7 +178,7 @@ export default function Home() {
                     <div className="featured-tour-footer">
                       <div>
                         <span>From</span>
-                        <strong>${tour.price}</strong>
+                        <strong>{formatCurrency(tour.price)}</strong>
                       </div>
                       <span className="featured-tour-action">See details</span>
                     </div>
