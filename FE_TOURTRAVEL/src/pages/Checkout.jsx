@@ -2,7 +2,6 @@ import { useEffect, useMemo, useState } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import Header from '../components/Header'
 import Footer from '../components/Footer'
-import { createBooking } from '../api/tourService'
 import { useAuth } from '../context/AuthContext'
 import { formatCurrency } from '../utils/currency'
 
@@ -10,19 +9,17 @@ export default function Checkout() {
   const insuranceFee = 45000
   const location = useLocation()
   const navigate = useNavigate()
-  const { user, token } = useAuth()
+  const { user } = useAuth()
   const [formData, setFormData] = useState({
-    firstName: user?.name?.split(' ').slice(0, -1).join(' ') || user?.name || '',
-    lastName: user?.name?.split(' ').slice(-1).join(' ') || '',
-    email: user?.email || '',
-    phoneCode: '+1',
-    phone: user?.phone || '',
-    dateOfBirth: '',
-    insurance: false,
-    vegetarian: false
+    firstName: location.state?.traveler?.firstName || user?.name?.split(' ').slice(0, -1).join(' ') || user?.name || '',
+    lastName: location.state?.traveler?.lastName || user?.name?.split(' ').slice(-1).join(' ') || '',
+    email: location.state?.traveler?.email || user?.email || '',
+    phoneCode: location.state?.traveler?.phoneCode || '+1',
+    phone: location.state?.traveler?.phone || user?.phone || '',
+    dateOfBirth: location.state?.traveler?.dateOfBirth || '',
+    insurance: location.state?.traveler?.insurance || false,
+    vegetarian: location.state?.traveler?.vegetarian || false
   })
-  const [loading, setLoading] = useState(false)
-  const [message, setMessage] = useState('')
   const [error, setError] = useState('')
 
   const tour = location.state?.tour
@@ -77,31 +74,21 @@ export default function Checkout() {
       setError('Huong dan vien khong the dat tour.')
       return
     }
-    try {
-      setLoading(true)
-      setError('')
-      const booking = await createBooking({
-        tour_id: tour.id,
-        user_name: `${formData.firstName} ${formData.lastName}`.trim(),
-        user_email: formData.email,
-        user_phone: `${formData.phoneCode} ${formData.phone}`.trim(),
+    setError('')
+    navigate('/payment', {
+      state: {
+        tour,
         quantity,
-        insurance_selected: formData.insurance
-      }, token)
-      setMessage(`Dat tour thanh cong. Ma don: ${booking.id}`)
-      setTimeout(() => {
-        if (user?.role === 'admin') {
-          navigate('/admin')
-          return
+        traveler: formData,
+        pricing: {
+          subtotal,
+          processingFee,
+          insuranceFee: selectedInsuranceFee,
+          earlyBirdDiscount,
+          total
         }
-
-        navigate(user ? '/account' : '/tours')
-      }, 1400)
-    } catch (err) {
-      setError(err.response?.data?.detail || 'Dat tour that bai.')
-    } finally {
-      setLoading(false)
-    }
+      }
+    })
   }
 
   return (
@@ -199,12 +186,10 @@ export default function Checkout() {
               </section>
 
               {error && <div className="checkout-feedback error">{error}</div>}
-              {message && <div className="checkout-feedback ok">{message}</div>}
-
               <div className="checkout-bottom-actions">
                 <Link to={`/tours/${tour.id}`} className="checkout-back-link">Quay lại</Link>
-                <button type="submit" disabled={loading} className="checkout-submit-btn">
-                  {loading ? 'Processing...' : 'Continue to Payment'}
+                <button type="submit" className="checkout-submit-btn">
+                  Continue to Payment
                 </button>
               </div>
             </form>
