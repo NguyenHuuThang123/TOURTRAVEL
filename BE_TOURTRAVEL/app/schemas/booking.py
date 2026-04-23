@@ -5,6 +5,7 @@ from pydantic import BaseModel, EmailStr, Field
 
 
 BookingStatus = Literal["pending", "confirmed", "cancelled"]
+PaymentMethod = Literal["card", "bank_transfer", "vnpay"]
 
 
 class BookingCreate(BaseModel):
@@ -14,6 +15,7 @@ class BookingCreate(BaseModel):
     user_phone: str = Field(..., min_length=8, max_length=30)
     quantity: int = Field(..., ge=1)
     insurance_selected: bool = False
+    payment_method: PaymentMethod = "card"
 
 
 class BookingUpdate(BaseModel):
@@ -40,8 +42,11 @@ class Booking(BaseModel):
     end_date: datetime | None = None
     quantity: int
     tour_unit_price: float | None = None
+    processing_fee: float = 0
+    discount_amount: float = 0
     insurance_selected: bool = False
     insurance_fee: float = 0
+    payment_method: PaymentMethod = "card"
     total_price: float
     status: BookingStatus
     created_at: datetime
