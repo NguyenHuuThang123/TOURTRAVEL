@@ -134,29 +134,29 @@ export default function Home() {
             <form className="hero-search-card" onSubmit={handleHeroSearch}>
               <div className="hero-search-header">
                 <div>
-                  <p className="hero-search-eyebrow">Search tours</p>
+                  <p className="hero-search-eyebrow">Tìm kiếm tour</p>
                   <h3 className="hero-search-title">Tìm tour phù hợp trong vài giây</h3>
                 </div>
-                <span className="hero-search-pill">Tim kiem nhanh</span>
+                <span className="hero-search-pill">Tìm kiếm nhanh</span>
               </div>
 
               <div className="hero-search-grid">
                 <label className="hero-field hero-field-search">
-                  <span>Tu khoa</span>
+                  <span>Từ khóa</span>
                   <input
                     value={heroSearch.search}
                     onChange={(event) => setHeroSearch((prev) => ({ ...prev, search: event.target.value }))}
-                    placeholder="VD: Ha Long, bien, luxury..."
+                    placeholder="VD: Ha Long, biển, luxury..."
                   />
                 </label>
 
                 <label className="hero-field hero-field-destination">
-                  <span>Diem den</span>
+                  <span>Điểm đến</span>
                   <select
                     value={heroSearch.destination}
                     onChange={(event) => setHeroSearch((prev) => ({ ...prev, destination: event.target.value }))}
                   >
-                    <option value="">Tat ca diem den</option>
+                    <option value="">Tất cả điểm đến</option>
                     {destinations.map((destination) => (
                       <option key={destination} value={destination}>{destination}</option>
                     ))}
@@ -164,26 +164,26 @@ export default function Home() {
                 </label>
 
                 <label className="hero-field hero-field-duration">
-                  <span>Thoi luong</span>
+                  <span>Thời lượng</span>
                   <select
                     value={heroSearch.duration}
                     onChange={(event) => setHeroSearch((prev) => ({ ...prev, duration: event.target.value }))}
                   >
-                    <option value="">Bat ky</option>
-                    <option value="1-3">1-3 ngay</option>
-                    <option value="4-7">4-7 ngay</option>
-                    <option value="8-14">8-14 ngay</option>
-                    <option value="15+">15+ ngay</option>
+                    <option value="">Bất kỳ</option>
+                    <option value="1-3">1-3 ngày</option>
+                    <option value="4-7">4-7 ngày</option>
+                    <option value="8-14">8-14 ngày</option>
+                    <option value="15+">15+ ngày</option>
                   </select>
                 </label>
 
                 <button type="submit" className="hero-search-button">
-                  Tim tour
+                  Tìm tour
                 </button>
               </div>
 
               {/* <div className="hero-search-suggestions">
-                <strong>Tuyen noi bat</strong>
+                <strong>Tuyến nổi bật</strong>
                 <div className="hero-search-chips">
                   {destinations.slice(0, 4).map((destination) => (
                     <button
@@ -221,11 +221,11 @@ export default function Home() {
         <div className="container">
           <div className="featured-showcase-head">
             <div>
-              <h2>Featured tours</h2>
-              <p>Popular options surfaced from the same tour catalog used across the app.</p>
+              <h2>Nổi bật</h2>
+              <p>Các lựa chọn phổ biến được chọn lọc từ cùng một danh mục tour du lịch được sử dụng trên toàn bộ ứng dụng.</p>
             </div>
             <Link to="/tours" className="featured-view-link">
-              View all tours
+              Xem tất cả tour
             </Link>
           </div>
 
@@ -239,7 +239,7 @@ export default function Home() {
                     className="featured-tour-image"
                     style={{ backgroundImage: `url(${tour.image || fallbackImage})` }}
                   >
-                    <span className="featured-tour-badge">{tour.duration_days} days</span>
+                    <span className="featured-tour-badge">{tour.duration_days} ngày</span>
                     <span className="featured-tour-rating">
                       ★ {tour.review_count ? Number(tour.rating_average || 0).toFixed(1) : 'New'}
                     </span>
@@ -251,11 +251,11 @@ export default function Home() {
 
                     <div className="featured-tour-footer">
                       <div>
-                        <span>From</span>
+                        <span>Từ </span>
                         <strong>{formatCurrency(tour.price)}</strong>
                       </div>
                       <span className="featured-tour-action">
-                        {tour.review_count ? `${tour.review_count} reviews` : 'See details'}
+                        {tour.review_count ? `${tour.review_count} đánh giá` : 'Xem chi tiết'}
                       </span>
                     </div>
                   </div>
@@ -269,10 +269,10 @@ export default function Home() {
       <section className="features-section">
         <div className="container">
           <div className="features-header">
-            <h2 className="features-title">Why travelers keep using TourTravel</h2>
+            <h2 className="features-title">Tại sao du khách tiếp tục sử dụng TourTravel</h2>
             <p className="features-subtitle">
-              The experience is built to keep discovery simple while still giving enough detail to
-              book confidently.
+              Trải nghiệm được xây dựng để giữ cho việc khám phá trở nên đơn giản hơn trong khi vẫn cung cấp đủ chi tiết để
+              đặt chỗ một cách tự tin.
             </p>
           </div>
 
@@ -291,8 +291,8 @@ export default function Home() {
       <section className="testimonials-section">
         <div className="container">
           <div className="features-header">
-            <h2 className="features-title">Traveler feedback</h2>
-            <p className="features-subtitle">A few short impressions from the kind of journeys this app supports.</p>
+            <h2 className="features-title">Traveler Đánh giá</h2>
+            <p className="features-subtitle">Một vài ấn tượng ngắn về loại hành trình mà ứng dụng này hỗ trợ.</p>
           </div>
 
           <div className="testimonials-grid">
