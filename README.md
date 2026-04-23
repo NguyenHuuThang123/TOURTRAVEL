@@ -1,180 +1,205 @@
-# TourTravel - Tour Booking Platform
+# TourTravel
 
-Full-stack tour booking application built with **React** (Frontend) + **FastAPI** (Backend).
+Ứng dụng đặt tour full-stack với:
+- Frontend: `React + Vite`
+- Backend: `FastAPI`
+- Database: `MongoDB`
 
-## 📁 Project Structure
+## Tổng quan tính năng
 
-```
+- Trang chủ, danh sách tour, chi tiết tour
+- Đăng nhập/đăng ký thường và Google Sign-In
+- Đặt tour theo flow `Checkout -> Payment`
+- Chọn phương thức thanh toán:
+  - `Thẻ`
+  - `Chuyển khoản ngân hàng`
+  - `VNPAY`
+- Đánh giá tour bằng sao và bình luận
+- Trang tài khoản người dùng
+- Dashboard quản trị và hướng dẫn viên
+- Chat khách hàng / admin / guide
+
+## Cấu trúc thư mục
+
+```text
 TOURTRAVEL/
-├── FE_TOURTRAVEL/          # React Frontend (Vite)
+├── FE_TOURTRAVEL/                 # Frontend React (Vite)
 │   ├── src/
-│   │   ├── components/     # React components
-│   │   ├── pages/          # Page components (Home, TourDetail, Cart)
-│   │   ├── api/            # API service (tourService.js)
-│   │   ├── styles/         # CSS files
-│   │   ├── App.jsx
-│   │   └── main.jsx
-│   ├── index.html
-│   ├── vite.config.js
+│   │   ├── api/
+│   │   ├── components/
+│   │   ├── context/
+│   │   ├── pages/
+│   │   ├── styles/
+│   │   └── utils/
 │   ├── package.json
-│   └── .gitignore
+│   └── .env
 │
-└── BE_TOURTRAVEL/          # FastAPI Backend (Python)
-    ├── app/
-    │   ├── routes/         # API endpoints (tours.py, bookings.py)
-    │   ├── models/         # Database models
-    │   ├── schemas/        # Pydantic schemas
-    │   ├── config/         # Configuration
-    │   └── __init__.py
-    ├── main.py             # FastAPI app entry point
-    ├── requirements.txt    # Python dependencies
-    ├── .env.example        # Environment variables template
-    └── .gitignore
+├── BE_TOURTRAVEL/                 # Backend FastAPI
+│   ├── app/
+│   │   ├── config/
+│   │   ├── routes/
+│   │   ├── schemas/
+│   │   └── models/
+│   ├── main.py
+│   ├── requirements.txt
+│   ├── .env
+│   └── .env.example
+│
+├── docker-compose.yml
+├── SETUP_GUIDE.md
+└── FE_DESIGN_GUIDE.md
 ```
 
-## 🚀 Quick Start
+## Chạy nhanh
 
-### Run With Docker
+### Backend
 
-1. **Open terminal at project root:**
-   ```bash
-   cd TOURTRAVEL
-   ```
+```bash
+cd BE_TOURTRAVEL
+python -m venv venv
+venv\Scripts\activate
+pip install -r requirements.txt
+python main.py
+```
 
-2. **Build and start all services:**
-   ```bash
-   docker compose up --build
-   ```
+Backend chạy tại:
+- `http://localhost:8000`
+- Swagger: `http://localhost:8000/docs`
 
-3. **Access the app:**
-   - Frontend: http://localhost:3000
-   - Backend API: http://localhost:8000
-   - Swagger Docs: http://localhost:8000/docs
+### Frontend
 
-4. **Stop containers:**
-   ```bash
-   docker compose down
-   ```
+```bash
+cd FE_TOURTRAVEL
+npm install
+npm run dev
+```
 
-5. **Stop and remove volume data:**
-   ```bash
-   docker compose down -v
-   ```
+Frontend mặc định chạy tại:
+- `http://localhost:5173`
 
-### Backend (FastAPI)
+## Biến môi trường
 
-1. **Navigate to backend folder:**
-   ```bash
-   cd BE_TOURTRAVEL
-   ```
+### Backend: `BE_TOURTRAVEL/.env`
 
-2. **Create virtual environment (optional but recommended):**
-   ```bash
-   python -m venv venv
-   venv\Scripts\activate  # Windows
-   # or: source venv/bin/activate  # Mac/Linux
-   ```
+Ví dụ:
 
-3. **Install dependencies:**
-   ```bash
-   pip install -r requirements.txt
-   ```
+```env
+MONGODB_URL=mongodb://127.0.0.1:27017
+MONGODB_DB_NAME=tourtravel
+GOOGLE_CLIENT_ID=your_google_web_client_id
+BACKEND_BASE_URL=http://localhost:8000
+FRONTEND_BASE_URL=http://localhost:5173
+VNPAY_TMN_CODE=your_vnpay_tmn_code
+VNPAY_HASH_SECRET=your_vnpay_hash_secret
+VNPAY_PAYMENT_URL=https://sandbox.vnpayment.vn/paymentv2/vpcpay.html
+VNPAY_RETURN_PATH=/api/payments/vnpay/return
+DEBUG=true
+```
 
-4. **Copy environment file:**
-   ```bash
-   copy .env.example .env
-   ```
+### Frontend: `FE_TOURTRAVEL/.env`
 
-   Google Sign-In:
-   - Set `GOOGLE_CLIENT_ID` in `BE_TOURTRAVEL/.env`
-   - Set `VITE_GOOGLE_CLIENT_ID` in `FE_TOURTRAVEL/.env`
-   - Both values should be the same Google OAuth Web Client ID
+```env
+VITE_GOOGLE_CLIENT_ID=your_google_web_client_id
+```
 
-5. **Run server:**
-   ```bash
-   python main.py
-   ```
-   Server runs at: **http://localhost:8000**
-   
-   - API Docs (Swagger): http://localhost:8000/docs
-   - ReDoc: http://localhost:8000/redoc
+Lưu ý:
+- `GOOGLE_CLIENT_ID` và `VITE_GOOGLE_CLIENT_ID` phải cùng một giá trị
+- Sau khi đổi `.env`, cần restart backend/frontend
 
-### Frontend (React + Vite)
+## Google Sign-In
 
-1. **Open new terminal, navigate to frontend folder:**
-   ```bash
-   cd FE_TOURTRAVEL
-   ```
+Nếu gặp lỗi `origin_mismatch`, hãy kiểm tra `OAuth Client` trên Google Cloud Console.
 
-2. **Install dependencies:**
-   ```bash
-   npm install
-   ```
+Trong `Authorized JavaScript origins`, thêm đúng origin frontend đang chạy, ví dụ:
+- `http://localhost:5173`
+- `http://127.0.0.1:5173`
 
-3. **Create frontend env file if needed:**
-   ```bash
-   copy .env.example .env
-   ```
+Không thêm path như `/login` hoặc `/register`.
 
-4. **Run development server:**
-   ```bash
-   npm run dev
-   ```
-   App runs at: **http://localhost:5173** (or 3000 if using port 3000)
+## VNPAY
 
-## 📡 API Endpoints
+Flow hiện tại:
+1. Người dùng nhập thông tin ở `Checkout`
+2. Chuyển sang `Payment`
+3. Chọn `VNPAY`
+4. Backend tạo `payment session` và trả về `payment_url`
+5. Frontend redirect sang cổng VNPAY
+6. VNPAY trả về backend qua `return URL`
+7. Backend verify checksum rồi mới tạo booking
+8. Backend redirect về frontend trang kết quả
+
+Các file chính:
+- [BE_TOURTRAVEL/app/routes/payments.py](BE_TOURTRAVEL/app/routes/payments.py)
+- [FE_TOURTRAVEL/src/pages/Payment.jsx](FE_TOURTRAVEL/src/pages/Payment.jsx)
+- [FE_TOURTRAVEL/src/pages/VnpayReturn.jsx](FE_TOURTRAVEL/src/pages/VnpayReturn.jsx)
+
+Lưu ý:
+- Cần điền `VNPAY_TMN_CODE` và `VNPAY_HASH_SECRET`
+- Nếu backend đã chạy trước khi cập nhật `.env`, phải restart server
+- Môi trường local hiện dùng flow `return URL` để xác nhận giao dịch
+
+## Reviews & Ratings
+
+Khách hàng có thể đánh giá tour bằng sao và bình luận.
+
+Điều kiện:
+- Phải đăng nhập
+- Phải là tài khoản `user`
+- Phải có booking `confirmed` cho tour đó
+
+Mỗi người dùng có thể:
+- tạo 1 review / tour
+- cập nhật lại review cũ
+
+## API chính
+
+### Auth
+- `POST /api/auth/register`
+- `POST /api/auth/login`
+- `POST /api/auth/google`
+- `GET /api/auth/me`
 
 ### Tours
-- `GET /api/tours` - Get all tours
-- `GET /api/tours/{id}` - Get tour details
-- `POST /api/tours` - Create new tour
+- `GET /api/tours/`
+- `GET /api/tours/{tour_id}`
+- `GET /api/tours/{tour_id}/reviews`
+- `GET /api/tours/{tour_id}/reviews/my`
+- `PUT /api/tours/{tour_id}/reviews/my`
 
 ### Bookings
-- `GET /api/bookings` - Get all bookings
-- `POST /api/bookings` - Create booking
-- `GET /api/bookings/{id}` - Get booking details
+- `POST /api/bookings/`
+- `GET /api/bookings/my`
+- `PUT /api/bookings/my/{booking_id}/cancel`
 
-## 🔧 Tech Stack
+### Payments
+- `POST /api/payments/vnpay/create`
+- `GET /api/payments/vnpay/return`
 
-**Frontend:**
-- React 18
-- Vite (build tool)
-- React Router (navigation)
-- Axios (HTTP client)
+## Ghi chú triển khai
 
-**Backend:**
-- FastAPI (Python web framework)
-- Uvicorn (ASGI server)
-- Pydantic (data validation)
-- SQLAlchemy (ORM - optional for database)
+- Backend dùng `python-dotenv` và hiện tự nạp `BE_TOURTRAVEL/.env` trong `settings.py`
+- Mongo indexes được tạo ở `app/database.py`
+- Booking total hiện được backend tính lại để khớp với summary thanh toán:
+  - giá tour
+  - phí xử lý
+  - giảm giá đặt sớm
+  - phí bảo hiểm nếu có
 
-## 📝 Next Steps
+## Tài liệu thêm
 
-1. **Database Setup:**
-   - Replace mock data with SQLite/PostgreSQL/MongoDB
-   - Uncomment SQLAlchemy models in `app/models/__init__.py`
+- [SETUP_GUIDE.md](SETUP_GUIDE.md)
+- [FE_DESIGN_GUIDE.md](FE_DESIGN_GUIDE.md)
 
-2. **Authentication:**
-   - Add JWT authentication
-   - Implement user login/signup endpoints
+## Tình trạng hiện tại
 
-3. **Payment Integration:**
-   - Add Stripe/PayPal integration for bookings
+Các phần đã có:
+- Google Sign-In
+- Review/rating
+- Payment page riêng
+- VNPAY sandbox integration
+- Admin / Guide dashboard
 
-4. **Frontend Enhancement:**
-   - Add UI components (Tailwind CSS, Material-UI, etc.)
-   - Implement proper state management (Redux/Zustand)
-   - Add form validation with Formik/React Hook Form
-
-5. **Database:**
-   - Set up PostgreSQL or MongoDB
-   - Create migrations
-   - Add database connection to FastAPI
-
-## 🤝 Contributing
-
-Feel free to modify and extend this project!
-
-## 📄 License
-
-MIT License
+Các phần còn có thể mở rộng:
+- IPN riêng cho VNPAY production
+- Quản lý review trong admin
+- Hiển thị phương thức thanh toán rõ hơn ở Account/Admin
