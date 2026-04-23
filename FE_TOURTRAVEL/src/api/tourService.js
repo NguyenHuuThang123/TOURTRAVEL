@@ -42,6 +42,21 @@ export const getTourById = async (id) => {
   return response.data
 }
 
+export const getTourReviews = async (id) => {
+  const response = await axios.get(`${API_BASE}/tours/${id}/reviews`)
+  return response.data
+}
+
+export const getMyTourReview = async (id, token) => {
+  const response = await axios.get(`${API_BASE}/tours/${id}/reviews/my`, authHeaders(token))
+  return response.data
+}
+
+export const upsertMyTourReview = async (id, payload, token) => {
+  const response = await axios.put(`${API_BASE}/tours/${id}/reviews/my`, payload, authHeaders(token))
+  return response.data
+}
+
 export const createTour = async (tourData, token) => {
   const response = await axios.post(`${API_BASE}/tours/`, tourData, authHeaders(token))
   return response.data

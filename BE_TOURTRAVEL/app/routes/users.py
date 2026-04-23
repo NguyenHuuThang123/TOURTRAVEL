@@ -110,6 +110,15 @@ async def update_user(user_id: str, payload: UserAdminUpdate, admin=Depends(requ
             }
         },
     )
+    get_collection("reviews").update_many(
+        {"user_id": user_id},
+        {
+            "$set": {
+                "user_name": payload.name,
+                "user_email": payload.email.lower(),
+            }
+        },
+    )
     if payload.is_blocked:
         _revoke_user_sessions(user_id)
 
