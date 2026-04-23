@@ -116,6 +116,12 @@ export const createBooking = async (bookingData, token) => {
   return response.data
 }
 
+export const createVnpayPayment = async (payload, token) => {
+  const config = token ? authHeaders(token) : undefined
+  const response = await axios.post(`${API_BASE}/payments/vnpay/create`, payload, config)
+  return response.data
+}
+
 export const getMyBookings = async (token) => {
   const response = await axios.get(`${API_BASE}/bookings/my`, authHeaders(token))
   return response.data

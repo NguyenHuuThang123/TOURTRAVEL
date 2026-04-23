@@ -5,7 +5,7 @@ from pydantic import BaseModel, EmailStr, Field
 
 
 BookingStatus = Literal["pending", "confirmed", "cancelled"]
-PaymentMethod = Literal["card", "bank_transfer", "momo"]
+PaymentMethod = Literal["card", "bank_transfer", "vnpay"]
 
 
 class BookingCreate(BaseModel):
@@ -42,6 +42,8 @@ class Booking(BaseModel):
     end_date: datetime | None = None
     quantity: int
     tour_unit_price: float | None = None
+    processing_fee: float = 0
+    discount_amount: float = 0
     insurance_selected: bool = False
     insurance_fee: float = 0
     payment_method: PaymentMethod = "card"

@@ -2,7 +2,7 @@ import { useMemo, useState } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import Header from '../components/Header'
 import Footer from '../components/Footer'
-import { createBooking } from '../api/tourService'
+import { createBooking, createVnpayPayment } from '../api/tourService'
 import { useAuth } from '../context/AuthContext'
 import { formatCurrency } from '../utils/currency'
 
@@ -18,9 +18,9 @@ const paymentMethods = [
     description: 'Nhan thong tin tai khoan va xac nhan thanh toan thu cong.'
   },
   {
-    id: 'momo',
-    label: 'Vi MoMo',
-    description: 'Phu hop cho thanh toan di dong va xac nhan nhanh.'
+    id: 'vnpay',
+    label: 'VNPAY',
+    description: 'Chuyen huong den cong thanh toan VNPAY de thanh toan online.'
   }
 ]
 
@@ -34,8 +34,7 @@ export default function Payment() {
     cardNumber: '',
     expiry: '',
     cvv: '',
-    bankReference: '',
-    momoPhone: ''
+    bankReference: ''
   })
   const [loading, setLoading] = useState(false)
   const [message, setMessage] = useState('')
@@ -94,6 +93,23 @@ export default function Payment() {
       setLoading(true)
       setError('')
       setMessage('')
+
+      if (selectedMethod === 'vnpay') {
+        const payment = await createVnpayPayment(
+          {
+            tour_id: tour.id,
+            user_name: `${traveler.firstName} ${traveler.lastName}`.trim(),
+            user_email: traveler.email,
+            user_phone: `${traveler.phoneCode} ${traveler.phone}`.trim(),
+            quantity,
+            insurance_selected: Boolean(traveler.insurance),
+            payment_method: 'vnpay'
+          },
+          token
+        )
+        window.location.href = payment.payment_url
+        return
+      }
 
       const booking = await createBooking(
         {
@@ -254,19 +270,10 @@ export default function Payment() {
                   </div>
                 )}
 
-                {selectedMethod === 'momo' && (
+                {selectedMethod === 'vnpay' && (
                   <div className="payment-helper-box">
-                    <strong>Thanh toan qua vi MoMo</strong>
-                    <span>Nhap so dien thoai vi de tiep tuc xac nhan thanh toan.</span>
-                    <label className="checkout-field" style={{ marginTop: '12px' }}>
-                      <span>So dien thoai MoMo</span>
-                      <input
-                        required
-                        value={paymentData.momoPhone}
-                        onChange={(event) => setPaymentData((prev) => ({ ...prev, momoPhone: event.target.value }))}
-                        placeholder="09xx xxx xxx"
-                      />
-                    </label>
+                    <strong>Thanh toan qua VNPAY</strong>
+                    <span>Ban se duoc chuyen sang cong thanh toan VNPAY de chon ngan hang va hoan tat giao dich.</span>
                   </div>
                 )}
               </section>

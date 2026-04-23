@@ -9,6 +9,8 @@ from app.security import get_current_user, get_current_user_optional, require_ad
 
 router = APIRouter(prefix="/api/bookings", tags=["bookings"])
 INSURANCE_FEE_VND = 45000
+PROCESSING_FEE_RATE = 0.1
+EARLY_BIRD_DISCOUNT_RATE = 0.06
 
 
 def _get_booking_or_404(booking_id: str):
@@ -39,6 +41,43 @@ def _assert_booking_owner(booking: dict, user: dict):
     if booking.get("user_id") == user["id"] or booking.get("user_email") == user["email"]:
         return
     raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Khong co quyen truy cap booking nay")
+
+
+def _calculate_booking_pricing(unit_price: float, quantity: int, insurance_selected: bool):
+    subtotal = float(unit_price) * quantity
+    processing_fee = round(subtotal * PROCESSING_FEE_RATE, 0)
+    discount_amount = round(subtotal * EARLY_BIRD_DISCOUNT_RATE, 0)
+    insurance_fee = INSURANCE_FEE_VND if insurance_selected else 0
+    total_price = subtotal + processing_fee + insurance_fee - discount_amount
+
+    return {
+        "tour_unit_price": float(unit_price),
+        "processing_fee": processing_fee,
+        "discount_amount": discount_amount,
+        "insurance_selected": insurance_selected,
+        "insurance_fee": insurance_fee,
+        "total_price": total_price,
+    }
+
+
+def _build_booking_payload(booking_data: dict, tour: dict, user: dict | None, now: datetime):
+    insurance_selected = bool(booking_data.get("insurance_selected"))
+    pricing = _calculate_booking_pricing(float(tour["price"]), int(booking_data["quantity"]), insurance_selected)
+
+    payload = dict(booking_data)
+    payload["user_id"] = user["id"] if user else None
+    payload["tour_name"] = tour["name"]
+    payload["tour_destination"] = tour.get("destination")
+    payload["tour_image"] = tour.get("image")
+    payload["guide_id"] = tour.get("guide_id")
+    payload["guide_name"] = tour.get("guide_name")
+    payload["start_date"] = tour.get("start_date")
+    payload["end_date"] = tour.get("end_date")
+    payload.update(pricing)
+    payload["status"] = "confirmed"
+    payload["created_at"] = now
+    payload["updated_at"] = now
+    return payload
 
 
 @router.get("/", response_model=list[Booking])
@@ -78,23 +117,7 @@ async def create_booking(booking: BookingCreate, user=Depends(get_current_user_o
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Not enough available slots")
 
     now = datetime.utcnow()
-    payload = booking.dict()
-    payload["user_id"] = user["id"] if user else None
-    payload["tour_name"] = tour["name"]
-    payload["tour_destination"] = tour.get("destination")
-    payload["tour_image"] = tour.get("image")
-    payload["guide_id"] = tour.get("guide_id")
-    payload["guide_name"] = tour.get("guide_name")
-    payload["start_date"] = tour.get("start_date")
-    payload["end_date"] = tour.get("end_date")
-    payload["tour_unit_price"] = float(tour["price"])
-    payload["insurance_selected"] = booking.insurance_selected
-    payload["insurance_fee"] = INSURANCE_FEE_VND if booking.insurance_selected else 0
-    payload["payment_method"] = booking.payment_method
-    payload["total_price"] = booking.quantity * float(tour["price"]) + payload["insurance_fee"]
-    payload["status"] = "confirmed"
-    payload["created_at"] = now
-    payload["updated_at"] = now
+    payload = _build_booking_payload(booking.dict(), tour, user, now)
 
     result = bookings_collection.insert_one(payload)
     tours_collection.update_one(
@@ -132,12 +155,13 @@ async def update_booking(booking_id: str, booking: BookingUpdate, _admin=Depends
     if slot_delta < 0 and abs(slot_delta) > tour["available_slots"]:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Not enough available slots")
 
-    insurance_fee = float(current.get("insurance_fee") or 0)
-    updates["tour_unit_price"] = float(tour["price"])
-    updates["insurance_selected"] = bool(current.get("insurance_selected"))
-    updates["insurance_fee"] = insurance_fee
+    pricing = _calculate_booking_pricing(
+        float(tour["price"]),
+        new_quantity,
+        bool(current.get("insurance_selected")),
+    )
+    updates.update(pricing)
     updates["payment_method"] = current.get("payment_method", "card")
-    updates["total_price"] = new_quantity * float(tour["price"]) + insurance_fee
     updates["tour_name"] = tour["name"]
     updates["tour_destination"] = tour.get("destination")
     updates["tour_image"] = tour.get("image")
