@@ -7,9 +7,9 @@ import { useAuth } from '../context/AuthContext'
 import { formatCurrency } from '../utils/currency'
 
 const bookingStatusLabel = {
-  pending: 'Dang xu ly',
-  confirmed: 'Da xac nhan',
-  cancelled: 'Da huy'
+  pending: 'Đang xử lý',
+  confirmed: 'Đã xác nhận',
+  cancelled: 'Đã hủy'
 }
 
 export default function Account() {
@@ -76,10 +76,10 @@ export default function Account() {
         email: formData.email,
         phone: formData.phone || null
       })
-      setProfileMessage('Thong tin tai khoan da duoc cap nhat.')
+      setProfileMessage('Thông tin của bạn đã được cập nhật thành công.')
       await loadBookings()
     } catch (err) {
-      setProfileError(err.response?.data?.detail || 'Khong the cap nhat thong tin.')
+      setProfileError(err.response?.data?.detail || 'Không thể cập nhật thông tin của bạn.')
     } finally {
       setSavingProfile(false)
     }
@@ -92,7 +92,7 @@ export default function Account() {
       const updated = await cancelMyBooking(bookingId, token)
       setBookings((prev) => prev.map((item) => (item.id === bookingId ? updated : item)))
     } catch (err) {
-      setBookingError(err.response?.data?.detail || 'Khong the huy booking nay.')
+      setBookingError(err.response?.data?.detail || 'Không thể hủy booking này.')
     } finally {
       setBusyBookingId('')
     }
@@ -105,25 +105,25 @@ export default function Account() {
       <main className="container account-main">
         <section className="account-hero">
           <div>
-            <p className="account-eyebrow">User Center</p>
-            <h1>Tai khoan cua ban</h1>
-            <p>Cap nhat thong tin ca nhan va theo doi cac tour ban da dat trong cung mot noi.</p>
+            <p className="account-eyebrow">Thông tin tài khoản</p>
+            <h1>Tài khoản của bạn</h1>
+            <p>Cập nhật thông tin cá nhân và theo dõi các tour bạn đã đặt trong cùng một nơi.</p>
           </div>
           <div className="account-stat-row">
             <article className="account-stat-card">
-              <span>Tong booking</span>
+              <span>Tổng booking</span>
               <strong>{bookingStats.total}</strong>
             </article>
             <article className="account-stat-card">
-              <span>Da xac nhan</span>
+              <span>Đã xác nhận</span>
               <strong>{bookingStats.confirmed}</strong>
             </article>
             <article className="account-stat-card">
-              <span>Da huy</span>
+              <span>Đã hủy</span>
               <strong>{bookingStats.cancelled}</strong>
             </article>
             <article className="account-stat-card">
-              <span>Da chi</span>
+              <span>Đã chi</span>
               <strong>{formatCurrency(bookingStats.totalSpend)}</strong>
             </article>
           </div>
@@ -134,13 +134,13 @@ export default function Account() {
             <div className="account-panel-head">
               <div>
                 <p className="account-panel-eyebrow">Profile</p>
-                <h2>Thong tin nguoi dung</h2>
+                <h2>Thông tin người dùng</h2>
               </div>
             </div>
 
             <form className="account-form" onSubmit={handleProfileSubmit}>
               <label className="account-field">
-                <span>Ho va ten</span>
+                <span>Họ và tên</span>
                 <input
                   required
                   value={formData.name}
@@ -159,9 +159,9 @@ export default function Account() {
               </label>
 
               <label className="account-field">
-                <span>So dien thoai</span>
+                <span>Số điện thoại</span>
                 <input
-                  placeholder="Nhap so dien thoai"
+                  placeholder="Nhập số điện thoại"
                   value={formData.phone}
                   onChange={(event) => setFormData((prev) => ({ ...prev, phone: event.target.value }))}
                 />
@@ -171,7 +171,7 @@ export default function Account() {
               {profileMessage && <div className="account-feedback ok">{profileMessage}</div>}
 
               <button type="submit" className="account-primary-btn" disabled={savingProfile}>
-                {savingProfile ? 'Dang luu...' : 'Luu thong tin'}
+                {savingProfile ? 'Đang lưu...' : 'Lưu thông tin'}
               </button>
             </form>
           </section>
@@ -180,18 +180,18 @@ export default function Account() {
             <div className="account-panel-head">
               <div>
                 <p className="account-panel-eyebrow">Bookings</p>
-                <h2>Tour da dat</h2>
+                <h2>Tour đã đặt</h2>
               </div>
-              <Link to="/tours" className="account-secondary-link">Dat them tour</Link>
+              <Link to="/tours" className="account-secondary-link">Đặt thêm tour</Link>
             </div>
 
-            {loadingBookings && <div className="account-empty-state">Dang tai booking cua ban...</div>}
+            {loadingBookings && <div className="account-empty-state">Đang tải booking của bạn...</div>}
             {bookingError && <div className="account-feedback error">{bookingError}</div>}
 
             {!loadingBookings && !bookingError && bookings.length === 0 && (
               <div className="account-empty-state">
-                <p>Ban chua co booking nao.</p>
-                <Link to="/tours" className="account-primary-btn inline">Kham pha tour</Link>
+                <p>Bạn chưa có booking nào.</p>
+                <Link to="/tours" className="account-primary-btn inline">Khám phá tour</Link>
               </div>
             )}
 
@@ -216,9 +216,9 @@ export default function Account() {
                       </div>
 
                       <div className="account-booking-meta">
-                        <span>Khoi hanh: {booking.start_date ? new Date(booking.start_date).toLocaleDateString() : 'Dang cap nhat'}</span>
-                        <span>So luong: {booking.quantity} nguoi</span>
-                        <span>Tong tien: {formatCurrency(booking.total_price)}</span>
+                        <span>Khởi hành: {booking.start_date ? new Date(booking.start_date).toLocaleDateString() : 'Đang cập nhật'}</span>
+                        <span>Số lượng: {booking.quantity} người</span>
+                        <span>Tổng tiền: {formatCurrency(booking.total_price)}</span>
                       </div>
 
                       <div className="account-booking-actions">
@@ -230,7 +230,7 @@ export default function Account() {
                             disabled={busyBookingId === booking.id}
                             onClick={() => handleCancelBooking(booking.id)}
                           >
-                            {busyBookingId === booking.id ? 'Dang huy...' : 'Huy booking'}
+                            {busyBookingId === booking.id ? 'Đang hủy...' : 'Hủy booking'}
                           </button>
                         )}
                       </div>
