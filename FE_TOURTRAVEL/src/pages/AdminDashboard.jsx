@@ -480,7 +480,7 @@ export default function AdminDashboard() {
               <strong>{booking.quantity} khach</strong>
               <small>{booking.user_phone}</small>
             </div>
-            <div>{formatCurrency(booking.total_price / booking.quantity)}</div>
+            <div>{formatCurrency(booking.tour_unit_price || (booking.total_price / booking.quantity))}</div>
             <div>
               <span className="admin-amount-chip">{formatCurrency(booking.total_price)}</span>
             </div>

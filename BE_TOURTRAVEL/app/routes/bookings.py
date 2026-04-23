@@ -8,6 +8,7 @@ from app.schemas.booking import Booking, BookingCreate, BookingUpdate
 from app.security import get_current_user, get_current_user_optional, require_admin
 
 router = APIRouter(prefix="/api/bookings", tags=["bookings"])
+INSURANCE_FEE_VND = 45000
 
 
 def _get_booking_or_404(booking_id: str):
@@ -86,7 +87,10 @@ async def create_booking(booking: BookingCreate, user=Depends(get_current_user_o
     payload["guide_name"] = tour.get("guide_name")
     payload["start_date"] = tour.get("start_date")
     payload["end_date"] = tour.get("end_date")
-    payload["total_price"] = booking.quantity * float(tour["price"])
+    payload["tour_unit_price"] = float(tour["price"])
+    payload["insurance_selected"] = booking.insurance_selected
+    payload["insurance_fee"] = INSURANCE_FEE_VND if booking.insurance_selected else 0
+    payload["total_price"] = booking.quantity * float(tour["price"]) + payload["insurance_fee"]
     payload["status"] = "confirmed"
     payload["created_at"] = now
     payload["updated_at"] = now
@@ -127,7 +131,11 @@ async def update_booking(booking_id: str, booking: BookingUpdate, _admin=Depends
     if slot_delta < 0 and abs(slot_delta) > tour["available_slots"]:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Not enough available slots")
 
-    updates["total_price"] = new_quantity * float(tour["price"])
+    insurance_fee = float(current.get("insurance_fee") or 0)
+    updates["tour_unit_price"] = float(tour["price"])
+    updates["insurance_selected"] = bool(current.get("insurance_selected"))
+    updates["insurance_fee"] = insurance_fee
+    updates["total_price"] = new_quantity * float(tour["price"]) + insurance_fee
     updates["tour_name"] = tour["name"]
     updates["tour_destination"] = tour.get("destination")
     updates["tour_image"] = tour.get("image")

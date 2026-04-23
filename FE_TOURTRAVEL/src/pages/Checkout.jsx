@@ -7,6 +7,7 @@ import { useAuth } from '../context/AuthContext'
 import { formatCurrency } from '../utils/currency'
 
 export default function Checkout() {
+  const insuranceFee = 45000
   const location = useLocation()
   const navigate = useNavigate()
   const { user, token } = useAuth()
@@ -29,7 +30,14 @@ export default function Checkout() {
   const subtotal = useMemo(() => (tour ? tour.price * quantity : 0), [quantity, tour])
   const processingFee = useMemo(() => subtotal * 0.1, [subtotal])
   const earlyBirdDiscount = useMemo(() => subtotal * 0.06, [subtotal])
-  const total = useMemo(() => subtotal + processingFee - earlyBirdDiscount, [earlyBirdDiscount, processingFee, subtotal])
+  const selectedInsuranceFee = useMemo(
+    () => (formData.insurance ? insuranceFee : 0),
+    [formData.insurance]
+  )
+  const total = useMemo(
+    () => subtotal + processingFee + selectedInsuranceFee - earlyBirdDiscount,
+    [earlyBirdDiscount, processingFee, selectedInsuranceFee, subtotal]
+  )
 
   useEffect(() => {
     if (!user) return
@@ -77,7 +85,8 @@ export default function Checkout() {
         user_name: `${formData.firstName} ${formData.lastName}`.trim(),
         user_email: formData.email,
         user_phone: `${formData.phoneCode} ${formData.phone}`.trim(),
-        quantity
+        quantity,
+        insurance_selected: formData.insurance
       }, token)
       setMessage(`Dat tour thanh cong. Ma don: ${booking.id}`)
       setTimeout(() => {
@@ -220,6 +229,9 @@ export default function Checkout() {
               <div className="checkout-summary-lines">
                 <div><span>Nguoi lon (x{quantity})</span><strong>{formatCurrency(subtotal)}</strong></div>
                 <div><span>Phi xu ly</span><strong>{formatCurrency(processingFee)}</strong></div>
+                {formData.insurance && (
+                  <div><span>Bao hiem du lich</span><strong>{formatCurrency(selectedInsuranceFee)}</strong></div>
+                )}
                 <div className="discount"><span>Uu dai dat som</span><strong>-{formatCurrency(earlyBirdDiscount)}</strong></div>
               </div>
 
