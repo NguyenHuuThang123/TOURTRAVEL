@@ -189,13 +189,13 @@ export default function Checkout() {
                   </div>
                 </label>
 
-                <label className="checkout-option-row">
+                {/* <label className="checkout-option-row">
                   <input type="checkbox" checked={formData.vegetarian} onChange={(event) => setFormData((prev) => ({ ...prev, vegetarian: event.target.checked }))} />
                   <div>
                     <strong>Vegetarian Meal Preference</strong>
                     <span>Request special dietary requirements for your tour meals.</span>
                   </div>
-                </label>
+                </label> */}
               </section>
 
               {error && <div className="checkout-feedback error">{error}</div>}
