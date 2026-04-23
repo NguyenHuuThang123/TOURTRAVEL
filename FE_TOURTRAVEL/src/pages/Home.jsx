@@ -1,5 +1,5 @@
-import { useEffect, useState } from 'react'
-import { Link } from 'react-router-dom'
+import { useEffect, useMemo, useState } from 'react'
+import { Link, useNavigate } from 'react-router-dom'
 import Header from '../components/Header'
 import Footer from '../components/Footer'
 import { getTours } from '../api/tourService'
@@ -41,8 +41,14 @@ const testimonials = [
 ]
 
 export default function Home() {
+  const navigate = useNavigate()
   const [tours, setTours] = useState([])
   const [loading, setLoading] = useState(true)
+  const [heroSearch, setHeroSearch] = useState({
+    search: '',
+    destination: '',
+    duration: ''
+  })
 
   useEffect(() => {
     const loadFeaturedTours = async () => {
@@ -58,6 +64,30 @@ export default function Home() {
 
     loadFeaturedTours()
   }, [])
+
+  const destinations = useMemo(() => {
+    return [...new Set(tours.map((tour) => tour.destination).filter(Boolean))].slice(0, 8)
+  }, [tours])
+
+  const heroHighlights = useMemo(() => {
+    return tours.slice(0, 3).map((tour) => ({
+      id: tour.id,
+      name: tour.name,
+      destination: tour.destination,
+      price: formatCurrency(tour.price)
+    }))
+  }, [tours])
+
+  const handleHeroSearch = (event) => {
+    event.preventDefault()
+    const params = new URLSearchParams()
+
+    if (heroSearch.search.trim()) params.set('search', heroSearch.search.trim())
+    if (heroSearch.destination) params.set('destination', heroSearch.destination)
+    if (heroSearch.duration) params.set('duration', heroSearch.duration)
+
+    navigate(`/tours${params.toString() ? `?${params.toString()}` : ''}`)
+  }
 
   return (
     <div>
@@ -101,46 +131,88 @@ export default function Home() {
           </div>
 
           <div className="hero-visual">
-            <div className="hero-visual-panel">
-              <div className="hero-visual-intro">
+            <form className="hero-search-card" onSubmit={handleHeroSearch}>
+              <div className="hero-search-header">
                 <div>
-                  <div className="hero-feature-label">Featured journey</div>
-                  <h3 style={{ color: '#fff', fontSize: '1.8rem', fontWeight: 800 }}>Ready for your next route</h3>
-                  <p>
-                    Search by destination, review trip length, and jump straight into the booking
-                    flow without losing context.
-                  </p>
+                  <p className="hero-search-eyebrow">Search tours</p>
+                  <h3 className="hero-search-title">Tìm tour phù hợp trong vài giây</h3>
                 </div>
-                <span className="hero-visual-kicker">Fast start</span>
+                <span className="hero-search-pill">Tim kiem nhanh</span>
               </div>
 
-              <div className="hero-feature-card hero-feature-main">
-                <div className="hero-feature-label">What the app already supports</div>
-                <h3>Discover, compare, and reserve</h3>
-                <p>
-                  The current flow connects homepage browsing, tour details, checkout, account
-                  management, and admin tools in one place.
-                </p>
-                <div className="hero-feature-meta">
-                  <span>Home to checkout</span>
-                  <span>Account aware</span>
+              <div className="hero-search-grid">
+                <label className="hero-field">
+                  <span>Tu khoa</span>
+                  <input
+                    value={heroSearch.search}
+                    onChange={(event) => setHeroSearch((prev) => ({ ...prev, search: event.target.value }))}
+                    placeholder="VD: Ha Long, bien, luxury..."
+                  />
+                </label>
+
+                <label className="hero-field">
+                  <span>Diem den</span>
+                  <select
+                    value={heroSearch.destination}
+                    onChange={(event) => setHeroSearch((prev) => ({ ...prev, destination: event.target.value }))}
+                  >
+                    <option value="">Tat ca diem den</option>
+                    {destinations.map((destination) => (
+                      <option key={destination} value={destination}>{destination}</option>
+                    ))}
+                  </select>
+                </label>
+
+                <label className="hero-field">
+                  <span>Thoi luong</span>
+                  <select
+                    value={heroSearch.duration}
+                    onChange={(event) => setHeroSearch((prev) => ({ ...prev, duration: event.target.value }))}
+                  >
+                    <option value="">Bat ky</option>
+                    <option value="1-3">1-3 ngay</option>
+                    <option value="4-7">4-7 ngay</option>
+                    <option value="8-14">8-14 ngay</option>
+                    <option value="15+">15+ ngay</option>
+                  </select>
+                </label>
+
+                <button type="submit" className="hero-search-button">
+                  Tim tour
+                </button>
+              </div>
+
+              <div className="hero-search-suggestions">
+                <strong>Tuyen noi bat</strong>
+                <div className="hero-search-chips">
+                  {destinations.slice(0, 4).map((destination) => (
+                    <button
+                      key={destination}
+                      type="button"
+                      className="hero-search-chip"
+                      onClick={() => setHeroSearch((prev) => ({ ...prev, destination }))}
+                    >
+                      {destination}
+                    </button>
+                  ))}
                 </div>
               </div>
 
-              <div className="hero-visual-grid">
-                <div className="hero-feature-card hero-feature-secondary">
-                  <div className="hero-feature-label">Tour browser</div>
-                  <h3>Flexible filters</h3>
-                  <p>Search by keyword, duration, destination, style, and price range.</p>
-                </div>
-
-                <div className="hero-feature-card hero-feature-secondary hero-feature-secondary-light">
-                  <div className="hero-feature-label">Account area</div>
-                  <h3>Booking history</h3>
-                  <p>Users can review bookings and manage personal details after signing in.</p>
-                </div>
+              <div className="hero-search-results">
+                {heroHighlights.map((tour) => (
+                  <button
+                    key={tour.id}
+                    type="button"
+                    className="hero-search-result-card"
+                    onClick={() => navigate(`/tours/${tour.id}`)}
+                  >
+                    <strong>{tour.name}</strong>
+                    <span>{tour.destination}</span>
+                    <em>Tu {tour.price}</em>
+                  </button>
+                ))}
               </div>
-            </div>
+            </form>
           </div>
         </div>
       </section>
