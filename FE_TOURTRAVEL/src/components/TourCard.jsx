@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom'
+import { formatCurrency } from '../utils/currency'
 
 export default function TourCard({ tour }) {
   return (
@@ -108,7 +109,7 @@ export default function TourCard({ tour }) {
                 backgroundClip: 'text',
                 margin: 'var(--spacing-xs) 0 0 0'
               }}>
-                ${tour.price}
+                {formatCurrency(tour.price)}
               </p>
             </div>
           </div>

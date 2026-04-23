@@ -4,6 +4,7 @@ import Header from '../components/Header'
 import Footer from '../components/Footer'
 import { createBooking } from '../api/tourService'
 import { useAuth } from '../context/AuthContext'
+import { formatCurrency } from '../utils/currency'
 
 export default function Checkout() {
   const location = useLocation()
@@ -164,7 +165,7 @@ export default function Checkout() {
                 <label className="checkout-option-row">
                   <input type="checkbox" checked={formData.insurance} onChange={(event) => setFormData((prev) => ({ ...prev, insurance: event.target.checked }))} />
                   <div>
-                    <strong>Add Travel Insurance (+$45.00)</strong>
+                    <strong>Thêm bảo hiểm du lịch (+45.000 VNĐ)</strong>
                     <span>Protect your trip against unforeseen cancellations and medical emergencies.</span>
                   </div>
                 </label>
@@ -207,14 +208,14 @@ export default function Checkout() {
               </div>
 
               <div className="checkout-summary-lines">
-                <div><span>Adult (x{quantity})</span><strong>${subtotal.toFixed(2)}</strong></div>
-                <div><span>Processing Fee</span><strong>${processingFee.toFixed(2)}</strong></div>
-                <div className="discount"><span>Early Bird Discount</span><strong>-${earlyBirdDiscount.toFixed(2)}</strong></div>
+                <div><span>Nguoi lon (x{quantity})</span><strong>{formatCurrency(subtotal)}</strong></div>
+                <div><span>Phi xu ly</span><strong>{formatCurrency(processingFee)}</strong></div>
+                <div className="discount"><span>Uu dai dat som</span><strong>-{formatCurrency(earlyBirdDiscount)}</strong></div>
               </div>
 
               <div className="checkout-summary-total">
-                <span>Total Price</span>
-                <strong>${total.toFixed(2)}</strong>
+                <span>Tong thanh toan</span>
+                <strong>{formatCurrency(total)}</strong>
               </div>
 
               <div className="checkout-promo-row">

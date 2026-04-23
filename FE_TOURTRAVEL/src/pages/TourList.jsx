@@ -3,6 +3,7 @@ import { Link, useSearchParams } from 'react-router-dom'
 import Header from '../components/Header'
 import Footer from '../components/Footer'
 import { getTours } from '../api/tourService'
+import { formatCurrency } from '../utils/currency'
 
 const durationOptions = [
   { label: '1-3 Days', key: '1-3' },
@@ -12,11 +13,8 @@ const durationOptions = [
 ]
 
 const styleOptions = ['Adventure', 'Luxury', 'Cultural', 'Beach']
-const FALLBACK_PRICE_MIN = 500
-const FALLBACK_PRICE_MAX = 5000
-
-const formatCurrency = (value) =>
-  `$${Math.round(value).toLocaleString('en-US')}`
+const FALLBACK_PRICE_MIN = 500000
+const FALLBACK_PRICE_MAX = 50000000
 
 export default function TourList() {
   const [searchParams] = useSearchParams()
@@ -119,7 +117,7 @@ export default function TourList() {
     const nextMin = Number(event.target.value)
     setPriceRange((prev) => ({
       ...prev,
-      min: Math.min(nextMin, prev.max - 50)
+      min: Math.min(nextMin, prev.max - 100000)
     }))
   }
 
@@ -127,7 +125,7 @@ export default function TourList() {
     const nextMax = Number(event.target.value)
     setPriceRange((prev) => ({
       ...prev,
-      max: Math.max(nextMax, prev.min + 50)
+      max: Math.max(nextMax, prev.min + 100000)
     }))
   }
 
@@ -280,7 +278,7 @@ export default function TourList() {
                       <div className="tour-browser-footer">
                         <div>
                           <span>From</span>
-                          <strong>${tour.price}</strong>
+                          <strong>{formatCurrency(tour.price)}</strong>
                         </div>
 
                         <Link to={`/tours/${tour.id}`} className="tour-browser-button">

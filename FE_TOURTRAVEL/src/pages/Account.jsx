@@ -4,6 +4,7 @@ import Header from '../components/Header'
 import Footer from '../components/Footer'
 import { cancelMyBooking, getMyBookings } from '../api/tourService'
 import { useAuth } from '../context/AuthContext'
+import { formatCurrency } from '../utils/currency'
 
 const bookingStatusLabel = {
   pending: 'Dang xu ly',
@@ -123,7 +124,7 @@ export default function Account() {
             </article>
             <article className="account-stat-card">
               <span>Da chi</span>
-              <strong>${bookingStats.totalSpend.toFixed(0)}</strong>
+              <strong>{formatCurrency(bookingStats.totalSpend)}</strong>
             </article>
           </div>
         </section>
@@ -217,7 +218,7 @@ export default function Account() {
                       <div className="account-booking-meta">
                         <span>Khoi hanh: {booking.start_date ? new Date(booking.start_date).toLocaleDateString() : 'Dang cap nhat'}</span>
                         <span>So luong: {booking.quantity} nguoi</span>
-                        <span>Tong tien: ${Number(booking.total_price).toFixed(2)}</span>
+                        <span>Tong tien: {formatCurrency(booking.total_price)}</span>
                       </div>
 
                       <div className="account-booking-actions">

@@ -3,6 +3,12 @@ import { useNavigate } from 'react-router-dom'
 import { createBooking } from '../api/tourService'
 import Header from '../components/Header'
 import Footer from '../components/Footer'
+import { formatCurrency } from '../utils/currency'
+
+const demoTourPrices = {
+  '1': 31200000,
+  '2': 46800000
+}
 
 export default function Cart() {
   const navigate = useNavigate()
@@ -15,6 +21,8 @@ export default function Cart() {
   })
   const [loading, setLoading] = useState(false)
   const [success, setSuccess] = useState(false)
+  const selectedTourPrice = demoTourPrices[formData.tourId] || 0
+  const totalAmount = selectedTourPrice * formData.quantity
 
   const handleSubmit = async (e) => {
     e.preventDefault()
@@ -230,8 +238,8 @@ export default function Cart() {
                     }}
                   >
                     <option value="">Select a tour</option>
-                    <option value="1">Paris City Tour - $1200</option>
-                    <option value="2">Tokyo Adventure - $1800</option>
+                    <option value="1">Paris City Tour - {formatCurrency(demoTourPrices['1'])}</option>
+                    <option value="2">Tokyo Adventure - {formatCurrency(demoTourPrices['2'])}</option>
                   </select>
                 </div>
 
@@ -291,7 +299,7 @@ export default function Cart() {
                     color: 'var(--text-secondary)'
                   }}>
                     <span>Tour Price</span>
-                    <span>${formData.tourId === '1' ? '1200' : formData.tourId === '2' ? '1800' : '0'}</span>
+                    <span>{formatCurrency(selectedTourPrice)}</span>
                   </div>
 
                   <div style={{
@@ -319,7 +327,7 @@ export default function Cart() {
                     color: 'var(--text-primary)'
                   }}>
                     <span>Total Amount</span>
-                    <span>${(parseInt(formData.tourId === '1' ? '1200' : formData.tourId === '2' ? '1800' : '0') * formData.quantity)}</span>
+                    <span>{formatCurrency(totalAmount)}</span>
                   </div>
                 </div>
 

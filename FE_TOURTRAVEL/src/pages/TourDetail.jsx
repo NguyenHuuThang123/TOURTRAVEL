@@ -3,6 +3,7 @@ import { Link, useNavigate, useParams } from 'react-router-dom'
 import Header from '../components/Header'
 import Footer from '../components/Footer'
 import { getTourById } from '../api/tourService'
+import { formatCurrency } from '../utils/currency'
 
 export default function TourDetail() {
   const { id } = useParams()
@@ -120,8 +121,8 @@ export default function TourDetail() {
             <div className="tour-booking-card">
               <div className="tour-booking-price">
                 <div>
-                  <strong>${tour.price}</strong>
-                  <span>/ person</span>
+                  <strong>{formatCurrency(tour.price)}</strong>
+                  <span>/ nguoi</span>
                 </div>
                 <span className="tour-booking-spots">{tour.available_slots} spots left</span>
               </div>
@@ -163,7 +164,7 @@ export default function TourDetail() {
 
               <div className="tour-booking-total">
                 <span>Total amount</span>
-                <strong>${total}</strong>
+                <strong>{formatCurrency(total)}</strong>
               </div>
             </div>
           </aside>
