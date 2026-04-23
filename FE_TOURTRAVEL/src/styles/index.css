@@ -355,6 +355,8 @@ img {
   color: #0f172a;
   font-size: 1.55rem;
   font-weight: 800;
+  line-height: 1.15;
+  max-width: 10ch;
 }
 
 .hero-search-pill {
@@ -369,9 +371,18 @@ img {
 
 .hero-search-grid {
   display: grid;
-  grid-template-columns: 1.1fr 0.8fr 1fr auto;
+  grid-template-columns: 1fr;
   gap: 16px;
-  align-items: end;
+  align-items: stretch;
+}
+
+.hero-field-search {
+  min-width: 0;
+}
+
+.hero-field-destination,
+.hero-field-duration {
+  min-width: 0;
 }
 
 .hero-field {
@@ -410,6 +421,7 @@ img {
 
 .hero-search-button {
   min-height: 56px;
+  width: 100%;
   padding: 0 24px;
   border-radius: 18px;
   background: linear-gradient(135deg, #2563eb 0%, #0f172a 100%);
@@ -463,6 +475,27 @@ img {
   display: grid;
   gap: 12px;
   margin-top: 18px;
+}
+
+@media (max-width: 1180px) {
+  .hero-search-header {
+    align-items: flex-start;
+  }
+
+  .hero-search-title {
+    max-width: none;
+  }
+
+  .hero-field-search,
+  .hero-field-destination,
+  .hero-field-duration,
+  .hero-search-button {
+    grid-column: 1 / -1;
+  }
+
+  .hero-search-button {
+    width: 100%;
+  }
 }
 
 .hero-search-result-card {
@@ -2547,6 +2580,10 @@ img {
   .hero-search-header {
     flex-direction: column;
     align-items: flex-start;
+  }
+
+  .hero-search-title {
+    max-width: none;
   }
 
   .hero-search-grid {

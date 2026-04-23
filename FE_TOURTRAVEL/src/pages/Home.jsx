@@ -141,7 +141,7 @@ export default function Home() {
               </div>
 
               <div className="hero-search-grid">
-                <label className="hero-field">
+                <label className="hero-field hero-field-search">
                   <span>Tu khoa</span>
                   <input
                     value={heroSearch.search}
@@ -150,7 +150,7 @@ export default function Home() {
                   />
                 </label>
 
-                <label className="hero-field">
+                <label className="hero-field hero-field-destination">
                   <span>Diem den</span>
                   <select
                     value={heroSearch.destination}
@@ -163,7 +163,7 @@ export default function Home() {
                   </select>
                 </label>
 
-                <label className="hero-field">
+                <label className="hero-field hero-field-duration">
                   <span>Thoi luong</span>
                   <select
                     value={heroSearch.duration}
@@ -182,7 +182,7 @@ export default function Home() {
                 </button>
               </div>
 
-              <div className="hero-search-suggestions">
+              {/* <div className="hero-search-suggestions">
                 <strong>Tuyen noi bat</strong>
                 <div className="hero-search-chips">
                   {destinations.slice(0, 4).map((destination) => (
@@ -211,7 +211,7 @@ export default function Home() {
                     <em>Tu {tour.price}</em>
                   </button>
                 ))}
-              </div>
+              </div> */}
             </form>
           </div>
         </div>
