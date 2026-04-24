@@ -6,7 +6,10 @@ import ssl
 from datetime import datetime
 from email.message import EmailMessage
 
+from bson import ObjectId
+
 from app.config.settings import get_settings
+from app.database import get_collection, serialize_document
 
 logger = logging.getLogger(__name__)
 
@@ -33,7 +36,47 @@ def is_email_enabled() -> bool:
     )
 
 
+def _has_value(value) -> bool:
+    return value not in (None, "", [], {})
+
+
+def _get_latest_booking_snapshot(booking: dict) -> dict:
+    booking_snapshot = dict(booking)
+    booking_id = booking_snapshot.get("id")
+
+    if booking_id and ObjectId.is_valid(booking_id):
+        latest_booking = get_collection("bookings").find_one({"_id": ObjectId(booking_id)})
+        if latest_booking:
+            booking_snapshot = serialize_document(latest_booking)
+
+    tour_id = booking_snapshot.get("tour_id")
+    if tour_id and ObjectId.is_valid(tour_id):
+        tour = serialize_document(get_collection("tours").find_one({"_id": ObjectId(tour_id)}))
+        if tour:
+            fallback_fields = {
+                "tour_name": tour.get("name"),
+                "tour_destination": tour.get("destination"),
+                "tour_image": tour.get("image"),
+                "guide_id": tour.get("guide_id"),
+                "guide_name": tour.get("guide_name"),
+                "start_date": tour.get("start_date"),
+                "end_date": tour.get("end_date"),
+            }
+            for key, value in fallback_fields.items():
+                if not _has_value(booking_snapshot.get(key)) and _has_value(value):
+                    booking_snapshot[key] = value
+
+    guide_id = booking_snapshot.get("guide_id")
+    if guide_id and ObjectId.is_valid(guide_id) and not _has_value(booking_snapshot.get("guide_name")):
+        guide = get_collection("users").find_one({"_id": ObjectId(guide_id), "role": "guide"})
+        if guide:
+            booking_snapshot["guide_name"] = guide.get("name")
+
+    return booking_snapshot
+
+
 def send_booking_confirmation_email(booking: dict) -> tuple[bool, str | None]:
+    booking = _get_latest_booking_snapshot(booking)
     settings = get_settings()
     recipient = booking.get("user_email")
     if not recipient:
