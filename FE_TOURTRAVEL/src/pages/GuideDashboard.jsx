@@ -10,10 +10,10 @@ import {
   getGuideTours,
   sendGuideChatMessage
 } from '../api/tourService'
+import { formatVietnamDateTime } from '../utils/datetime'
 
 function formatDate(value) {
-  if (!value) return '-'
-  return new Date(value).toLocaleString('vi-VN')
+  return formatVietnamDateTime(value) || '-'
 }
 
 function bubbleClass(senderType) {

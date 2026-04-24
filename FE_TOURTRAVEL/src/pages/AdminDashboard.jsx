@@ -18,6 +18,7 @@ import {
   updateTour,
   updateUserByAdmin
 } from '../api/tourService'
+import { formatVietnamDate, formatVietnamDateTime, formatVietnamTime, VIETNAM_TIMEZONE } from '../utils/datetime'
 
 const initialTour = {
   id: '',
@@ -57,14 +58,42 @@ const sidebarItems = [
   { id: 'editor', label: 'Tour Editor', icon: 'ED' }
 ]
 
-function toDateTimeLocal(value) {
+function padDatePart(value) {
+  return String(value).padStart(2, '0')
+}
+
+function toVietnamDateTimeLocal(value) {
   if (!value) return ''
-  return new Date(value).toISOString().slice(0, 16)
+  const date = new Date(value)
+  const formatter = new Intl.DateTimeFormat('sv-SE', {
+    timeZone: VIETNAM_TIMEZONE,
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+    hourCycle: 'h23'
+  })
+
+  const parts = Object.fromEntries(formatter.formatToParts(date).map((part) => [part.type, part.value]))
+  return `${parts.year}-${parts.month}-${parts.day}T${parts.hour}:${parts.minute}`
+}
+
+function vietnamDateTimeLocalToIso(value) {
+  if (!value) return ''
+  const [datePart, timePart] = value.split('T')
+  if (!datePart || !timePart) return ''
+  const [year, month, day] = datePart.split('-')
+  const [hour, minute] = timePart.split(':')
+  return `${year}-${padDatePart(month)}-${padDatePart(day)}T${padDatePart(hour)}:${padDatePart(minute)}:00+07:00`
+}
+
+function toDateTimeLocal(value) {
+  return toVietnamDateTimeLocal(value)
 }
 
 function formatDateTime(value) {
-  if (!value) return '-'
-  return new Date(value).toLocaleString('vi-VN')
+  return formatVietnamDateTime(value) || '-'
 }
 
 function titleForSection(section) {
@@ -261,8 +290,8 @@ export default function AdminDashboard() {
         max_participants: Number(tourForm.max_participants),
         available_slots: Number(tourForm.available_slots),
         guide_id: tourForm.guide_id || null,
-        start_date: new Date(tourForm.start_date).toISOString(),
-        end_date: new Date(tourForm.end_date).toISOString()
+        start_date: vietnamDateTimeLocalToIso(tourForm.start_date),
+        end_date: vietnamDateTimeLocalToIso(tourForm.end_date)
       }
 
       if (tourForm.id) {
@@ -473,8 +502,8 @@ export default function AdminDashboard() {
               <small>{booking.user_email}</small>
             </div>
             <div>
-              <strong>{new Date(booking.created_at).toLocaleDateString('vi-VN')}</strong>
-              <small>{new Date(booking.created_at).toLocaleTimeString('vi-VN')}</small>
+              <strong>{formatVietnamDate(booking.created_at)}</strong>
+              <small>{formatVietnamTime(booking.created_at)}</small>
             </div>
             <div>
               <strong>{booking.quantity} khach</strong>
@@ -526,7 +555,7 @@ export default function AdminDashboard() {
               <div className="admin-tour-thumb" style={{ backgroundImage: `url(${tour.image || 'https://images.unsplash.com/photo-1469474968028-56623f02e42e?w=800'})` }} />
               <div>
                 <strong>{tour.name}</strong>
-                <small>{new Date(tour.start_date).toLocaleDateString('vi-VN')}</small>
+                <small>{formatVietnamDate(tour.start_date)}</small>
               </div>
             </div>
             <div>{tour.destination}</div>

@@ -5,6 +5,7 @@ import Footer from '../components/Footer'
 import { cancelMyBooking, getMyBookings } from '../api/tourService'
 import { useAuth } from '../context/AuthContext'
 import { formatCurrency } from '../utils/currency'
+import { formatVietnamDate } from '../utils/datetime'
 
 const bookingStatusLabel = {
   pending: 'Đang xử lý',
@@ -216,7 +217,7 @@ export default function Account() {
                       </div>
 
                       <div className="account-booking-meta">
-                        <span>Khởi hành: {booking.start_date ? new Date(booking.start_date).toLocaleDateString() : 'Đang cập nhật'}</span>
+                        <span>Khởi hành: {booking.start_date ? formatVietnamDate(booking.start_date) : 'Đang cập nhật'}</span>
                         <span>Số lượng: {booking.quantity} người</span>
                         <span>Tổng tiền: {formatCurrency(booking.total_price)}</span>
                       </div>

@@ -6,20 +6,41 @@ import {
   getMyChatConversations,
   sendChatMessage
 } from '../api/tourService'
+import { formatVietnamTime } from '../utils/datetime'
 
 const CHAT_STORAGE_KEY = 'tourtravel_chat_session'
+const CHAT_GUEST_NAME_KEY = 'tourtravel_chat_guest_name'
 
-function getOrCreateSessionKey() {
-  const saved = localStorage.getItem(CHAT_STORAGE_KEY)
+function buildChatStorageKey(user) {
+  if (user?.id) {
+    return `${CHAT_STORAGE_KEY}_user_${user.id}`
+  }
+
+  return `${CHAT_STORAGE_KEY}_guest`
+}
+
+function getStorageForChat(user) {
+  return user?.id ? window.localStorage : window.sessionStorage
+}
+
+function getOrCreateSessionKey(user) {
+  const storage = getStorageForChat(user)
+  const storageKey = buildChatStorageKey(user)
+  const saved = storage.getItem(storageKey)
   if (saved) return saved
   const nextKey = `chat_${Math.random().toString(36).slice(2)}${Date.now().toString(36)}`
-  localStorage.setItem(CHAT_STORAGE_KEY, nextKey)
+  storage.setItem(storageKey, nextKey)
+  return nextKey
+}
+
+function createFreshGuestSessionKey() {
+  const nextKey = `chat_${Math.random().toString(36).slice(2)}${Date.now().toString(36)}`
+  window.sessionStorage.setItem(buildChatStorageKey(null), nextKey)
   return nextKey
 }
 
 function formatTime(value) {
-  if (!value) return ''
-  return new Date(value).toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })
+  return formatVietnamTime(value, 'vi-VN', { hour: '2-digit', minute: '2-digit' })
 }
 
 function labelForSender(message) {
@@ -44,8 +65,14 @@ export default function ChatWidget() {
   const messagesRef = useRef(null)
 
   useEffect(() => {
-    setSessionKey(getOrCreateSessionKey())
-  }, [])
+    setSessionKey(getOrCreateSessionKey(user))
+  }, [user?.id])
+
+  useEffect(() => {
+    if (isAuthenticated) {
+      window.sessionStorage.removeItem(CHAT_GUEST_NAME_KEY)
+    }
+  }, [isAuthenticated])
 
   useEffect(() => {
     const handleOpenGuideChat = (event) => {
@@ -155,9 +182,23 @@ export default function ChatWidget() {
           token
         )
       } else {
+        let nextSessionKey = sessionKey
+        if (!isAuthenticated) {
+          const normalizedGuestName = guestName.trim()
+          const previousGuestName = window.sessionStorage.getItem(CHAT_GUEST_NAME_KEY) || ''
+          if (normalizedGuestName && normalizedGuestName !== previousGuestName) {
+            nextSessionKey = createFreshGuestSessionKey()
+            setSessionKey(nextSessionKey)
+            setConversation(null)
+            setMessages([])
+            setConversations([])
+            window.sessionStorage.setItem(CHAT_GUEST_NAME_KEY, normalizedGuestName)
+          }
+        }
+
         detail = await createChatConversation(
           {
-            session_key: sessionKey,
+            session_key: nextSessionKey,
             guest_name: isAuthenticated ? undefined : guestName.trim() || undefined,
             tour_id: activeTour?.tourId,
             message: draft.trim()

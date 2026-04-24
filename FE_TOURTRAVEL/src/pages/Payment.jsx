@@ -5,6 +5,7 @@ import Footer from '../components/Footer'
 import { createBooking, createVnpayPayment } from '../api/tourService'
 import { useAuth } from '../context/AuthContext'
 import { formatCurrency } from '../utils/currency'
+import { formatVietnamDateRange } from '../utils/datetime'
 
 const paymentMethods = [
   {
@@ -321,7 +322,7 @@ export default function Payment() {
                 />
                 <div>
                   <strong>{tour.name}</strong>
-                  <span>{new Date(tour.start_date).toLocaleDateString()} - {new Date(tour.end_date).toLocaleDateString()}</span>
+                  <span>{formatVietnamDateRange(tour.start_date, tour.end_date)}</span>
                   <span>{quantity} Người lớn</span>
                 </div>
               </div>
