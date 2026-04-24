@@ -21,16 +21,11 @@ def _serialize_conversation(conversation_doc):
 
 
 def _conversation_query(user, session_key: str | None):
-    clauses = []
     if user:
-      clauses.append({"user_id": user["id"]})
+        return {"user_id": user["id"]}
     if session_key:
-      clauses.append({"session_key": session_key})
-    if not clauses:
-      raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Missing chat identity")
-    if len(clauses) == 1:
-      return clauses[0]
-    return {"$or": clauses}
+        return {"session_key": session_key}
+    raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Missing chat identity")
 
 
 def _customer_name(user, guest_name: str | None):
