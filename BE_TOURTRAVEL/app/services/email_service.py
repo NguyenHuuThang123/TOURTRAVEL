@@ -49,6 +49,12 @@ def _build_checkin_url(booking: dict) -> str:
     return f"{settings.checkin_base_url}?{query}"
 
 
+def _build_checkin_qr_download_url(booking: dict) -> str:
+    settings = get_settings()
+    booking_id = booking.get("id", "")
+    return f"{settings.backend_base_url}/api/bookings/public/{booking_id}/qr"
+
+
 def _build_checkin_qr_payload(booking: dict) -> dict:
     return {
         "type": "tourtravel_checkin",
@@ -56,6 +62,7 @@ def _build_checkin_qr_payload(booking: dict) -> dict:
         "booking_id": booking.get("id"),
         "tour_id": booking.get("tour_id"),
         "checkin_url": _build_checkin_url(booking),
+        "qr_download_url": _build_checkin_qr_download_url(booking),
         "issued_at": datetime.utcnow().isoformat(timespec="seconds") + "Z",
     }
 
@@ -148,6 +155,7 @@ Thong tin booking:
 - Tong thanh toan: {_format_currency(booking.get("total_price"))}
 - Huong dan vien: {booking.get("guide_name") or "Se cap nhat sau"}
 - Link check-in: {_build_checkin_url(booking)}
+- Link tai QR: {_build_checkin_qr_download_url(booking)}
 
 Chung toi da ghi nhan don cua ban va se ho tro neu ban can them thong tin.
 Neu Gmail khong hien ma QR ngay trong noi dung, ban co the mo file QR dinh kem trong email.
@@ -184,6 +192,7 @@ TourTravel
       <tr><td style="padding: 8px; border: 1px solid #e2e8f0;"><strong>Tong thanh toan</strong></td><td style="padding: 8px; border: 1px solid #e2e8f0;">{_format_currency(booking.get("total_price"))}</td></tr>
       <tr><td style="padding: 8px; border: 1px solid #e2e8f0;"><strong>Huong dan vien</strong></td><td style="padding: 8px; border: 1px solid #e2e8f0;">{booking.get("guide_name") or "Se cap nhat sau"}</td></tr>
       <tr><td style="padding: 8px; border: 1px solid #e2e8f0;"><strong>Link check-in</strong></td><td style="padding: 8px; border: 1px solid #e2e8f0;"><a href="{_build_checkin_url(booking)}">{_build_checkin_url(booking)}</a></td></tr>
+      <tr><td style="padding: 8px; border: 1px solid #e2e8f0;"><strong>Link tai QR</strong></td><td style="padding: 8px; border: 1px solid #e2e8f0;"><a href="{_build_checkin_qr_download_url(booking)}">{_build_checkin_qr_download_url(booking)}</a></td></tr>
     </table>
     {qr_section}
     <p style="margin-top: 16px;">Chung toi da ghi nhan don cua ban va se ho tro neu ban can them thong tin.</p>

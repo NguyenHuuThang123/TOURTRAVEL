@@ -2,9 +2,10 @@ from datetime import datetime
 
 from bson import ObjectId
 from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi.responses import Response
 
 from app.database import get_collection, serialize_document
-from app.services.email_service import send_booking_confirmation_email
+from app.services.email_service import _generate_checkin_qr_png, send_booking_confirmation_email
 from app.schemas.booking import Booking, BookingCreate, BookingUpdate
 from app.security import get_current_user, get_current_user_optional, require_admin
 
@@ -124,6 +125,15 @@ async def get_my_bookings(user=Depends(get_current_user)):
 @router.get("/public/{booking_id}")
 async def get_public_booking(booking_id: str):
     return _serialize_public_booking(_get_booking_or_404(booking_id))
+
+
+@router.get("/public/{booking_id}/qr")
+async def get_public_booking_qr(booking_id: str):
+    booking = serialize_document(_get_booking_or_404(booking_id))
+    qr_image = _generate_checkin_qr_png(booking)
+    if not qr_image:
+        raise HTTPException(status_code=status.HTTP_503_SERVICE_UNAVAILABLE, detail="QR code is unavailable")
+    return Response(content=qr_image, media_type="image/png")
 
 
 @router.get("/{booking_id}", response_model=Booking)
