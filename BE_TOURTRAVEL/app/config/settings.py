@@ -19,6 +19,14 @@ class Settings:
         self.vnpay_hash_secret = os.getenv("VNPAY_HASH_SECRET", "")
         self.vnpay_payment_url = os.getenv("VNPAY_PAYMENT_URL", "https://sandbox.vnpayment.vn/paymentv2/vpcpay.html")
         self.vnpay_return_path = os.getenv("VNPAY_RETURN_PATH", "/api/payments/vnpay/return")
+        self.smtp_host = os.getenv("SMTP_HOST", "")
+        self.smtp_port = int(os.getenv("SMTP_PORT", "587"))
+        self.smtp_username = os.getenv("SMTP_USERNAME", "")
+        self.smtp_password = os.getenv("SMTP_PASSWORD", "")
+        self.smtp_from_email = os.getenv("SMTP_FROM_EMAIL", "")
+        self.smtp_reply_to = os.getenv("SMTP_REPLY_TO", "")
+        self.smtp_use_tls = os.getenv("SMTP_USE_TLS", "true").lower() == "true"
+        self.smtp_use_ssl = os.getenv("SMTP_USE_SSL", "false").lower() == "true"
         self.debug = os.getenv("DEBUG", "true").lower() == "true"
 
 

@@ -9,6 +9,7 @@ from app.config.settings import get_settings
 from app.database import get_collection, serialize_document
 from app.routes.bookings import _build_booking_payload, _get_tour_or_400
 from app.schemas.payment import VnpayPaymentCreate, VnpayPaymentResponse
+from app.services.email_service import send_booking_confirmation_email
 from app.security import get_current_user_optional
 
 router = APIRouter(prefix="/api/payments", tags=["payments"])
@@ -203,4 +204,6 @@ async def vnpay_return(request: Request):
     )
 
     created_booking = get_collection("bookings").find_one({"_id": result.inserted_id})
-    return _redirect_frontend("success", "Thanh toan VNPAY thanh cong.", serialize_document(created_booking)["id"])
+    serialized_booking = serialize_document(created_booking)
+    send_booking_confirmation_email(serialized_booking)
+    return _redirect_frontend("success", "Thanh toan VNPAY thanh cong.", serialized_booking["id"])

@@ -93,6 +93,14 @@ VNPAY_TMN_CODE=your_vnpay_tmn_code
 VNPAY_HASH_SECRET=your_vnpay_hash_secret
 VNPAY_PAYMENT_URL=https://sandbox.vnpayment.vn/paymentv2/vpcpay.html
 VNPAY_RETURN_PATH=/api/payments/vnpay/return
+SMTP_HOST=smtp.gmail.com
+SMTP_PORT=587
+SMTP_USERNAME=your_email@gmail.com
+SMTP_PASSWORD=your_app_password
+SMTP_FROM_EMAIL=TourTravel <your_email@gmail.com>
+SMTP_REPLY_TO=your_email@gmail.com
+SMTP_USE_TLS=true
+SMTP_USE_SSL=false
 DEBUG=true
 ```
 
@@ -105,6 +113,7 @@ VITE_GOOGLE_CLIENT_ID=your_google_web_client_id
 Lưu ý:
 - `GOOGLE_CLIENT_ID` và `VITE_GOOGLE_CLIENT_ID` phải cùng một giá trị
 - Sau khi đổi `.env`, cần restart backend/frontend
+- Nếu dùng Gmail SMTP, nên dùng `App Password` thay vì mật khẩu đăng nhập thường
 
 ## Google Sign-In
 
@@ -174,6 +183,14 @@ Mỗi người dùng có thể:
 ### Payments
 - `POST /api/payments/vnpay/create`
 - `GET /api/payments/vnpay/return`
+
+## Email xác nhận booking
+
+Hệ thống hiện có thể gửi email xác nhận khi booking được tạo thành công, gồm cả:
+- thanh toán thường qua `POST /api/bookings/`
+- thanh toán VNPAY sau khi backend xác nhận giao dịch thành công
+
+Để bật tính năng này, cấu hình các biến `SMTP_*` trong `BE_TOURTRAVEL/.env` rồi restart backend.
 
 ## Ghi chú triển khai
 

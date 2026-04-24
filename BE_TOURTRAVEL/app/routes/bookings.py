@@ -4,6 +4,7 @@ from bson import ObjectId
 from fastapi import APIRouter, Depends, HTTPException, status
 
 from app.database import get_collection, serialize_document
+from app.services.email_service import send_booking_confirmation_email
 from app.schemas.booking import Booking, BookingCreate, BookingUpdate
 from app.security import get_current_user, get_current_user_optional, require_admin
 
@@ -125,7 +126,9 @@ async def create_booking(booking: BookingCreate, user=Depends(get_current_user_o
         {"$inc": {"available_slots": -booking.quantity}, "$set": {"updated_at": now}},
     )
     created = bookings_collection.find_one({"_id": result.inserted_id})
-    return serialize_document(created)
+    serialized_booking = serialize_document(created)
+    send_booking_confirmation_email(serialized_booking)
+    return serialized_booking
 
 
 @router.put("/{booking_id}", response_model=Booking)
