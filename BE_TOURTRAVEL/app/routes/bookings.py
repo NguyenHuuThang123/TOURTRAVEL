@@ -2,8 +2,10 @@ from datetime import datetime
 
 from bson import ObjectId
 from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi.responses import Response
 
 from app.database import get_collection, serialize_document
+from app.services.email_service import _generate_checkin_qr_png, send_booking_confirmation_email
 from app.schemas.booking import Booking, BookingCreate, BookingUpdate
 from app.security import get_current_user, get_current_user_optional, require_admin
 
@@ -35,6 +37,24 @@ def _get_tour_or_400(tour_id: str):
 
 def _serialize_bookings(cursor):
     return [serialize_document(booking) for booking in cursor]
+
+
+def _serialize_public_booking(booking: dict):
+    serialized = serialize_document(booking)
+    return {
+        "id": serialized["id"],
+        "tour_id": serialized.get("tour_id"),
+        "tour_name": serialized.get("tour_name"),
+        "tour_destination": serialized.get("tour_destination"),
+        "tour_image": serialized.get("tour_image"),
+        "guide_name": serialized.get("guide_name"),
+        "start_date": serialized.get("start_date"),
+        "end_date": serialized.get("end_date"),
+        "quantity": serialized.get("quantity"),
+        "status": serialized.get("status"),
+        "total_price": serialized.get("total_price"),
+        "created_at": serialized.get("created_at"),
+    }
 
 
 def _assert_booking_owner(booking: dict, user: dict):
@@ -75,6 +95,9 @@ def _build_booking_payload(booking_data: dict, tour: dict, user: dict | None, no
     payload["end_date"] = tour.get("end_date")
     payload.update(pricing)
     payload["status"] = "confirmed"
+    payload["email_notification_status"] = "pending"
+    payload["email_notification_error"] = None
+    payload["email_notification_sent_at"] = None
     payload["created_at"] = now
     payload["updated_at"] = now
     return payload
@@ -97,6 +120,20 @@ async def get_my_bookings(user=Depends(get_current_user)):
         }
     ).sort("created_at", -1)
     return _serialize_bookings(bookings)
+
+
+@router.get("/public/{booking_id}")
+async def get_public_booking(booking_id: str):
+    return _serialize_public_booking(_get_booking_or_404(booking_id))
+
+
+@router.get("/public/{booking_id}/qr")
+async def get_public_booking_qr(booking_id: str):
+    booking = serialize_document(_get_booking_or_404(booking_id))
+    qr_image = _generate_checkin_qr_png(booking)
+    if not qr_image:
+        raise HTTPException(status_code=status.HTTP_503_SERVICE_UNAVAILABLE, detail="QR code is unavailable")
+    return Response(content=qr_image, media_type="image/png")
 
 
 @router.get("/{booking_id}", response_model=Booking)
@@ -125,7 +162,17 @@ async def create_booking(booking: BookingCreate, user=Depends(get_current_user_o
         {"$inc": {"available_slots": -booking.quantity}, "$set": {"updated_at": now}},
     )
     created = bookings_collection.find_one({"_id": result.inserted_id})
-    return serialize_document(created)
+    serialized_booking = serialize_document(created)
+    email_sent, email_error = send_booking_confirmation_email(serialized_booking)
+    email_updates = {
+        "email_notification_status": "sent" if email_sent else "failed",
+        "email_notification_error": email_error,
+        "email_notification_sent_at": datetime.utcnow() if email_sent else None,
+        "updated_at": datetime.utcnow(),
+    }
+    bookings_collection.update_one({"_id": result.inserted_id}, {"$set": email_updates})
+    refreshed = bookings_collection.find_one({"_id": result.inserted_id})
+    return serialize_document(refreshed)
 
 
 @router.put("/{booking_id}", response_model=Booking)
