@@ -76,6 +76,9 @@ def _build_booking_payload(booking_data: dict, tour: dict, user: dict | None, no
     payload["end_date"] = tour.get("end_date")
     payload.update(pricing)
     payload["status"] = "confirmed"
+    payload["email_notification_status"] = "pending"
+    payload["email_notification_error"] = None
+    payload["email_notification_sent_at"] = None
     payload["created_at"] = now
     payload["updated_at"] = now
     return payload
@@ -127,8 +130,16 @@ async def create_booking(booking: BookingCreate, user=Depends(get_current_user_o
     )
     created = bookings_collection.find_one({"_id": result.inserted_id})
     serialized_booking = serialize_document(created)
-    send_booking_confirmation_email(serialized_booking)
-    return serialized_booking
+    email_sent, email_error = send_booking_confirmation_email(serialized_booking)
+    email_updates = {
+        "email_notification_status": "sent" if email_sent else "failed",
+        "email_notification_error": email_error,
+        "email_notification_sent_at": datetime.utcnow() if email_sent else None,
+        "updated_at": datetime.utcnow(),
+    }
+    bookings_collection.update_one({"_id": result.inserted_id}, {"$set": email_updates})
+    refreshed = bookings_collection.find_one({"_id": result.inserted_id})
+    return serialize_document(refreshed)
 
 
 @router.put("/{booking_id}", response_model=Booking)

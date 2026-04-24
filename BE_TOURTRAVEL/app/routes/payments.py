@@ -182,6 +182,9 @@ async def vnpay_return(request: Request):
         )
         return _redirect_frontend("failed", "Tour khong con du cho trong de xac nhan giao dich.")
 
+    booking_payload["email_notification_status"] = "pending"
+    booking_payload["email_notification_error"] = None
+    booking_payload["email_notification_sent_at"] = None
     result = get_collection("bookings").insert_one(booking_payload)
     get_collection("tours").update_one(
         {"_id": tour["_id"]},
@@ -205,5 +208,17 @@ async def vnpay_return(request: Request):
 
     created_booking = get_collection("bookings").find_one({"_id": result.inserted_id})
     serialized_booking = serialize_document(created_booking)
-    send_booking_confirmation_email(serialized_booking)
+    email_sent, email_error = send_booking_confirmation_email(serialized_booking)
+    get_collection("bookings").update_one(
+        {"_id": result.inserted_id},
+        {
+            "$set": {
+                "email_notification_status": "sent" if email_sent else "failed",
+                "email_notification_error": email_error,
+                "email_notification_sent_at": datetime.utcnow() if email_sent else None,
+                "updated_at": datetime.utcnow(),
+            }
+        },
+    )
+    serialized_booking = serialize_document(get_collection("bookings").find_one({"_id": result.inserted_id}))
     return _redirect_frontend("success", "Thanh toan VNPAY thanh cong.", serialized_booking["id"])

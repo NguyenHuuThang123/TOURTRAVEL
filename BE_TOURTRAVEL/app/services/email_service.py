@@ -33,16 +33,16 @@ def is_email_enabled() -> bool:
     )
 
 
-def send_booking_confirmation_email(booking: dict) -> bool:
+def send_booking_confirmation_email(booking: dict) -> tuple[bool, str | None]:
     settings = get_settings()
     recipient = booking.get("user_email")
     if not recipient:
         logger.warning("Skip booking confirmation email because recipient email is missing.")
-        return False
+        return False, "missing_recipient"
 
     if not is_email_enabled():
         logger.warning("Skip booking confirmation email because SMTP is not configured.")
-        return False
+        return False, "smtp_not_configured"
 
     subject = f"Xac nhan dat tour thanh cong - {booking.get('tour_name', 'TourTravel')}"
     plain_body = f"""
@@ -116,7 +116,7 @@ TourTravel
                     server.ehlo()
                 server.login(settings.smtp_username, settings.smtp_password)
                 server.send_message(message)
-        return True
-    except Exception:
+        return True, None
+    except Exception as exc:
         logger.exception("Failed to send booking confirmation email to %s", recipient)
-        return False
+        return False, str(exc)
