@@ -5,6 +5,7 @@ import Footer from '../components/Footer'
 import { getMyTourReview, getTourById, getTourReviews, upsertMyTourReview } from '../api/tourService'
 import { useAuth } from '../context/AuthContext'
 import { formatCurrency } from '../utils/currency'
+import { formatVietnamDate, formatVietnamDateRange } from '../utils/datetime'
 
 export default function TourDetail() {
   const { id } = useParams()
@@ -279,7 +280,7 @@ export default function TourDetail() {
                         <div className="tour-review-card-head">
                           <div>
                             <strong>{review.user_name}</strong>
-                            <span>{new Date(review.updated_at).toLocaleDateString()}</span>
+                            <span>{formatVietnamDate(review.updated_at)}</span>
                           </div>
                           <div className="tour-review-card-rating">
                             <span>{renderStars(review.rating)}</span>
@@ -307,7 +308,7 @@ export default function TourDetail() {
 
               <div className="tour-booking-field">
                 <span>Ngày bắt đầu</span>
-                <strong>{new Date(tour.start_date).toLocaleDateString()} - {new Date(tour.end_date).toLocaleDateString()}</strong>
+                <strong>{formatVietnamDateRange(tour.start_date, tour.end_date)}</strong>
               </div>
 
               <div className="tour-booking-field">

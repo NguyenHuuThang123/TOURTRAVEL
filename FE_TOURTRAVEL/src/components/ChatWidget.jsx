@@ -6,6 +6,7 @@ import {
   getMyChatConversations,
   sendChatMessage
 } from '../api/tourService'
+import { formatVietnamTime } from '../utils/datetime'
 
 const CHAT_STORAGE_KEY = 'tourtravel_chat_session'
 const CHAT_GUEST_NAME_KEY = 'tourtravel_chat_guest_name'
@@ -39,8 +40,7 @@ function createFreshGuestSessionKey() {
 }
 
 function formatTime(value) {
-  if (!value) return ''
-  return new Date(value).toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })
+  return formatVietnamTime(value, 'vi-VN', { hour: '2-digit', minute: '2-digit' })
 }
 
 function labelForSender(message) {

@@ -4,6 +4,7 @@ import Header from '../components/Header'
 import Footer from '../components/Footer'
 import { useAuth } from '../context/AuthContext'
 import { formatCurrency } from '../utils/currency'
+import { formatVietnamDateRange } from '../utils/datetime'
 
 export default function Checkout() {
   const insuranceFee = 45000
@@ -206,7 +207,7 @@ export default function Checkout() {
                 />
                 <div>
                   <strong>{tour.name}</strong>
-                  <span>{new Date(tour.start_date).toLocaleDateString()} - {new Date(tour.end_date).toLocaleDateString()}</span>
+                  <span>{formatVietnamDateRange(tour.start_date, tour.end_date)}</span>
                   <span>{quantity} Người lớn</span>
                 </div>
               </div>

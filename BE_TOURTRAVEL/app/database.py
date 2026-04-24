@@ -1,7 +1,8 @@
 from __future__ import annotations
 
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from typing import Any
+from zoneinfo import ZoneInfo
 
 from pymongo import MongoClient
 from pymongo.collection import Collection
@@ -11,6 +12,7 @@ from app.config.settings import get_settings
 
 _client: MongoClient | None = None
 LEGACY_VND_RATE = 26000
+VIETNAM_TIMEZONE = ZoneInfo("Asia/Ho_Chi_Minh")
 
 
 def get_client() -> MongoClient:
@@ -183,10 +185,21 @@ def close_database() -> None:
         _client = None
 
 
+def _serialize_value(value: Any) -> Any:
+    if isinstance(value, datetime):
+        source_value = value.replace(tzinfo=timezone.utc) if value.tzinfo is None else value
+        return source_value.astimezone(VIETNAM_TIMEZONE)
+    if isinstance(value, dict):
+        return {key: _serialize_value(item) for key, item in value.items()}
+    if isinstance(value, list):
+        return [_serialize_value(item) for item in value]
+    return value
+
+
 def serialize_document(document: dict[str, Any] | None) -> dict[str, Any] | None:
     if document is None:
         return None
 
-    serialized = dict(document)
+    serialized = {key: _serialize_value(value) for key, value in document.items()}
     serialized["id"] = str(serialized.pop("_id"))
     return serialized
