@@ -6,6 +6,7 @@ import TourDetail from './pages/TourDetail'
 import Checkout from './pages/Checkout'
 import Payment from './pages/Payment'
 import VnpayReturn from './pages/VnpayReturn'
+import CheckIn from './pages/CheckIn'
 import AdminDashboard from './pages/AdminDashboard'
 import GuideDashboard from './pages/GuideDashboard'
 import Account from './pages/Account'
@@ -39,6 +40,7 @@ function App() {
         <Route path="/checkout" element={<Checkout />} />
         <Route path="/payment" element={<Payment />} />
         <Route path="/payment/vnpay-return" element={<VnpayReturn />} />
+        <Route path="/check-in" element={<CheckIn />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
         <Route path="/account" element={<ProtectedRoute allowedRoles={['user', 'admin']}><Account /></ProtectedRoute>} />

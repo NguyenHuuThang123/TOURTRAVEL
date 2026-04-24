@@ -1,10 +1,13 @@
 from __future__ import annotations
 
+import io
+import json
 import logging
 import smtplib
 import ssl
 from datetime import datetime
 from email.message import EmailMessage
+from urllib.parse import urlencode
 
 from bson import ObjectId
 
@@ -38,6 +41,47 @@ def is_email_enabled() -> bool:
 
 def _has_value(value) -> bool:
     return value not in (None, "", [], {})
+
+
+def _build_checkin_url(booking: dict) -> str:
+    settings = get_settings()
+    query = urlencode({"booking_id": booking.get("id", "")})
+    return f"{settings.checkin_base_url}?{query}"
+
+
+def _build_checkin_qr_payload(booking: dict) -> dict:
+    return {
+        "type": "tourtravel_checkin",
+        "version": 1,
+        "booking_id": booking.get("id"),
+        "tour_id": booking.get("tour_id"),
+        "checkin_url": _build_checkin_url(booking),
+        "issued_at": datetime.utcnow().isoformat(timespec="seconds") + "Z",
+    }
+
+
+def _generate_checkin_qr_png(booking: dict) -> bytes | None:
+    try:
+        import qrcode
+        from qrcode.image.pure import PyPNGImage
+        from qrcode.constants import ERROR_CORRECT_M
+    except ImportError:
+        logger.warning("QR code generation skipped because qrcode dependency is not installed.")
+        return None
+
+    qr = qrcode.QRCode(
+        version=None,
+        error_correction=ERROR_CORRECT_M,
+        box_size=8,
+        border=2,
+    )
+    qr.add_data(json.dumps(_build_checkin_qr_payload(booking), ensure_ascii=True, separators=(",", ":")))
+    qr.make(fit=True)
+
+    image = qr.make_image(image_factory=PyPNGImage)
+    buffer = io.BytesIO()
+    image.save(buffer)
+    return buffer.getvalue()
 
 
 def _get_latest_booking_snapshot(booking: dict) -> dict:
@@ -103,11 +147,25 @@ Thong tin booking:
 - Phuong thuc thanh toan: {booking.get("payment_method", "Dang cap nhat")}
 - Tong thanh toan: {_format_currency(booking.get("total_price"))}
 - Huong dan vien: {booking.get("guide_name") or "Se cap nhat sau"}
+- Link check-in: {_build_checkin_url(booking)}
 
 Chung toi da ghi nhan don cua ban va se ho tro neu ban can them thong tin.
+Neu Gmail khong hien ma QR ngay trong noi dung, ban co the mo file QR dinh kem trong email.
 
 TourTravel
 """.strip()
+
+    qr_image = _generate_checkin_qr_png(booking)
+    qr_cid = "tourtravel-checkin-qr"
+    qr_section = ""
+    if qr_image:
+        qr_section = f"""
+    <div style="margin-top: 20px; padding: 16px; max-width: 640px; border: 1px solid #e2e8f0; border-radius: 12px; text-align: center;">
+      <p style="margin: 0 0 8px; font-size: 14px; color: #475569;">Ma QR check-in</p>
+      <img src="cid:{qr_cid}" alt="QR code check-in cho booking {booking.get("id", "")}" style="width: 180px; height: 180px; display: block; margin: 0 auto 12px;" />
+      <p style="margin: 0; font-size: 13px; color: #64748b;">Luu ma nay de su dung khi tinh nang check-in duoc kich hoat.</p>
+    </div>
+""".rstrip()
 
     html_body = f"""
 <html>
@@ -125,8 +183,11 @@ TourTravel
       <tr><td style="padding: 8px; border: 1px solid #e2e8f0;"><strong>Phuong thuc thanh toan</strong></td><td style="padding: 8px; border: 1px solid #e2e8f0;">{booking.get("payment_method", "Dang cap nhat")}</td></tr>
       <tr><td style="padding: 8px; border: 1px solid #e2e8f0;"><strong>Tong thanh toan</strong></td><td style="padding: 8px; border: 1px solid #e2e8f0;">{_format_currency(booking.get("total_price"))}</td></tr>
       <tr><td style="padding: 8px; border: 1px solid #e2e8f0;"><strong>Huong dan vien</strong></td><td style="padding: 8px; border: 1px solid #e2e8f0;">{booking.get("guide_name") or "Se cap nhat sau"}</td></tr>
+      <tr><td style="padding: 8px; border: 1px solid #e2e8f0;"><strong>Link check-in</strong></td><td style="padding: 8px; border: 1px solid #e2e8f0;"><a href="{_build_checkin_url(booking)}">{_build_checkin_url(booking)}</a></td></tr>
     </table>
+    {qr_section}
     <p style="margin-top: 16px;">Chung toi da ghi nhan don cua ban va se ho tro neu ban can them thong tin.</p>
+    <p style="margin-top: 8px; color: #64748b; font-size: 13px;">Neu Gmail chua hien ma QR ngay trong noi dung, vui long mo file QR dinh kem trong email.</p>
     <p>TourTravel</p>
   </body>
 </html>
@@ -140,6 +201,21 @@ TourTravel
         message["Reply-To"] = settings.smtp_reply_to
     message.set_content(plain_body)
     message.add_alternative(html_body, subtype="html")
+    if qr_image:
+        message.get_payload()[-1].add_related(
+            qr_image,
+            maintype="image",
+            subtype="png",
+            cid=f"<{qr_cid}>",
+            filename=f"tourtravel-checkin-{booking.get('id', 'booking')}.png",
+            disposition="inline",
+        )
+        message.add_attachment(
+            qr_image,
+            maintype="image",
+            subtype="png",
+            filename=f"tourtravel-checkin-{booking.get('id', 'booking')}.png",
+        )
 
     try:
         if settings.smtp_use_ssl:

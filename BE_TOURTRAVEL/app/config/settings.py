@@ -15,6 +15,7 @@ class Settings:
         self.google_client_id = os.getenv("GOOGLE_CLIENT_ID", "")
         self.backend_base_url = os.getenv("BACKEND_BASE_URL", "http://localhost:8000")
         self.frontend_base_url = os.getenv("FRONTEND_BASE_URL", "http://localhost:5173")
+        self.checkin_base_url = os.getenv("CHECKIN_BASE_URL", f"{self.frontend_base_url}/check-in")
         self.vnpay_tmn_code = os.getenv("VNPAY_TMN_CODE", "")
         self.vnpay_hash_secret = os.getenv("VNPAY_HASH_SECRET", "")
         self.vnpay_payment_url = os.getenv("VNPAY_PAYMENT_URL", "https://sandbox.vnpayment.vn/paymentv2/vpcpay.html")

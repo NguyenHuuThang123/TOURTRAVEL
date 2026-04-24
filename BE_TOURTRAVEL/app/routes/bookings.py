@@ -38,6 +38,24 @@ def _serialize_bookings(cursor):
     return [serialize_document(booking) for booking in cursor]
 
 
+def _serialize_public_booking(booking: dict):
+    serialized = serialize_document(booking)
+    return {
+        "id": serialized["id"],
+        "tour_id": serialized.get("tour_id"),
+        "tour_name": serialized.get("tour_name"),
+        "tour_destination": serialized.get("tour_destination"),
+        "tour_image": serialized.get("tour_image"),
+        "guide_name": serialized.get("guide_name"),
+        "start_date": serialized.get("start_date"),
+        "end_date": serialized.get("end_date"),
+        "quantity": serialized.get("quantity"),
+        "status": serialized.get("status"),
+        "total_price": serialized.get("total_price"),
+        "created_at": serialized.get("created_at"),
+    }
+
+
 def _assert_booking_owner(booking: dict, user: dict):
     if booking.get("user_id") == user["id"] or booking.get("user_email") == user["email"]:
         return
@@ -101,6 +119,11 @@ async def get_my_bookings(user=Depends(get_current_user)):
         }
     ).sort("created_at", -1)
     return _serialize_bookings(bookings)
+
+
+@router.get("/public/{booking_id}")
+async def get_public_booking(booking_id: str):
+    return _serialize_public_booking(_get_booking_or_404(booking_id))
 
 
 @router.get("/{booking_id}", response_model=Booking)
