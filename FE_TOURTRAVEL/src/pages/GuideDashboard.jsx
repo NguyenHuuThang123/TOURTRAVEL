@@ -1,15 +1,17 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import Header from '../components/Header'
 import Footer from '../components/Footer'
 import { useAuth } from '../context/AuthContext'
 import {
+  guideCheckInBooking,
   getGuideBookings,
   getGuideChatConversationDetail,
   getGuideChatConversations,
   getGuideTours,
   sendGuideChatMessage
 } from '../api/tourService'
+import { formatCurrency } from '../utils/currency'
 import { formatVietnamDateTime } from '../utils/datetime'
 
 function formatDate(value) {
@@ -28,6 +30,12 @@ function senderLabel(senderType) {
   return 'Customer'
 }
 
+const bookingStatusLabel = {
+  confirmed: 'Da xac nhan',
+  cancelled: 'Da huy',
+  pending: 'Cho xu ly'
+}
+
 export default function GuideDashboard() {
   const { token, user, logout } = useAuth()
   const [activeSection, setActiveSection] = useState('overview')
@@ -39,6 +47,18 @@ export default function GuideDashboard() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
   const [message, setMessage] = useState('')
+  const [scanInput, setScanInput] = useState('')
+  const [scanBusy, setScanBusy] = useState(false)
+  const [scanResult, setScanResult] = useState(null)
+  const [scannerNotice, setScannerNotice] = useState('')
+  const [cameraEnabled, setCameraEnabled] = useState(false)
+  const videoRef = useRef(null)
+  const canvasRef = useRef(null)
+  const scanLockRef = useRef(false)
+  const lastScanRef = useRef({ value: '', time: 0 })
+
+  const hasNativeQrScanner = typeof window !== 'undefined' && 'BarcodeDetector' in window
+  const hasCameraAccess = typeof navigator !== 'undefined' && !!navigator.mediaDevices?.getUserMedia
 
   useEffect(() => {
     if (token) {
@@ -68,6 +88,93 @@ export default function GuideDashboard() {
 
     return () => window.clearInterval(timerId)
   }, [activeSection, activeChat?.conversation?.id, token])
+
+  useEffect(() => {
+    if (activeSection !== 'checkin') {
+      setCameraEnabled(false)
+    }
+  }, [activeSection])
+
+  useEffect(() => {
+    if (activeSection !== 'checkin' || !cameraEnabled) return undefined
+
+    if (!hasCameraAccess) {
+      setScannerNotice('Trinh duyet nay khong ho tro camera. Ban van co the dan noi dung QR hoac ma booking ben duoi.')
+      setCameraEnabled(false)
+      return undefined
+    }
+
+    if (!hasNativeQrScanner) {
+      setScannerNotice('Camera da san sang nhung trinh duyet chua ho tro quet QR native. Hay dan noi dung QR hoac ma booking de check-in.')
+      setCameraEnabled(false)
+      return undefined
+    }
+
+    let stream
+    let intervalId
+    let cancelled = false
+
+    const startScanner = async () => {
+      try {
+        setScannerNotice('Dang khoi dong camera quet QR...')
+        stream = await navigator.mediaDevices.getUserMedia({
+          video: { facingMode: { ideal: 'environment' } },
+          audio: false
+        })
+
+        if (cancelled || !videoRef.current) return
+
+        videoRef.current.srcObject = stream
+        await videoRef.current.play()
+        setScannerNotice('Dua ma QR vao khung hinh. He thong se tu dong check-in khi doc duoc ma hop le.')
+
+        const detector = new window.BarcodeDetector({ formats: ['qr_code'] })
+        intervalId = window.setInterval(async () => {
+          if (scanLockRef.current || !videoRef.current || !canvasRef.current) return
+          if (videoRef.current.readyState < 2) return
+
+          const canvas = canvasRef.current
+          const context = canvas.getContext('2d')
+          if (!context) return
+
+          canvas.width = videoRef.current.videoWidth || 720
+          canvas.height = videoRef.current.videoHeight || 540
+          context.drawImage(videoRef.current, 0, 0, canvas.width, canvas.height)
+
+          const codes = await detector.detect(canvas)
+          const rawValue = codes?.[0]?.rawValue?.trim()
+          if (!rawValue) return
+
+          const now = Date.now()
+          if (lastScanRef.current.value === rawValue && now - lastScanRef.current.time < 5000) return
+          lastScanRef.current = { value: rawValue, time: now }
+          await handleCheckIn(rawValue, true)
+        }, 900)
+      } catch (err) {
+        setScannerNotice(
+          err?.name === 'NotAllowedError'
+            ? 'Camera bi tu choi quyen truy cap. Ban co the cap quyen camera hoac dan noi dung QR vao o nhap.'
+            : 'Khong the bat camera tren thiet bi nay. Ban van co the check-in bang noi dung QR hoac ma booking.'
+        )
+        setCameraEnabled(false)
+      }
+    }
+
+    startScanner()
+
+    return () => {
+      cancelled = true
+      if (intervalId) window.clearInterval(intervalId)
+      if (videoRef.current?.srcObject) {
+        const tracks = videoRef.current.srcObject.getTracks?.() || []
+        tracks.forEach((track) => track.stop())
+        videoRef.current.srcObject = null
+      }
+      if (stream) {
+        stream.getTracks().forEach((track) => track.stop())
+      }
+    }
+  }, [activeSection, cameraEnabled, hasCameraAccess, hasNativeQrScanner])
 
   const loadData = async () => {
     try {
@@ -139,6 +246,41 @@ export default function GuideDashboard() {
     }
   }
 
+  const syncCheckedInBooking = (updatedBooking) => {
+    setBookings((prev) => prev.map((item) => (item.id === updatedBooking.id ? updatedBooking : item)))
+  }
+
+  const handleCheckIn = async (rawContent = scanInput, fromCamera = false) => {
+    const value = rawContent.trim()
+    if (!value || scanBusy) return
+
+    try {
+      scanLockRef.current = true
+      setScanBusy(true)
+      setError('')
+      setMessage('')
+      const result = await guideCheckInBooking(value, token)
+      setScanResult(result)
+      setScanInput(value)
+      syncCheckedInBooking(result.booking)
+      setMessage(
+        result.checkin_status === 'checked_in_now'
+          ? `Check-in thanh cong cho ${result.booking.user_name}.`
+          : `${result.booking.user_name} da duoc check-in truoc do.`
+      )
+      if (fromCamera) {
+        setScannerNotice('Da doc ma thanh cong. Ban co the giu camera de quet tiep hoac tat camera de xem chi tiet.')
+      }
+    } catch (err) {
+      setError(err.response?.data?.detail || 'Khong the check-in booking nay.')
+    } finally {
+      setScanBusy(false)
+      window.setTimeout(() => {
+        scanLockRef.current = false
+      }, 1200)
+    }
+  }
+
   return (
     <div className="guide-shell">
       <Header />
@@ -172,6 +314,7 @@ export default function GuideDashboard() {
         <section className="guide-tabs">
           <button type="button" className={activeSection === 'overview' ? 'active' : ''} onClick={() => setActiveSection('overview')}>Overview</button>
           <button type="button" className={activeSection === 'travelers' ? 'active' : ''} onClick={() => setActiveSection('travelers')}>Travelers</button>
+          <button type="button" className={activeSection === 'checkin' ? 'active' : ''} onClick={() => setActiveSection('checkin')}>QR Check-in</button>
           <button type="button" className={activeSection === 'messages' ? 'active' : ''} onClick={() => setActiveSection('messages')}>Messages</button>
         </section>
 
@@ -241,14 +384,131 @@ export default function GuideDashboard() {
                   <div>
                     <strong>{booking.user_name}</strong>
                     <small>{booking.user_email}</small>
+                    {booking.checked_in_at && <small className="guide-checkin-inline">Check-in: {formatDate(booking.checked_in_at)}</small>}
                   </div>
                   <div>{booking.tour_name}</div>
                   <div>{booking.quantity} khach</div>
                   <div>{booking.user_phone}</div>
-                  <div>{booking.status}</div>
+                  <div>
+                    <span>{bookingStatusLabel[booking.status] || booking.status}</span>
+                    <small className={`guide-checkin-badge ${booking.checked_in_at ? 'done' : 'pending'}`}>
+                      {booking.checked_in_at ? 'Da check-in' : 'Chua check-in'}
+                    </small>
+                  </div>
                 </article>
               ))}
               {!bookings.length && !loading && <div className="admin-empty-row">Chua co booking nao cho tour ban quan ly.</div>}
+            </div>
+          </section>
+        )}
+
+        {activeSection === 'checkin' && (
+          <section className="guide-grid">
+            <div className="guide-panel">
+              <div className="guide-panel-head">
+                <div>
+                  <h2>Quet ma QR cua khach</h2>
+                  <span>Camera tu dong doc QR check-in, hoac dan booking id de doi chieu nhanh.</span>
+                </div>
+                <button
+                  type="button"
+                  className="admin-ghost-btn"
+                  onClick={() => setCameraEnabled((prev) => !prev)}
+                >
+                  {cameraEnabled ? 'Tat camera' : 'Bat camera'}
+                </button>
+              </div>
+
+              <div className="guide-scanner-body">
+                <div className={`guide-scanner-frame ${cameraEnabled ? 'live' : ''}`}>
+                  <video ref={videoRef} muted playsInline />
+                  {!cameraEnabled && (
+                    <div className="guide-scanner-placeholder">
+                      <strong>QR Check-in</strong>
+                      <p>Bat camera de quet truc tiep tu dien thoai cua khach.</p>
+                    </div>
+                  )}
+                </div>
+                <canvas ref={canvasRef} hidden />
+                <p className="guide-scanner-note">{scannerNotice || 'Ban co the quet QR, dan link check-in, JSON QR, hoac nhap truc tiep booking id.'}</p>
+
+                <form
+                  className="guide-scanner-form"
+                  onSubmit={(event) => {
+                    event.preventDefault()
+                    handleCheckIn()
+                  }}
+                >
+                  <textarea
+                    rows="4"
+                    placeholder="Dan noi dung QR, link check-in hoac booking id vao day..."
+                    value={scanInput}
+                    onChange={(event) => setScanInput(event.target.value)}
+                  />
+                  <button type="submit" className="admin-green-btn" disabled={!scanInput.trim() || scanBusy}>
+                    {scanBusy ? 'Dang xu ly...' : 'Check-in booking'}
+                  </button>
+                </form>
+              </div>
+            </div>
+
+            <div className="guide-panel">
+              <div className="guide-panel-head">
+                <h2>Thong tin sau khi quet</h2>
+                <span>{scanResult?.matched_via ? `Nhan dien qua ${scanResult.matched_via}` : 'Chua co ket qua'}</span>
+              </div>
+
+              <div className="guide-checkin-result">
+                {!scanResult && <div className="admin-empty-row">Quet QR cua khach de hien thong tin booking va trang thai check-in.</div>}
+
+                {scanResult && (
+                  <>
+                    <div className={`guide-result-banner ${scanResult.checkin_status}`}>
+                      <strong>
+                        {scanResult.checkin_status === 'checked_in_now' ? 'Check-in vua duoc ghi nhan' : 'Khach da check-in truoc do'}
+                      </strong>
+                      <span>
+                        {scanResult.booking.checked_in_at
+                          ? `Thoi gian: ${formatDate(scanResult.booking.checked_in_at)}`
+                          : 'Chua co moc thoi gian check-in'}
+                      </span>
+                    </div>
+
+                    <div className="guide-result-grid">
+                      <div>
+                        <span>Khach hang</span>
+                        <strong>{scanResult.booking.user_name}</strong>
+                        <small>{scanResult.booking.user_email}</small>
+                      </div>
+                      <div>
+                        <span>Booking</span>
+                        <strong>{scanResult.booking.id}</strong>
+                        <small>{bookingStatusLabel[scanResult.booking.status] || scanResult.booking.status}</small>
+                      </div>
+                      <div>
+                        <span>Tour</span>
+                        <strong>{scanResult.booking.tour_name}</strong>
+                        <small>{scanResult.booking.tour_destination || 'Dang cap nhat'}</small>
+                      </div>
+                      <div>
+                        <span>Lich khoi hanh</span>
+                        <strong>{scanResult.booking.start_date ? formatDate(scanResult.booking.start_date) : '-'}</strong>
+                        <small>{scanResult.booking.quantity} khach</small>
+                      </div>
+                      <div>
+                        <span>Lien he</span>
+                        <strong>{scanResult.booking.user_phone}</strong>
+                        <small>{formatCurrency(scanResult.booking.total_price)}</small>
+                      </div>
+                      <div>
+                        <span>Guide xac nhan</span>
+                        <strong>{scanResult.booking.checked_in_by_guide_name || user?.name || 'Guide'}</strong>
+                        <small>{scanResult.booking.checked_in_at ? formatDate(scanResult.booking.checked_in_at) : 'Dang cho quet'}</small>
+                      </div>
+                    </div>
+                  </>
+                )}
+              </div>
             </div>
           </section>
         )}
