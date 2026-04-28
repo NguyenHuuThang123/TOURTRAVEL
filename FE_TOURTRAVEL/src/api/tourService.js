@@ -197,6 +197,11 @@ export const getGuideBookings = async (token) => {
   return response.data
 }
 
+export const guideCheckInBooking = async (qrContent, token) => {
+  const response = await axios.post(`${API_BASE}/guides/me/check-in`, { qr_content: qrContent }, authHeaders(token))
+  return response.data
+}
+
 export const getGuideChatConversations = async (token) => {
   const response = await axios.get(`${API_BASE}/chat/guide/conversations`, authHeaders(token))
   return response.data

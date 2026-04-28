@@ -49,8 +49,21 @@ class Booking(BaseModel):
     payment_method: PaymentMethod = "card"
     total_price: float
     status: BookingStatus
+    checked_in_at: datetime | None = None
+    checked_in_by_guide_id: str | None = None
+    checked_in_by_guide_name: str | None = None
     created_at: datetime
     updated_at: datetime
 
     class Config:
         orm_mode = True
+
+
+class GuideBookingCheckInRequest(BaseModel):
+    qr_content: str = Field(..., min_length=1, max_length=5000)
+
+
+class GuideBookingCheckInResult(BaseModel):
+    booking: Booking
+    checkin_status: Literal["checked_in_now", "already_checked_in"]
+    matched_via: Literal["booking_id", "checkin_url", "qr_payload"]
