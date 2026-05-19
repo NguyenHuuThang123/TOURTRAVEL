@@ -1242,12 +1242,42 @@ img {
   align-items: center;
 }
 
-.tour-booking-travelers input {
-  width: 90px;
-  min-height: 42px;
-  padding: 0 12px;
+.tour-booking-stepper {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
   border: 1px solid #dbe2ea;
-  border-radius: 10px;
+  background: #f8fafc;
+  font-size: 18px;
+  font-weight: 700;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s;
+}
+.tour-booking-stepper:hover:not(:disabled) {
+  background: #e2e8f0;
+}
+.tour-booking-stepper:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.tour-detail-feedback {
+  padding: 60px 24px;
+  text-align: center;
+  color: var(--text-secondary);
+  font-size: var(--font-size-lg);
+}
+.tour-detail-feedback.error {
+  color: #dc2626;
+}
+.tour-detail-feedback a {
+  display: inline-block;
+  margin-top: 12px;
+  color: var(--primary-color);
+  font-weight: 600;
 }
 
 .tour-booking-button {
@@ -3397,6 +3427,24 @@ img {
 .auth-form {
   display: grid;
   gap: 16px;
+}
+.auth-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.auth-field > span {
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  color: var(--text-primary);
+}
+.auth-error {
+  color: #dc2626;
+  font-size: var(--font-size-sm);
+  padding: 10px 14px;
+  border-radius: 10px;
+  background: #fef2f2;
+  border: 1px solid #fecaca;
 }
 .auth-input {
   padding: 14px 16px;

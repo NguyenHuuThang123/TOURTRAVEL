@@ -69,15 +69,6 @@ export default function Home() {
     return [...new Set(tours.map((tour) => tour.destination).filter(Boolean))].slice(0, 8)
   }, [tours])
 
-  const heroHighlights = useMemo(() => {
-    return tours.slice(0, 3).map((tour) => ({
-      id: tour.id,
-      name: tour.name,
-      destination: tour.destination,
-      price: formatCurrency(tour.price)
-    }))
-  }, [tours])
-
   const handleHeroSearch = (event) => {
     event.preventDefault()
     const params = new URLSearchParams()
@@ -181,37 +172,6 @@ export default function Home() {
                   Tìm tour
                 </button>
               </div>
-
-              {/* <div className="hero-search-suggestions">
-                <strong>Tuyến nổi bật</strong>
-                <div className="hero-search-chips">
-                  {destinations.slice(0, 4).map((destination) => (
-                    <button
-                      key={destination}
-                      type="button"
-                      className="hero-search-chip"
-                      onClick={() => setHeroSearch((prev) => ({ ...prev, destination }))}
-                    >
-                      {destination}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              <div className="hero-search-results">
-                {heroHighlights.map((tour) => (
-                  <button
-                    key={tour.id}
-                    type="button"
-                    className="hero-search-result-card"
-                    onClick={() => navigate(`/tours/${tour.id}`)}
-                  >
-                    <strong>{tour.name}</strong>
-                    <span>{tour.destination}</span>
-                    <em>Tu {tour.price}</em>
-                  </button>
-                ))}
-              </div> */}
             </form>
           </div>
         </div>
@@ -279,7 +239,7 @@ export default function Home() {
           <div className="features-grid">
             {featureItems.map((item) => (
               <article key={item.title} className="feature-card">
-                <div className="feature-icon-wrapper">TT</div>
+                <div className="feature-icon-wrapper" aria-hidden="true">✦</div>
                 <h3 className="feature-card-title">{item.title}</h3>
                 <p className="feature-card-desc">{item.description}</p>
               </article>
@@ -291,7 +251,7 @@ export default function Home() {
       <section className="testimonials-section">
         <div className="container">
           <div className="features-header">
-            <h2 className="features-title">Traveler Đánh giá</h2>
+            <h2 className="features-title">Đánh giá từ du khách</h2>
             <p className="features-subtitle">Một vài ấn tượng ngắn về loại hành trình mà ứng dụng này hỗ trợ.</p>
           </div>
 

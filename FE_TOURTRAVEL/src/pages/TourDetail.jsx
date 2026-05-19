@@ -66,14 +66,24 @@ export default function TourDetail() {
   }, [id, isAuthenticated, token])
 
   if (loading) {
-    return <div style={{ padding: '40px' }}>Đang tải chi tiết tour...</div>
+    return (
+      <div className="tour-detail-shell">
+        <Header />
+        <div className="tour-detail-feedback">Đang tải chi tiết tour...</div>
+        <Footer />
+      </div>
+    )
   }
 
   if (error || !tour) {
     return (
-      <div style={{ padding: '40px' }}>
-        <p style={{ color: '#dc2626' }}>{error || 'Không tìm thay tour hoặc có lỗi xảy ra khi tải dữ liệu.'}</p>
-        <Link to="/tours">Quay lại danh sách tour</Link>
+      <div className="tour-detail-shell">
+        <Header />
+        <div className="tour-detail-feedback error">
+          <p>{error || 'Không tìm thấy tour hoặc có lỗi xảy ra khi tải dữ liệu.'}</p>
+          <Link to="/tours">Quay lại danh sách tour</Link>
+        </div>
+        <Footer />
       </div>
     )
   }
@@ -92,10 +102,10 @@ export default function TourDetail() {
     : null
   const quickInfo = [
     { label: 'Thời lượng', value: `${tour.duration_days} ngày`, icon: '◔' },
-    { label: 'Số lượng', value: `Tối đa ${tour.max_participants}`, icon: '⌘' },
-    { label: 'Mức độ hoạt động', value: 'Trung bình', icon: '↟' },
-    { label: 'Ngôn ngữ', value: 'Tiếng Anh, tiếng Đức', icon: '◎' }
-  ]
+    { label: 'Số chỗ tối đa', value: `${tour.max_participants} người`, icon: '⌘' },
+    tour.activity_level && { label: 'Mức độ hoạt động', value: tour.activity_level, icon: '↟' },
+    tour.languages && { label: 'Ngôn ngữ', value: tour.languages, icon: '◎' }
+  ].filter(Boolean)
 
   const handleMessageGuide = () => {
     window.dispatchEvent(
@@ -156,10 +166,11 @@ export default function TourDetail() {
           >
             <div className="tour-detail-overlay" />
             <div className="tour-detail-hero-content">
-              <div className="tour-detail-tags">
-                <span>Phổ biến nhất</span>
-                
-              </div>
+              {tour.travel_style && (
+                <div className="tour-detail-tags">
+                  <span>{tour.travel_style}</span>
+                </div>
+              )}
               <h1>{tour.name}</h1>
               <div className="tour-detail-rating">
                 <span>
@@ -194,7 +205,6 @@ export default function TourDetail() {
                       <p>{guide.title} • {guide.experience}</p>
                       <div className="tour-guide-links">
                         <button type="button" onClick={handleMessageGuide}>Nhắn tin</button>
-                        <span>Xem thông tin </span>
                       </div>
                       <p>{guide.bio}</p>
                     </div>
@@ -232,11 +242,13 @@ export default function TourDetail() {
                         : 'Chỉ tài khoản khách hàng mới có thể gửi đánh giá.'}
                   </p>
 
-                  <div className="tour-review-stars-input" role="radiogroup" aria-label="Tour rating">
+                  <div className="tour-review-stars-input" role="radiogroup" aria-label="Đánh giá sao">
                     {[1, 2, 3, 4, 5].map((star) => (
                       <button
                         key={star}
                         type="button"
+                        aria-label={`${star} sao`}
+                        aria-pressed={star <= reviewForm.rating}
                         className={star <= reviewForm.rating ? 'active' : ''}
                         onClick={() => setReviewForm((prev) => ({ ...prev, rating: star }))}
                         disabled={!isAuthenticated || !canReview || reviewSubmitting}
@@ -272,7 +284,7 @@ export default function TourDetail() {
                 <div className="tour-review-list">
                   {reviews.length === 0 ? (
                     <div className="tour-review-empty">
-                      Chua co binh luan nao. Hoi vien dat tour dau tien co the mo man phan danh gia nay.
+                      Chưa có bình luận nào. Hãy là người đầu tiên chia sẻ trải nghiệm về tour này.
                     </div>
                   ) : (
                     reviews.map((review) => (
@@ -314,14 +326,21 @@ export default function TourDetail() {
               <div className="tour-booking-field">
                 <span>Số người</span>
                 <div className="tour-booking-travelers">
-                  <input
-                    type="number"
-                    min="1"
-                    max={tour.available_slots || 1}
-                    value={quantity}
-                    onChange={(event) => setQuantity(Math.max(1, Number(event.target.value) || 1))}
-                  />
-                  <strong>{quantity} Người lớn</strong>
+                  <button
+                    type="button"
+                    className="tour-booking-stepper"
+                    aria-label="Giảm số người"
+                    onClick={() => setQuantity((q) => Math.max(1, q - 1))}
+                    disabled={quantity <= 1}
+                  >−</button>
+                  <strong>{quantity} người lớn</strong>
+                  <button
+                    type="button"
+                    className="tour-booking-stepper"
+                    aria-label="Tăng số người"
+                    onClick={() => setQuantity((q) => Math.min(tour.available_slots || 1, q + 1))}
+                    disabled={quantity >= (tour.available_slots || 1)}
+                  >+</button>
                 </div>
               </div>
 
@@ -329,16 +348,16 @@ export default function TourDetail() {
                 onClick={() => navigate('/checkout', { state: { tour, quantity } })}
                 disabled={tour.available_slots < 1 || user?.role === 'guide'}
                 className="tour-booking-button"
+                title={user?.role === 'guide' ? 'Hướng dẫn viên không thể đặt tour' : undefined}
               >
-                {user?.role === 'guide' ? 'Hướng dẫn viên không thể đặt tour' : tour.available_slots < 1 ? 'Hết chỗ' : 'Đặt ngay'}
+                {tour.available_slots < 1 ? 'Hết chỗ' : 'Đặt ngay'}
               </button>
 
               <div className="tour-booking-benefits">
-                <d></d>
                 <span>Đặt tour an toàn với chính sách hủy linh hoạt.</span>
                 <span>Hủy miễn phí đến 30 ngày trước ngày khởi hành.</span>
-                <span>Bảo vệ du lịch được bao gồm</span>
-                <span>Đảm bảo giá tốt nhất</span>
+                <span>Bảo vệ du lịch được bao gồm.</span>
+                <span>Đảm bảo giá tốt nhất.</span>
               </div>
 
               <div className="tour-booking-total">

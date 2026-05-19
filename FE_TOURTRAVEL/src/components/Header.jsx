@@ -123,7 +123,7 @@ export default function Header() {
                   fontWeight: 600
                 }}
               >
-                {user?.role === 'guide' ? 'Bang guide' : 'Tài khoản'}
+                {user?.role === 'guide' ? 'Dashboard' : 'Tài khoản'}
               </Link>
             )}
           </nav>

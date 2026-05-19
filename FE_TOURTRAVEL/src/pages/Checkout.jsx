@@ -15,7 +15,7 @@ export default function Checkout() {
     firstName: location.state?.traveler?.firstName || user?.name?.split(' ').slice(0, -1).join(' ') || user?.name || '',
     lastName: location.state?.traveler?.lastName || user?.name?.split(' ').slice(-1).join(' ') || '',
     email: location.state?.traveler?.email || user?.email || '',
-    phoneCode: location.state?.traveler?.phoneCode || '+1',
+    phoneCode: location.state?.traveler?.phoneCode || '+84',
     phone: location.state?.traveler?.phone || user?.phone || '',
     dateOfBirth: location.state?.traveler?.dateOfBirth || '',
     insurance: location.state?.traveler?.insurance || false,
@@ -143,8 +143,8 @@ export default function Checkout() {
                     <input required value={formData.lastName} onChange={(event) => setFormData((prev) => ({ ...prev, lastName: event.target.value }))} placeholder="Doe" />
                   </label>
                   <label className="checkout-field checkout-span-2">
-                    <span>Email Address</span>
-                    <input required type="email" value={formData.email} onChange={(event) => setFormData((prev) => ({ ...prev, email: event.target.value }))} placeholder="john.doe@example.com" />
+                    <span>Địa chỉ email</span>
+                    <input required type="email" value={formData.email} onChange={(event) => setFormData((prev) => ({ ...prev, email: event.target.value }))} placeholder="example@email.com" />
                   </label>
                   <label className="checkout-field">
                     <span>Số điện thoại</span>
@@ -159,7 +159,7 @@ export default function Checkout() {
                   </label>
                   <label className="checkout-field">
                     <span>Ngày sinh</span>
-                    <input value={formData.dateOfBirth} onChange={(event) => setFormData((prev) => ({ ...prev, dateOfBirth: event.target.value }))} placeholder="mm/dd/yyyy" />
+                    <input type="date" value={formData.dateOfBirth} onChange={(event) => setFormData((prev) => ({ ...prev, dateOfBirth: event.target.value }))} />
                   </label>
                 </div>
               </section>
@@ -177,20 +177,13 @@ export default function Checkout() {
                   </div>
                 </label>
 
-                {/* <label className="checkout-option-row">
-                  <input type="checkbox" checked={formData.vegetarian} onChange={(event) => setFormData((prev) => ({ ...prev, vegetarian: event.target.checked }))} />
-                  <div>
-                    <strong>Vegetarian Meal Preference</strong>
-                    <span>Request special dietary requirements for your tour meals.</span>
-                  </div>
-                </label> */}
               </section>
 
               {error && <div className="checkout-feedback error">{error}</div>}
               <div className="checkout-bottom-actions">
                 <Link to={`/tours/${tour.id}`} className="checkout-back-link">Quay lại</Link>
                 <button type="submit" className="checkout-submit-btn">
-                  Continue to Payment
+                  Tiếp tục thanh toán
                 </button>
               </div>
             </form>
@@ -224,11 +217,6 @@ export default function Checkout() {
               <div className="checkout-summary-total">
                 <span>Tổng thanh toán</span>
                 <strong>{formatCurrency(total)}</strong>
-              </div>
-
-              <div className="checkout-promo-row">
-                <input placeholder="Mã giảm giá" />
-                <button type="button">Áp dụng</button>
               </div>
 
               <div className="checkout-secure-box">

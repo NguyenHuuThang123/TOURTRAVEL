@@ -54,30 +54,36 @@ export default function Login() {
       <Header />
       <main className="auth-main">
         <div className="auth-card">
-          <p className="auth-eyebrow">Welcome back</p>
-          <h1 className="auth-title">Dang nhap</h1>
-          <p className="auth-subtitle">Dang nhap de quan ly tour, xem tai khoan va thao tac admin neu ban duoc cap quyen.</p>
+          <p className="auth-eyebrow">Chào mừng trở lại</p>
+          <h1 className="auth-title">Đăng nhập</h1>
+          <p className="auth-subtitle">Đăng nhập để quản lý tour, xem tài khoản và thao tác quản trị nếu bạn được cấp quyền.</p>
 
           <form onSubmit={handleSubmit} className="auth-form">
-            <input
-              type="email"
-              required
-              placeholder="Email"
-              value={formData.email}
-              onChange={(event) => setFormData((prev) => ({ ...prev, email: event.target.value }))}
-              className="auth-input"
-            />
-            <input
-              type="password"
-              required
-              placeholder="Mat khau"
-              value={formData.password}
-              onChange={(event) => setFormData((prev) => ({ ...prev, password: event.target.value }))}
-              className="auth-input"
-            />
-            {error && <p style={{ color: '#dc2626' }}>{error}</p>}
+            <label className="auth-field">
+              <span>Email</span>
+              <input
+                type="email"
+                required
+                placeholder="example@email.com"
+                value={formData.email}
+                onChange={(event) => setFormData((prev) => ({ ...prev, email: event.target.value }))}
+                className="auth-input"
+              />
+            </label>
+            <label className="auth-field">
+              <span>Mật khẩu</span>
+              <input
+                type="password"
+                required
+                placeholder="Nhập mật khẩu"
+                value={formData.password}
+                onChange={(event) => setFormData((prev) => ({ ...prev, password: event.target.value }))}
+                className="auth-input"
+              />
+            </label>
+            {error && <p className="auth-error">{error}</p>}
             <button type="submit" disabled={loading} className="auth-button">
-              {loading ? 'Dang dang nhap...' : 'Dang nhap'}
+              {loading ? 'Đang đăng nhập...' : 'Đăng nhập'}
             </button>
           </form>
 
@@ -86,7 +92,7 @@ export default function Login() {
           </div>
 
           <p className="auth-footer-text">
-            Chua co tai khoan? <Link to="/register" style={{ color: 'var(--primary-color)', fontWeight: 'bold' }}>Dang ky ngay</Link>
+            Chưa có tài khoản? <Link to="/register" style={{ color: 'var(--primary-color)', fontWeight: 'bold' }}>Đăng ký ngay</Link>
           </p>
         </div>
       </main>
