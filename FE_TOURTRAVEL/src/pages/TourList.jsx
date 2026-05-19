@@ -260,7 +260,7 @@ export default function TourList() {
 
             {!loading && !error && (
               <div className="tour-card-grid">
-                {visibleTours.map((tour, index) => (
+                {visibleTours.map((tour) => (
                   <article key={tour.id} className="tour-browser-card">
                     <div
                       className="tour-browser-image"
@@ -281,7 +281,7 @@ export default function TourList() {
                         </div>
 
                         <Link to={`/tours/${tour.id}`} className="tour-browser-button">
-                          {index % 2 === 0 ? 'Đặt ngay' : 'Chi tiết '}
+                          Xem chi tiết
                         </Link>
                       </div>
                     </div>
