@@ -20,7 +20,7 @@ export default function Register() {
       await register(formData)
       navigate('/account', { replace: true })
     } catch (err) {
-      setError(err.response?.data?.detail || 'Dang ky that bai.')
+      setError(err.response?.data?.detail || 'Đăng ký thất bại. Vui lòng thử lại.')
     } finally {
       setLoading(false)
     }
@@ -31,103 +31,80 @@ export default function Register() {
       setLoading(true)
       setError('')
       const auth = await googleLogin(credential)
-      navigate(auth?.user?.role === 'admin' ? '/admin' : auth?.user?.role === 'guide' ? '/guide' : '/account', { replace: true })
+      navigate(
+        auth?.user?.role === 'admin' ? '/admin'
+        : auth?.user?.role === 'guide' ? '/guide'
+        : '/account',
+        { replace: true }
+      )
     } catch (err) {
-      setError(err.response?.data?.detail || 'Dang ky bang Google that bai.')
+      setError(err.response?.data?.detail || 'Đăng ký bằng Google thất bại.')
     } finally {
       setLoading(false)
     }
   }
 
   return (
-    <div style={{ minHeight: '100vh', backgroundColor: 'var(--bg-gray-50)' }}>
+    <div className="auth-shell">
       <Header />
-      <main style={{ maxWidth: '480px', margin: '0 auto', padding: '48px 20px' }}>
-        <div style={authCardStyle}>
-          <p style={eyebrowStyle}>Create account</p>
-          <h1 style={titleStyle}>Dang ky</h1>
-          <p style={subtitleStyle}>Tao tai khoan de dat tour nhanh hon va quan ly thong tin ca nhan.</p>
+      <main className="auth-main">
+        <div className="auth-card">
+          <p className="auth-eyebrow">Tạo tài khoản</p>
+          <h1 className="auth-title">Đăng ký</h1>
+          <p className="auth-subtitle">Tạo tài khoản để đặt tour nhanh hơn và quản lý thông tin cá nhân.</p>
 
-          <form onSubmit={handleSubmit} style={{ display: 'grid', gap: '16px' }}>
-            <input
-              required
-              placeholder="Ho va ten"
-              value={formData.name}
-              onChange={(event) => setFormData((prev) => ({ ...prev, name: event.target.value }))}
-              style={inputStyle}
-            />
-            <input
-              type="email"
-              required
-              placeholder="Email"
-              value={formData.email}
-              onChange={(event) => setFormData((prev) => ({ ...prev, email: event.target.value }))}
-              style={inputStyle}
-            />
-            <input
-              type="password"
-              required
-              placeholder="Mat khau"
-              value={formData.password}
-              onChange={(event) => setFormData((prev) => ({ ...prev, password: event.target.value }))}
-              style={inputStyle}
-            />
-            {error && <p style={{ color: '#dc2626' }}>{error}</p>}
-            <button type="submit" disabled={loading} style={primaryButton}>
-              {loading ? 'Dang tao tai khoan...' : 'Dang ky'}
+          <form onSubmit={handleSubmit} className="auth-form">
+            <label className="auth-field">
+              <span>Họ và tên</span>
+              <input
+                required
+                placeholder="Nguyễn Văn A"
+                value={formData.name}
+                onChange={(event) => setFormData((prev) => ({ ...prev, name: event.target.value }))}
+                className="auth-input"
+              />
+            </label>
+            <label className="auth-field">
+              <span>Email</span>
+              <input
+                type="email"
+                required
+                placeholder="example@email.com"
+                value={formData.email}
+                onChange={(event) => setFormData((prev) => ({ ...prev, email: event.target.value }))}
+                className="auth-input"
+              />
+            </label>
+            <label className="auth-field">
+              <span>Mật khẩu</span>
+              <input
+                type="password"
+                required
+                placeholder="Tối thiểu 8 ký tự"
+                value={formData.password}
+                onChange={(event) => setFormData((prev) => ({ ...prev, password: event.target.value }))}
+                className="auth-input"
+              />
+            </label>
+            {error && <p className="auth-error">{error}</p>}
+            <button type="submit" disabled={loading} className="auth-button">
+              {loading ? 'Đang tạo tài khoản...' : 'Đăng ký ngay'}
             </button>
           </form>
 
-          <GoogleAuthButton onCredential={handleGoogleRegister} text="signup_with" />
+          <div style={{ marginTop: '20px', marginBottom: '20px' }}>
+            <GoogleAuthButton onCredential={handleGoogleRegister} text="signup_with" />
+          </div>
 
-          <p style={{ marginTop: '20px' }}>
-            Da co tai khoan? <Link to="/login">Dang nhap</Link>
+          <p className="auth-footer-text">
+            Đã có tài khoản?{' '}
+            <Link to="/login" style={{ color: 'var(--accent-color)', fontWeight: 700 }}>
+              Đăng nhập
+            </Link>
           </p>
         </div>
       </main>
       <Footer />
     </div>
   )
-}
-
-const authCardStyle = {
-  background: 'linear-gradient(180deg, #ffffff 0%, #f8fbff 100%)',
-  borderRadius: '24px',
-  padding: '32px',
-  border: '1px solid #dbe7ff',
-  boxShadow: '0 24px 80px rgba(37, 99, 235, 0.12)'
-}
-
-const eyebrowStyle = {
-  color: '#2563eb',
-  fontWeight: 700,
-  textTransform: 'uppercase',
-  letterSpacing: '0.08em',
-  fontSize: '12px',
-  marginBottom: '8px'
-}
-
-const titleStyle = {
-  fontSize: '36px',
-  fontWeight: 800,
-  marginBottom: '10px'
-}
-
-const subtitleStyle = {
-  marginBottom: '20px'
-}
-
-const inputStyle = {
-  padding: '14px 16px',
-  borderRadius: '14px',
-  border: '1px solid #cbd5e1'
-}
-
-const primaryButton = {
-  padding: '14px 18px',
-  borderRadius: '14px',
-  border: 'none',
-  background: 'linear-gradient(135deg, #2563eb 0%, #0f172a 100%)',
-  color: 'white',
-  fontWeight: 700
 }

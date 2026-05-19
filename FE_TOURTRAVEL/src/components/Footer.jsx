@@ -1,124 +1,95 @@
+import { Link } from 'react-router-dom'
+
+const quickLinks = [
+  { label: 'Trang chủ', to: '/' },
+  { label: 'Khám phá tour', to: '/tours' },
+  { label: 'Đặt tour', to: '/tours' },
+  { label: 'Tài khoản', to: '/account' },
+]
+
+const services = [
+  'Đặt tour trực tuyến',
+  'Hướng dẫn viên riêng',
+  'Bảo hiểm du lịch',
+  'Tour theo nhóm',
+  'Gói tùy chỉnh',
+]
+
 export default function Footer() {
   return (
-    <footer style={{
-      background: 'var(--text-primary)',
-      color: 'var(--text-white)',
-      padding: 'var(--spacing-2xl) 0 var(--spacing-lg)',
-      marginTop: 'var(--spacing-2xl)'
-    }}>
-      <div className="container">
-        <div className="grid grid-4" style={{ marginBottom: 'var(--spacing-xl)' }}>
-          {/* Company Info */}
-          <div>
-            <h3 style={{
-              fontSize: 'var(--font-size-lg)',
-              marginBottom: 'var(--spacing-md)',
-              background: 'var(--gradient-primary)',
-              WebkitBackgroundClip: 'text',
-              WebkitTextFillColor: 'transparent',
-              backgroundClip: 'text'
-            }}>
-              TourTravel
-            </h3>
-            <p style={{
-              color: 'var(--text-light)',
-              lineHeight: '1.6',
-              marginBottom: 'var(--spacing-md)'
-            }}>
-              Discover amazing destinations and create unforgettable memories with our curated tour experiences.
-            </p>
-            <div style={{ display: 'flex', gap: 'var(--spacing-sm)' }}>
-              <a href="#" style={{ color: 'var(--text-light)', fontSize: '1.2rem' }}>📘</a>
-              <a href="#" style={{ color: 'var(--text-light)', fontSize: '1.2rem' }}>🐦</a>
-              <a href="#" style={{ color: 'var(--text-light)', fontSize: '1.2rem' }}>📷</a>
-              <a href="#" style={{ color: 'var(--text-light)', fontSize: '1.2rem' }}>💼</a>
-            </div>
+    <footer className="site-footer">
+      <div className="container site-footer-grid">
+        {/* Brand */}
+        <div className="site-footer-brand">
+          <div className="site-footer-logo">
+            <span className="site-footer-logo-icon" aria-hidden="true">✈</span>
+            <strong>TourTravel</strong>
           </div>
-
-          {/* Quick Links */}
-          <div>
-            <h4 style={{
-              fontSize: 'var(--font-size-base)',
-              marginBottom: 'var(--spacing-md)',
-              color: 'var(--text-white)'
-            }}>
-              Quick Links
-            </h4>
-            <ul style={{ listStyle: 'none', padding: 0 }}>
-              {['Home', 'Tours', 'Destinations', 'About Us', 'Contact'].map((item) => (
-                <li key={item} style={{ marginBottom: 'var(--spacing-sm)' }}>
-                  <a href="#" style={{
-                    color: 'var(--text-light)',
-                    transition: 'var(--transition-fast)'
-                  }}>
-                    {item}
-                  </a>
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          {/* Services */}
-          <div>
-            <h4 style={{
-              fontSize: 'var(--font-size-base)',
-              marginBottom: 'var(--spacing-md)',
-              color: 'var(--text-white)'
-            }}>
-              Services
-            </h4>
-            <ul style={{ listStyle: 'none', padding: 0 }}>
-              {['Tour Booking', 'Hotel Reservation', 'Travel Insurance', 'Guided Tours', 'Custom Packages'].map((item) => (
-                <li key={item} style={{ marginBottom: 'var(--spacing-sm)' }}>
-                  <a href="#" style={{
-                    color: 'var(--text-light)',
-                    transition: 'var(--transition-fast)'
-                  }}>
-                    {item}
-                  </a>
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          {/* Contact Info */}
-          <div>
-            <h4 style={{
-              fontSize: 'var(--font-size-base)',
-              marginBottom: 'var(--spacing-md)',
-              color: 'var(--text-white)'
-            }}>
-              Contact Us
-            </h4>
-            <div style={{ color: 'var(--text-light)', lineHeight: '1.6' }}>
-              <p>📍 123 Travel Street, City, Country</p>
-              <p>📞 +1 (555) 123-4567</p>
-              <p>✉️ info@tourtravel.com</p>
-              <p>🕒 Mon - Fri: 9AM - 6PM</p>
-            </div>
+          <p className="site-footer-tagline">
+            Khám phá những điểm đến tuyệt vời và tạo nên những kỷ niệm khó quên cùng các tour du lịch được tuyển chọn kỹ lưỡng.
+          </p>
+          <div className="site-footer-socials" aria-label="Mạng xã hội">
+            <a href="#" aria-label="Facebook" className="site-footer-social">f</a>
+            <a href="#" aria-label="Instagram" className="site-footer-social">in</a>
+            <a href="#" aria-label="YouTube" className="site-footer-social">▶</a>
+            <a href="#" aria-label="TikTok" className="site-footer-social">♪</a>
           </div>
         </div>
 
-        {/* Bottom Bar */}
-        <div style={{
-          borderTop: '1px solid rgba(255, 255, 255, 0.1)',
-          paddingTop: 'var(--spacing-lg)',
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          flexWrap: 'wrap',
-          gap: 'var(--spacing-md)'
-        }}>
-          <p style={{ color: 'var(--text-light)', margin: 0 }}>
-            © 2024 TourTravel. All rights reserved.
-          </p>
-          <div style={{ display: 'flex', gap: 'var(--spacing-lg)' }}>
-            <a href="#" style={{ color: 'var(--text-light)', fontSize: 'var(--font-size-sm)' }}>
-              Privacy Policy
-            </a>
-            <a href="#" style={{ color: 'var(--text-light)', fontSize: 'var(--font-size-sm)' }}>
-              Terms of Service
-            </a>
+        {/* Quick links */}
+        <div className="site-footer-col">
+          <h4 className="site-footer-col-title">Điều hướng</h4>
+          <ul className="site-footer-list">
+            {quickLinks.map((item) => (
+              <li key={item.label}>
+                <Link to={item.to} className="site-footer-link">{item.label}</Link>
+              </li>
+            ))}
+          </ul>
+        </div>
+
+        {/* Services */}
+        <div className="site-footer-col">
+          <h4 className="site-footer-col-title">Dịch vụ</h4>
+          <ul className="site-footer-list">
+            {services.map((s) => (
+              <li key={s}>
+                <span className="site-footer-link">{s}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+
+        {/* Contact */}
+        <div className="site-footer-col">
+          <h4 className="site-footer-col-title">Liên hệ</h4>
+          <div className="site-footer-contact">
+            <div className="site-footer-contact-row">
+              <span>📍</span>
+              <span>123 Đường Du Lịch, TP. Hồ Chí Minh</span>
+            </div>
+            <div className="site-footer-contact-row">
+              <span>📞</span>
+              <span>+84 (028) 1234-5678</span>
+            </div>
+            <div className="site-footer-contact-row">
+              <span>✉️</span>
+              <span>hello@tourtravel.vn</span>
+            </div>
+            <div className="site-footer-contact-row">
+              <span>🕒</span>
+              <span>Thứ 2 – Thứ 7: 8:00 – 18:00</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="site-footer-bottom">
+        <div className="container site-footer-bottom-inner">
+          <p>© 2025 TourTravel. Bảo lưu mọi quyền.</p>
+          <div className="site-footer-legal">
+            <a href="#">Chính sách bảo mật</a>
+            <a href="#">Điều khoản dịch vụ</a>
           </div>
         </div>
       </div>
