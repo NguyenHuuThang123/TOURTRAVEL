@@ -68,6 +68,7 @@ export default function TourDetail() {
   if (loading) {
     return (
       <div className="tour-detail-shell">
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400;1,700&family=Be+Vietnam+Pro:wght@400;500;600;700&display=swap" />
         <Header />
         <div className="tour-detail-feedback">Đang tải chi tiết tour...</div>
         <Footer />
@@ -78,6 +79,7 @@ export default function TourDetail() {
   if (error || !tour) {
     return (
       <div className="tour-detail-shell">
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400;1,700&family=Be+Vietnam+Pro:wght@400;500;600;700&display=swap" />
         <Header />
         <div className="tour-detail-feedback error">
           <p>{error || 'Không tìm thấy tour hoặc có lỗi xảy ra khi tải dữ liệu.'}</p>
@@ -156,6 +158,10 @@ export default function TourDetail() {
 
   return (
     <div className="tour-detail-shell">
+      <link
+        rel="stylesheet"
+        href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400;1,700&family=Be+Vietnam+Pro:wght@400;500;600;700&display=swap"
+      />
       <Header />
 
       <main className="container tour-detail-main">
@@ -166,17 +172,16 @@ export default function TourDetail() {
           >
             <div className="tour-detail-overlay" />
             <div className="tour-detail-hero-content">
-              {tour.travel_style && (
-                <div className="tour-detail-tags">
-                  <span>{tour.travel_style}</span>
-                </div>
-              )}
+              <div className="tour-detail-tags">
+                {tour.travel_style && <span>{tour.travel_style}</span>}
+                {tour.duration_days && <span>{tour.duration_days} ngày</span>}
+              </div>
               <h1>{tour.name}</h1>
               <div className="tour-detail-rating">
-                <span>
-                  ★ {reviewCount ? ratingAverage.toFixed(1) : 'New'} ({reviewCount} Reviews)
+                <span style={{ color: '#e7c9a0' }}>
+                  ★ {reviewCount ? ratingAverage.toFixed(1) : 'Mới'}{reviewCount ? ` · ${reviewCount} đánh giá` : ''}
                 </span>
-                <span>◉ {tour.destination}</span>
+                <span style={{ opacity: 0.75 }}>◉ {tour.destination}</span>
               </div>
             </div>
           </div>
@@ -370,6 +375,25 @@ export default function TourDetail() {
       </main>
 
       <Footer />
+      <style>{`
+        .tour-detail-hero-image { transition: box-shadow .3s; }
+        .tour-quick-card { transition: box-shadow .2s, transform .2s; }
+        .tour-quick-card:hover { box-shadow: 0 6px 24px rgba(31,77,63,0.12) !important; transform: translateY(-2px); }
+        .tour-review-card { transition: box-shadow .2s; }
+        .tour-review-card:hover { box-shadow: 0 4px 18px rgba(31,77,63,0.1) !important; }
+        @media (max-width: 1024px) {
+          .tour-detail-layout { grid-template-columns: 1fr !important; }
+          .tour-booking-column { position: static !important; }
+          .tour-reviews-layout { grid-template-columns: 1fr !important; }
+          .tour-review-form { position: static !important; }
+          .tour-quick-grid { grid-template-columns: repeat(2, 1fr) !important; }
+        }
+        @media (max-width: 640px) {
+          .tour-detail-hero-image { min-height: 320px !important; }
+          .tour-quick-grid { grid-template-columns: repeat(2, 1fr) !important; }
+          .container { padding-left: 16px !important; padding-right: 16px !important; }
+        }
+      `}</style>
     </div>
   )
 }

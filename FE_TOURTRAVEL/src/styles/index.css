@@ -850,22 +850,23 @@ img {
 
 .tour-detail-shell {
   min-height: 100vh;
-  background: #fffbf5;
+  background: #f4efe6;
+  font-family: 'Be Vietnam Pro', sans-serif;
 }
 
 .tour-detail-main {
-  padding-top: 30px;
-  padding-bottom: 40px;
+  padding-top: 94px;
+  padding-bottom: 60px;
 }
 
 .tour-detail-hero {
-  margin-bottom: 20px;
+  margin-bottom: 24px;
 }
 
 .tour-detail-hero-image {
   position: relative;
-  min-height: 560px;
-  border-radius: 24px;
+  min-height: 520px;
+  border-radius: 16px;
   overflow: hidden;
   background-size: cover;
   background-position: center;
@@ -874,7 +875,7 @@ img {
 .tour-detail-overlay {
   position: absolute;
   inset: 0;
-  background: linear-gradient(180deg, rgba(10, 23, 40, 0.08) 0%, rgba(15, 23, 42, 0.7) 82%);
+  background: linear-gradient(180deg, rgba(10, 25, 18, 0.06) 0%, rgba(15, 36, 26, 0.72) 82%);
 }
 
 .tour-detail-hero-content {
@@ -892,105 +893,111 @@ img {
 }
 
 .tour-detail-tags span {
-  padding: 7px 12px;
-  border-radius: 999px;
-  background: rgba(255, 255, 255, 0.18);
-  color: white;
-  font-size: 12px;
-  font-weight: 800;
+  padding: 5px 12px;
+  border-radius: 20px;
+  background: rgba(231, 201, 160, 0.25);
+  border: 1px solid rgba(231, 201, 160, 0.5);
+  color: #e7c9a0;
+  font-size: 11px;
+  font-weight: 600;
   text-transform: uppercase;
-  letter-spacing: 0.06em;
-  backdrop-filter: blur(10px);
+  letter-spacing: 0.08em;
+  backdrop-filter: blur(8px);
 }
 
 .tour-detail-hero-content h1 {
   max-width: 760px;
   margin-bottom: 14px;
   color: white;
-  font-size: clamp(2.6rem, 5vw, 4.5rem);
-  font-weight: 900;
-  line-height: 0.95;
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(2.2rem, 5vw, 3.8rem);
+  font-weight: 700;
+  line-height: 1.1;
 }
 
 .tour-detail-rating {
   display: flex;
   flex-wrap: wrap;
   gap: 14px;
-  color: rgba(255, 255, 255, 0.88);
-  font-weight: 600;
+  color: rgba(255, 255, 255, 0.85);
+  font-weight: 500;
+  font-size: 0.95rem;
 }
 
 .tour-detail-layout {
   display: grid;
   grid-template-columns: minmax(0, 1.6fr) 340px;
-  gap: 24px;
+  gap: 28px;
 }
 
 .tour-quick-grid {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 14px;
-  margin-bottom: 22px;
+  gap: 12px;
+  margin-bottom: 24px;
 }
 
 .tour-quick-card,
 .tour-guide-card,
 .tour-overview-section,
 .tour-booking-card {
-  border: 1px solid #fde8d0;
-  border-radius: 18px;
+  border: 1px solid rgba(31, 77, 63, 0.12);
+  border-radius: 10px;
   background: #ffffff;
-  box-shadow: 0 8px 24px rgba(120, 53, 15, 0.06);
+  box-shadow: 0 2px 16px rgba(31, 77, 63, 0.07);
 }
 
 .tour-quick-card {
-  padding: 22px 16px;
+  padding: 20px 14px;
   text-align: center;
 }
 
 .tour-quick-icon {
   display: block;
   margin-bottom: 8px;
-  color: #ea580c;
-  font-weight: 800;
-  font-size: 1.3rem;
+  color: #cda06a;
+  font-weight: 700;
+  font-size: 1.2rem;
 }
 
 .tour-quick-card p {
-  margin-bottom: 6px;
-  color: #64748b;
-  font-size: 12px;
+  margin-bottom: 4px;
+  color: rgba(27, 42, 37, 0.5);
+  font-size: 10px;
   text-transform: uppercase;
-  letter-spacing: 0.06em;
-  font-weight: 800;
+  letter-spacing: 0.1em;
+  font-weight: 700;
 }
 
 .tour-quick-card strong {
-  color: #0f172a;
+  color: #1b2a25;
+  font-size: 0.95rem;
 }
 
 .tour-guide-section,
 .tour-overview-section {
-  margin-bottom: 26px;
+  margin-bottom: 24px;
 }
 
 .tour-guide-section h2,
 .tour-overview-section h2,
 .tour-reviews-section h2 {
   margin-bottom: 14px;
-  font-size: 2rem;
-  font-weight: 800;
+  font-family: 'Playfair Display', serif;
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: #1b2a25;
 }
 
 .tour-guide-card {
   padding: 18px;
-  background: linear-gradient(180deg, #fffbf5 0%, #fff7ed 100%);
+  background: #f9f6f1;
 }
 
 .tour-guide-profile {
   display: flex;
-  align-items: center;
-  gap: 14px;
+  align-items: flex-start;
+  gap: 16px;
 }
 
 .tour-guide-profile img {
@@ -998,52 +1005,53 @@ img {
   height: 64px;
   border-radius: 999px;
   object-fit: cover;
+  border: 2px solid rgba(31, 77, 63, 0.15);
 }
 
 .tour-guide-profile strong {
   display: block;
-  font-size: 1.35rem;
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #1b2a25;
   margin-bottom: 4px;
 }
 
 .tour-guide-links {
   display: flex;
   flex-wrap: wrap;
-  gap: 12px;
-  margin-top: 8px;
-  color: #ea580c;
-  font-size: 0.9rem;
-  font-weight: 700;
+  gap: 10px;
+  margin-top: 10px;
 }
 
 .tour-guide-links button {
-  padding: 8px 16px;
-  border-radius: 999px;
-  background: linear-gradient(135deg, #fb923c 0%, #ea580c 100%);
+  padding: 7px 16px;
+  border-radius: 4px;
+  background: #1f4d3f;
   color: #ffffff;
-  font-size: 0.85rem;
-  font-weight: 700;
-  box-shadow: 0 4px 14px rgba(234, 88, 12, 0.28);
-  transition: transform 0.15s, box-shadow 0.15s;
+  font-size: 0.83rem;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+  box-shadow: 0 2px 10px rgba(31, 77, 63, 0.2);
+  transition: background 0.15s, box-shadow 0.15s;
 }
 
 .tour-guide-links button:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 8px 20px rgba(234, 88, 12, 0.36);
+  background: #1a3e32;
+  box-shadow: 0 4px 14px rgba(31, 77, 63, 0.28);
 }
 
 .tour-overview-section {
-  padding: 20px;
+  padding: 22px;
 }
 
 .tour-overview-section p {
-  color: #475569;
-  font-size: 1.08rem;
-  line-height: 1.8;
+  color: rgba(27, 42, 37, 0.72);
+  font-size: 1rem;
+  line-height: 1.85;
 }
 
 .tour-reviews-section {
-  margin-bottom: 26px;
+  margin-bottom: 24px;
 }
 
 .tour-reviews-header {
@@ -1055,22 +1063,23 @@ img {
 }
 
 .tour-reviews-header p {
-  color: #64748b;
+  color: rgba(27, 42, 37, 0.55);
+  font-size: 0.9rem;
 }
 
 .tour-review-summary-card,
 .tour-review-form,
 .tour-review-card,
 .tour-review-empty {
-  border: 1px solid #fde8d0;
-  border-radius: 18px;
+  border: 1px solid rgba(31, 77, 63, 0.12);
+  border-radius: 10px;
   background: #ffffff;
-  box-shadow: 0 8px 24px rgba(120, 53, 15, 0.06);
+  box-shadow: 0 2px 12px rgba(31, 77, 63, 0.06);
 }
 
 .tour-review-summary-card {
-  min-width: 140px;
-  padding: 18px;
+  min-width: 130px;
+  padding: 16px;
   display: grid;
   gap: 4px;
   justify-items: center;
@@ -1078,22 +1087,24 @@ img {
 }
 
 .tour-review-summary-card strong {
-  color: #0f172a;
+  color: #1b2a25;
   font-size: 2rem;
+  font-family: 'Playfair Display', serif;
 }
 
 .tour-review-summary-card span {
-  color: #f59e0b;
+  color: #cda06a;
   letter-spacing: 0.14em;
 }
 
 .tour-review-summary-card small {
-  color: #64748b;
+  color: rgba(27, 42, 37, 0.5);
+  font-size: 0.8rem;
 }
 
 .tour-reviews-layout {
   display: grid;
-  grid-template-columns: minmax(280px, 360px) minmax(0, 1fr);
+  grid-template-columns: minmax(260px, 340px) minmax(0, 1fr);
   gap: 18px;
 }
 
@@ -1106,13 +1117,16 @@ img {
 
 .tour-review-form h3 {
   margin-bottom: 8px;
-  font-size: 1.2rem;
-  font-weight: 800;
+  font-family: 'Playfair Display', serif;
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: #1b2a25;
 }
 
 .tour-review-form-note {
   margin-bottom: 16px;
-  color: #64748b;
+  color: rgba(27, 42, 37, 0.55);
+  font-size: 0.88rem;
   line-height: 1.6;
 }
 
@@ -1123,25 +1137,25 @@ img {
 }
 
 .tour-review-stars-input button {
-  width: 44px;
-  height: 44px;
-  border: 1px solid #cbd5e1;
-  border-radius: 12px;
-  background: #f8fafc;
-  color: #cbd5e1;
-  font-size: 1.35rem;
-  transition: transform var(--transition-fast), border-color var(--transition-fast), background var(--transition-fast), color var(--transition-fast);
+  width: 42px;
+  height: 42px;
+  border: 1px solid rgba(31, 77, 63, 0.2);
+  border-radius: 8px;
+  background: #f9f6f1;
+  color: rgba(31, 77, 63, 0.25);
+  font-size: 1.25rem;
+  transition: border-color 0.15s, background 0.15s, color 0.15s;
 }
 
 .tour-review-stars-input button.active {
-  border-color: #f59e0b;
-  background: #fff7ed;
-  color: #f59e0b;
+  border-color: #cda06a;
+  background: rgba(205, 160, 106, 0.1);
+  color: #cda06a;
 }
 
 .tour-review-stars-input button:disabled {
   cursor: not-allowed;
-  opacity: 0.55;
+  opacity: 0.5;
 }
 
 .tour-review-textarea {
@@ -1150,33 +1164,35 @@ img {
 }
 
 .tour-review-textarea span {
-  color: #334155;
-  font-size: 0.92rem;
-  font-weight: 700;
+  color: #1b2a25;
+  font-size: 0.88rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
 }
 
 .tour-review-textarea textarea {
   width: 100%;
-  padding: 14px 16px;
-  border: 1px solid #dbe7ff;
-  border-radius: 14px;
-  background: #f8fbff;
-  color: #0f172a;
-  font-size: 0.98rem;
+  padding: 12px 14px;
+  border: 1px solid rgba(31, 77, 63, 0.2);
+  border-radius: 6px;
+  background: #f9f6f1;
+  color: #1b2a25;
+  font-size: 0.95rem;
+  font-family: 'Be Vietnam Pro', sans-serif;
   resize: vertical;
   outline: none;
 }
 
 .tour-review-textarea textarea:focus {
-  border-color: #60a5fa;
-  box-shadow: 0 0 0 4px rgba(96, 165, 250, 0.18);
+  border-color: #1f4d3f;
+  box-shadow: 0 0 0 3px rgba(31, 77, 63, 0.1);
 }
 
 .tour-review-feedback {
   margin-top: 14px;
-  padding: 12px 14px;
-  border-radius: 14px;
-  font-size: 0.95rem;
+  padding: 10px 14px;
+  border-radius: 6px;
+  font-size: 0.9rem;
   font-weight: 600;
 }
 
@@ -1192,29 +1208,31 @@ img {
 
 .tour-review-submit {
   width: 100%;
-  min-height: 50px;
+  min-height: 48px;
   margin-top: 14px;
-  border-radius: 14px;
-  background: linear-gradient(135deg, #fb923c 0%, #ea580c 100%);
+  border-radius: 6px;
+  background: #1f4d3f;
   color: #ffffff;
-  font-size: 0.98rem;
-  font-weight: 800;
-  box-shadow: 0 12px 28px rgba(234, 88, 12, 0.28);
-  transition: transform 0.18s, box-shadow 0.18s;
+  font-size: 0.92rem;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  box-shadow: 0 4px 14px rgba(31, 77, 63, 0.22);
+  transition: background 0.18s, box-shadow 0.18s;
+  font-family: 'Be Vietnam Pro', sans-serif;
 }
 .tour-review-submit:hover:not(:disabled) {
-  transform: translateY(-1px);
-  box-shadow: 0 16px 36px rgba(234, 88, 12, 0.38);
+  background: #1a3e32;
+  box-shadow: 0 6px 20px rgba(31, 77, 63, 0.3);
 }
 
 .tour-review-submit:disabled {
   cursor: not-allowed;
-  opacity: 0.6;
+  opacity: 0.55;
 }
 
 .tour-review-list {
   display: grid;
-  gap: 14px;
+  gap: 12px;
 }
 
 .tour-review-card,
@@ -1226,31 +1244,33 @@ img {
   display: flex;
   justify-content: space-between;
   gap: 14px;
-  margin-bottom: 12px;
+  margin-bottom: 10px;
 }
 
 .tour-review-card-head strong {
   display: block;
-  margin-bottom: 4px;
-  color: #0f172a;
-  font-size: 1rem;
+  margin-bottom: 3px;
+  color: #1b2a25;
+  font-size: 0.95rem;
+  font-weight: 700;
 }
 
 .tour-review-card-head span {
-  color: #64748b;
-  font-size: 0.9rem;
+  color: rgba(27, 42, 37, 0.5);
+  font-size: 0.85rem;
 }
 
 .tour-review-card-rating {
   display: grid;
   justify-items: end;
-  color: #f59e0b;
+  color: #cda06a;
 }
 
 .tour-review-card p,
 .tour-review-empty {
-  color: #475569;
+  color: rgba(27, 42, 37, 0.65);
   line-height: 1.7;
+  font-size: 0.92rem;
 }
 
 .tour-booking-column {
@@ -1272,40 +1292,42 @@ img {
 }
 
 .tour-booking-price strong {
-  font-size: 2.3rem;
-  color: #ea580c;
-  font-weight: 900;
+  font-size: 2rem;
+  color: #1f4d3f;
+  font-weight: 700;
+  font-family: 'Playfair Display', serif;
 }
 
 .tour-booking-price span {
-  color: #64748b;
+  color: rgba(27, 42, 37, 0.55);
 }
 
 .tour-booking-spots {
-  padding: 7px 12px;
-  border-radius: 999px;
-  background: #fff7ed;
-  color: #ea580c !important;
-  border: 1px solid #fed7aa;
-  font-size: 12px;
-  font-weight: 800;
+  padding: 5px 12px;
+  border-radius: 20px;
+  background: rgba(231, 201, 160, 0.15);
+  color: #1b2a25 !important;
+  border: 1px solid rgba(205, 160, 106, 0.4);
+  font-size: 11px;
+  font-weight: 600;
 }
 
 .tour-booking-field {
-  padding: 16px;
-  margin-bottom: 12px;
-  border: 1px solid #e2e8f0;
-  border-radius: 14px;
+  padding: 14px 16px;
+  margin-bottom: 10px;
+  border: 1px solid rgba(31, 77, 63, 0.12);
+  border-radius: 8px;
+  background: #f9f6f1;
 }
 
 .tour-booking-field span {
   display: block;
   margin-bottom: 6px;
-  color: #64748b;
-  font-size: 12px;
+  color: rgba(27, 42, 37, 0.5);
+  font-size: 10px;
   text-transform: uppercase;
-  letter-spacing: 0.06em;
-  font-weight: 800;
+  letter-spacing: 0.1em;
+  font-weight: 700;
 }
 
 .tour-booking-travelers {
@@ -1315,13 +1337,14 @@ img {
 }
 
 .tour-booking-stepper {
-  width: 36px;
-  height: 36px;
-  border-radius: 50%;
-  border: 1px solid #dbe2ea;
-  background: #f8fafc;
-  font-size: 18px;
+  width: 34px;
+  height: 34px;
+  border-radius: 6px;
+  border: 1px solid rgba(31, 77, 63, 0.2);
+  background: #ffffff;
+  font-size: 16px;
   font-weight: 700;
+  color: #1b2a25;
   cursor: pointer;
   display: inline-flex;
   align-items: center;
@@ -1329,17 +1352,17 @@ img {
   transition: background 0.15s;
 }
 .tour-booking-stepper:hover:not(:disabled) {
-  background: #e2e8f0;
+  background: rgba(31, 77, 63, 0.08);
 }
 .tour-booking-stepper:disabled {
-  opacity: 0.4;
+  opacity: 0.35;
   cursor: not-allowed;
 }
 
 .tour-detail-feedback {
   padding: 60px 24px;
   text-align: center;
-  color: var(--text-secondary);
+  color: rgba(27, 42, 37, 0.5);
   font-size: var(--font-size-lg);
 }
 .tour-detail-feedback.error {
@@ -1348,52 +1371,58 @@ img {
 .tour-detail-feedback a {
   display: inline-block;
   margin-top: 12px;
-  color: var(--primary-color);
+  color: #1f4d3f;
   font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 2px;
 }
 
 .tour-booking-button {
   width: 100%;
-  min-height: 54px;
-  margin-top: 10px;
-  border-radius: 14px;
-  background: linear-gradient(135deg, #fb923c 0%, #ea580c 100%);
+  min-height: 52px;
+  margin-top: 12px;
+  border-radius: 4px;
+  background: #1f4d3f;
   color: #ffffff;
-  font-size: 1rem;
-  font-weight: 800;
-  box-shadow: 0 16px 36px rgba(234, 88, 12, 0.32);
-  transition: transform 0.2s, box-shadow 0.2s;
+  font-size: 0.9rem;
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  box-shadow: 0 4px 16px rgba(31, 77, 63, 0.25);
+  transition: background 0.2s, box-shadow 0.2s;
+  font-family: 'Be Vietnam Pro', sans-serif;
 }
 .tour-booking-button:hover:not(:disabled) {
-  transform: translateY(-2px);
-  box-shadow: 0 22px 44px rgba(234, 88, 12, 0.42);
+  background: #1a3e32;
+  box-shadow: 0 6px 22px rgba(31, 77, 63, 0.32);
 }
 .tour-booking-button:disabled {
-  background: #e2e8f0;
-  color: #9ca3af;
+  background: rgba(31, 77, 63, 0.12);
+  color: rgba(27, 42, 37, 0.4);
   box-shadow: none;
   cursor: not-allowed;
 }
 
 .tour-booking-note {
   margin: 12px 0 18px;
-  color: #94a3b8;
-  font-size: 0.92rem;
+  color: rgba(27, 42, 37, 0.45);
+  font-size: 0.88rem;
   text-align: center;
 }
 
 .tour-booking-benefits {
   display: grid;
-  gap: 10px;
-  margin-bottom: 18px;
-  color: #475569;
+  gap: 8px;
+  margin: 14px 0 16px;
+  color: rgba(27, 42, 37, 0.65);
+  font-size: 0.88rem;
 }
 
 .tour-booking-benefits span::before {
   content: '✓';
   margin-right: 8px;
-  color: #ea580c;
-  font-weight: 900;
+  color: #1f4d3f;
+  font-weight: 700;
 }
 
 .tour-booking-total {
@@ -1401,11 +1430,13 @@ img {
   justify-content: space-between;
   align-items: center;
   padding-top: 14px;
-  border-top: 1px solid #e2e8f0;
+  border-top: 1px solid rgba(31, 77, 63, 0.12);
 }
 
 .tour-booking-total strong {
-  font-size: 1.35rem;
+  font-size: 1.25rem;
+  color: #1b2a25;
+  font-family: 'Playfair Display', serif;
 }
 
 .tour-list-shell,
